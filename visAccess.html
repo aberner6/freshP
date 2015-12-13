@@ -37,14 +37,13 @@ var token = "UdIthOMIL8Cwte3wyfQVK_CrLz8rrGEFjMlJb0BIPcRlIRL5SspTpWOu1m4IDTnGIUH
 
 var minRX, maxRX, minRY, maxRY;
 var rx = [];
-var ry = [];
-var cwidth=50,cheight=50,cmargin=5,maxr=5;
+var ry = []
 
+var cwidth=200,cheight=200,cmargin=25,maxr=5;
+
+var x=d3.scale.linear().range([cmargin,cwidth-cmargin]);
+var y=d3.scale.linear().range([cheight-cmargin,cmargin]);
 var o=d3.scale.linear().domain([0,300000]).range([.5,1]);
-
-var val = [];
-var minVal, maxVal;
-var scaleF=d3.scale.linear().range([1,3]);
 function goAhead(toD){	
 	var toD = toD;
 	console.log(toD)
@@ -54,30 +53,25 @@ function goAhead(toD){
 		.data(toD.values)
 		.enter()
 	  	.append("g")
-	  	.attr("class",function(d){
-	  		console.log(d.values.length);
-	  		val.push(d.values.length);
-	  		var minVal = d3.min(val);
-	  		var maxVal = d3.max(val);
-	  		scaleF.domain([minVal, maxVal])
-	  		return "go"; 
+	  	.attr("class","go")
+	  	.attr("transform",function(d,i) {
+	  		return "translate("+(cwidth*i)+",0)";
 	  	});
-
+svg.on("click", function(){
+	d3.selectAll(".go")
+		.transition()
+		.attr("transform",function(d,i) {
+	  		return "translate("+cmargin+",0)";
+	  	});
+	d3.selectAll(".rectText")
+		.remove();
+})
 		g
 		  .append("rect")
 		  .attr("x",cmargin)
 		  .attr("y",cmargin)
-		  .attr("width",function(d){
-		  	cwidth = cwidth*scaleF(d.values.length);
-				return cwidth;
-			})//-2*cmargin)
-		  .attr("height",function(d){
-		  	cheight = cheight*scaleF(d.values.length);
-		  		return cheight;
-		  	})//-2*cmargin)
-	  	.attr("transform",function(d,i) {
-	  		return "translate("+(cwidth*scaleF(d.values.length))+",0)";
-	  	});
+		  .attr("width",cwidth)//-2*cmargin)
+		  .attr("height",cheight)//-2*cmargin)
 		  .attr("fill","none")
 		  .attr("stroke","lightgray")
 		    .append("title")
@@ -91,8 +85,7 @@ function goAhead(toD){
 		  .attr("y",cheight+10)
 		  .attr("x",cmargin)
 		  .text(function(d) {return d.values.length+" "+d.key;})
-	var x=d3.scale.linear().range([cmargin,cwidth-cmargin]);	
-	var y=d3.scale.linear().range([cheight-cmargin,cmargin]);
+		
 		// now marks, initiated to default values
 		g.selectAll("circle")
 		// we are getting the values of the countries like this:
@@ -112,15 +105,15 @@ function goAhead(toD){
 		      	rx.push(d.rx);
 				minRX = d3.min(rx);
 				maxRX = d3.max(rx);
-
-				ry.push(d.ry);
+		      	
+		      	ry.push(d.ry);
 				minRY = d3.min(ry);
 				maxRY = d3.max(ry);
 
-				x.domain([minRX, maxRX])
 				y.domain([minRY, maxRY])
+				x.domain([minRX, maxRX])
 		      	// console.log(minRX);
-		      	return "this guy"+d.num;
+		      	return d.num;
 		      });
 		 
 		// finally, we animate our marks in position
