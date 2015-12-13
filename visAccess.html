@@ -40,6 +40,7 @@ var rx = [];
 var ry = []
 
 var cwidth=200,cheight=200,cmargin=25,maxr=5;
+var toggling = true;
 
 var x=d3.scale.linear().range([cmargin,cwidth-cmargin]);
 var y=d3.scale.linear().range([cheight-cmargin,cmargin]);
@@ -58,14 +59,26 @@ function goAhead(toD){
 	  		return "translate("+(cwidth*i)+",0)";
 	  	});
 svg.on("click", function(){
-	d3.selectAll(".go")
-		.transition()
-		.attr("transform",function(d,i) {
-	  		return "translate("+cmargin+",0)";
-	  	});
-	d3.selectAll(".rectText")
-		.remove();
+	toggling = !toggling;
+	console.log(toggling)
+	if(!toggling){
+		d3.selectAll(".go")
+			.transition()
+			.attr("transform",function(d,i) {
+		  		return "translate("+cmargin+",0)";
+		  	});
+		$(".rectText").hide();
+	}
+	if(toggling){
+		d3.selectAll(".go")
+			.transition()
+			.attr("transform",function(d,i) {
+		  		return "translate("+cwidth*i+",0)";
+		  	});
+		$(".rectText").show();
+	}
 })
+
 		g
 		  .append("rect")
 		  .attr("x",cmargin)
