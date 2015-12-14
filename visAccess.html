@@ -11,9 +11,11 @@ var data;
 var types = ["hand","ide","particle","face"];
 var handData = [];
 
+var cwidth=200,cheight=200,cmargin=25,maxr=5;
+
 var nested_data;
 var m = [15, 20, 40, 120], //top right bottom left
-    w = window.innerWidth - m[1] * 2 - m[3],
+    w = window.innerWidth-cmargin,
     h = window.innerHeight;
 var goAhead;
 var svg = d3.select("body").append("svg").attr("width",w).attr("height",h);
@@ -42,14 +44,16 @@ var token = "lKLCHs8DJm6a5FLrcsZLeYKrRWObG9cXy4C_TM76ZnYrht_tboNc0fsWNFP4M1ieIUH
 			.entries(data)
 
 		if (typeof nested_data !== "undefined"){
-			console.log("yup")
 			for(i=0; i<nested_data.length; i++){
 				if(nested_data[i].key&&nest_again[i].key==types[0]){
+					console.log(nested_data[i].key)
 					goHands(nested_data[i], nest_again[i].values);
 				}
 				if(nested_data[i].key&&nest_again[i].key==types[3]){
+					console.log(nested_data[i].key)
 					goFace(nested_data[i], nest_again[i].values);
 				}
+				else{ console.log("nope")}
 			}	
 		}
 	});
@@ -60,7 +64,6 @@ var ry = [];
 var xIs = [];
 var yIs = [];
 
-var cwidth=200,cheight=200,cmargin=25,maxr=5;
 var toggling = true;
 
 var x=d3.scale.linear().range([cmargin,cwidth-cmargin]);
@@ -72,6 +75,7 @@ var fy=d3.scale.linear().range([cheight-cmargin,cmargin]);
 
 var rows = 2;
 
+//probably have to fix this
 svg.on("click", function(){
 	toggling = !toggling;
 	console.log(toggling)
@@ -102,7 +106,9 @@ svg.on("click", function(){
 		$(".rectText").show();
 	}
 })
+
 function goHands(incomingData, summary){	
+	console.log(summary)
 	var toD = incomingData;
 	var summary = summary;
 	// One cell for each hand tracked (hands are in nested data @ at 1)
@@ -176,11 +182,20 @@ function goHands(incomingData, summary){
 		    })
 }
 
+var timeMin, timeMax;
+var timeX = d3.scale.linear();
 var maxtime = [];
+var whatTime = [];	
 function goFace(incomingData, summary){
 	var toD = incomingData;
 	var summary = summary;
 	console.log(summary);
+	for(j=0; j<summary.length; j++){
+		whatTime.push(summary[j].values.max_time)
+	}
+	timeMin = d3.min(whatTime);
+	timeMax = d3.max(whatTime);
+	timeX.domain([timeMin, timeMax]).range([cmargin, w-cwidth-cwidth/2]);
 	// One cell for each face tracked (hands are in nested data @ at 1)
 	var g = svg.selectAll(".face")
 		.data(toD.values)
@@ -188,13 +203,11 @@ function goFace(incomingData, summary){
 	  	.append("g")
 	  	.attr("class","face")
 	  	.attr("transform",function(d,i) {
-	  		// if(d.key==summary[i].key){
-	  			// console.log(summary[i].values.max_time)
-	  			// maxtime.push(summary[i].values.max_time)
-		  		return "translate("+(cwidth*i)+","+(cheight*rows)+")";
-	  		// }
+	  		if(d.key==summary[i].key){
+		  		return "translate("+(timeX(whatTime[i]))+","+(cheight*rows)+")";
+		  		// return "translate("+(cwidth*i)+","+(cheight*rows)+")";
+	  		}
 	  	});
-
 		g
 		  .append("rect")
 		  // .attr("class","faceBox")
