@@ -19,7 +19,7 @@ var goAhead;
 var svg = d3.select("body").append("svg").attr("width",w).attr("height",h);
 
 // $(document).ready(function() {
-var token = "UdIthOMIL8Cwte3wyfQVK_CrLz8rrGEFjMlJb0BIPcRlIRL5SspTpWOu1m4IDTnGIUH5Gdtx7Uc3IdMb30uR5Jlg0629LU4fhdBOKCzoNIrTAtl1n3y50aTdTxmY0ein";
+var token = "mg--1GmXQWY0wFSqbZwW5uHX2TUd2bEMVmeUXO4B5gFAho4BeDpWb268sN-Z4gO8IUH5Gdtx7Uc3IdMb30uR5C4ALa6GoDWF0KPUKH9Mdbd1t_8iP9ErQBnGZI44mM8k";
 	// pelars_authenticate();
 	$.getJSON( "http://pelars.sssup.it:8080/pelars/data/615/session?token="+token,function(json) { 
 		// document.getElementById("id").innerHTML = JSON.stringify(json); 
@@ -31,13 +31,22 @@ var token = "UdIthOMIL8Cwte3wyfQVK_CrLz8rrGEFjMlJb0BIPcRlIRL5SspTpWOu1m4IDTnGIUH
 			.entries(data);
 		if (typeof nested_data !== "undefined"){
 			console.log("yup")
-			goAhead(nested_data[1]);
+			for(i=0; i<nested_data.length; i++){
+				if(nested_data[i].key==types[0]){
+					goHands(nested_data[i]);
+				}
+				if(nested_data[i].key==types[3]){
+					goFace(nested_data[i]);
+				}
+			}	
 		}
 	});
 
-var minRX, maxRX, minRY, maxRY;
+var minRX, maxRX, minRY, maxRY, minFX, minFY, maxFX, maxFY;
 var rx = [];
-var ry = []
+var ry = [];
+var xIs = [];
+var yIs = [];
 
 var cwidth=200,cheight=200,cmargin=25,maxr=5;
 var toggling = true;
@@ -45,24 +54,22 @@ var toggling = true;
 var x=d3.scale.linear().range([cmargin,cwidth-cmargin]);
 var y=d3.scale.linear().range([cheight-cmargin,cmargin]);
 var o=d3.scale.linear().domain([0,300000]).range([.5,1]);
-function goAhead(toD){	
-	var toD = toD;
-	console.log(toD)
 
-	// One cell for each hand tracked (hands are in nested data @ at 1)
-	var g = svg.selectAll(".go")
-		.data(toD.values)
-		.enter()
-	  	.append("g")
-	  	.attr("class","go")
-	  	.attr("transform",function(d,i) {
-	  		return "translate("+(cwidth*i)+",0)";
-	  	});
+var fx=d3.scale.linear().range([cmargin,cwidth-cmargin]);
+var fy=d3.scale.linear().range([cheight-cmargin,cmargin]);
+
+var rows = 2;
+
 svg.on("click", function(){
 	toggling = !toggling;
 	console.log(toggling)
 	if(!toggling){
-		d3.selectAll(".go")
+		d3.selectAll(".hand")
+			.transition()
+			.attr("transform",function(d,i) {
+		  		return "translate("+cmargin+",0)";
+		  	});
+		d3.selectAll(".face")
 			.transition()
 			.attr("transform",function(d,i) {
 		  		return "translate("+cmargin+",0)";
@@ -70,14 +77,32 @@ svg.on("click", function(){
 		$(".rectText").hide();
 	}
 	if(toggling){
-		d3.selectAll(".go")
+		d3.selectAll(".hand")
 			.transition()
 			.attr("transform",function(d,i) {
 		  		return "translate("+cwidth*i+",0)";
 		  	});
+		d3.selectAll(".face")
+			.transition()
+			.attr("transform",function(d,i) {
+	  		return "translate("+(cwidth*i)+","+(cheight*rows)+")";
+		  	});
 		$(".rectText").show();
 	}
 })
+function goHands(toD){	
+	var toD = toD;
+	console.log(toD)
+
+	// One cell for each hand tracked (hands are in nested data @ at 1)
+	var g = svg.selectAll(".hand")
+		.data(toD.values)
+		.enter()
+	  	.append("g")
+	  	.attr("class","hand")
+	  	.attr("transform",function(d,i) {
+	  		return "translate("+(cwidth*i)+",0)";
+	  	});
 
 		g
 		  .append("rect")
@@ -86,18 +111,16 @@ svg.on("click", function(){
 		  .attr("width",cwidth)//-2*cmargin)
 		  .attr("height",cheight)//-2*cmargin)
 		  .attr("fill","none")
-		  .attr("stroke","lightgray")
-		    .append("title")
-		    .text(function(d) {
-		    	return d.key;
-		    })
+		  .attr("stroke","lightgray");
 		// we also write its name below.
 		g
 		  .append("text")
 		  .attr("class","rectText")
 		  .attr("y",cheight+10)
 		  .attr("x",cmargin)
-		  .text(function(d) {return d.values.length+" "+d.key;})
+		  .text(function(d) {
+		  	// return d.values.length+" "+d.key;
+		  })
 		
 		// now marks, initiated to default values
 		g.selectAll("circle")
@@ -110,7 +133,7 @@ svg.on("click", function(){
 		  .attr("cx",cmargin)
 		  .attr("cy",cheight-cmargin)
 		  .attr("fill","none")
-		  .attr("stroke","aqua")
+		  .attr("stroke","teal")
 		  .attr("r",1)
 		    // throwing in a title element
 		    .append("title")
@@ -133,11 +156,86 @@ svg.on("click", function(){
 		g.selectAll("circle").transition().delay(100).duration(1000)
 		    .attr("r",3)
 		    .attr("cx",function(d) {
-		      	// console.log(minRX);
 		    	return x(d.rx);
 		    })
 		    .attr("cy",function(d) {
 		    	return y(d.ry);
+		    })
+}
+
+function goFace(incomingData){
+	console.log(incomingData)
+	var toD = incomingData;
+	console.log(toD)
+
+	// One cell for each face tracked (hands are in nested data @ at 1)
+	var g = svg.selectAll(".face")
+		.data(toD.values)
+		.enter()
+	  	.append("g")
+	  	.attr("class","face")
+	  	.attr("transform",function(d,i) {
+	  		return "translate("+(cwidth*i)+","+(cheight*rows)+")";
+	  	});
+
+		g
+		  .append("rect")
+		  // .attr("class","faceBox")
+		  .attr("x",cmargin)
+		  .attr("y",cmargin)
+		  .attr("width",cwidth)//-2*cmargin)
+		  .attr("height",cheight)//-2*cmargin)
+		  .attr("fill","none")
+		  .attr("stroke","lightgray");
+		// we also write its name below.
+		g
+		  .append("text")
+		  .attr("class","faceText")
+		  .attr("y",cheight+10)
+		  .attr("x",cmargin)
+		  .text(function(d) {
+		  	// return d.values.length+" "+d.key;
+		  })
+		
+		// now marks, initiated to default values
+		g.selectAll("circle")
+		// we are getting the values of the countries like this:
+		.data(function(d) {
+			return d.values;
+		}) 
+		.enter()
+		  .append("circle")
+		  .attr("class","faceCirc")
+		  .attr("cx",cmargin)
+		  .attr("cy",cheight-cmargin)
+		  .attr("fill","none")
+		  .attr("stroke","pink")
+		  .attr("r",1)
+		    // throwing in a title element
+		    .append("title")
+		      .text(function(d) {
+		      	xIs.push(d.pos_x0+(d.pos_y0-d.pos_x0)/2);
+				minFX = d3.min(xIs);
+				maxFX = d3.max(xIs);
+		      	
+		      	yIs.push(d.pos_x1+(d.pos_y1-d.pos_x1)/2);
+				minFY = d3.min(yIs);
+				maxFY = d3.max(yIs);
+
+				fy.domain([minFY, maxFY])
+				fx.domain([minFX, maxFX])
+		      	// console.log(minRX);
+		      	return d.num;
+		      });
+		 
+		// finally, we animate our marks in position
+		g.selectAll("circle").transition().delay(100).duration(1000)
+		    .attr("r",3)
+		    .attr("cx",function(d) {
+		    	return fx(d.pos_x0+(d.pos_y0-d.pos_x0)/2);;
+		    })
+		    .attr("cy",function(d) {
+		    	return fy(d.pos_x1+(d.pos_y1-d.pos_x1)/2);
 		    })
 }
 // });
