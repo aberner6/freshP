@@ -154,13 +154,15 @@ function goIDE(incomingD, summary){
 	sumIDE = summary;
 	console.log("in IDE");
 	// console.log(ideData);
-	// for(i=0; i<ideData.length-1; i++){
-		// if(ideData[i].data_id==ideData[i+1].data_id){ 
-		// 	console.log("yes");
-		// }else{
-		// 	console.log("no")
-		// }
-	// }
+	for(i=0; i<ideData.length; i++){
+		if(ideData[i].action_id.length>2){
+			ideData[i].mod = ideData[i].action_id.substr(0, 2);
+			ideData[i].oc = ideData[i].action_id.substr(2, 2);
+		}else{ //doesn't matter about the CC without open close
+			ideData[i].mod = ideData[i].action_id.substr(0, 1);
+			ideData[i].oc = ideData[i].action_id.substr(1, 1);
+		}
+	}
 	var ide_nest = d3.nest()
 		.key(function(d) { 
 			return d.time; 
