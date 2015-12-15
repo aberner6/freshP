@@ -153,8 +153,10 @@ function goIDE(incomingD, summary){
 	ideData = incomingD[0].values;
 	sumIDE = summary;
 	console.log("in IDE");
+    var patt1 = /[A-Z]/gi; 
 	// console.log(ideData);
 	for(i=0; i<ideData.length; i++){
+		ideData[i].name= ideData[i].opt.match(patt1).join().replace(/,/g, '');
 		if(ideData[i].action_id.length>2){
 			ideData[i].mod = ideData[i].action_id.substr(0, 2);
 			ideData[i].oc = ideData[i].action_id.substr(2, 2);
@@ -168,12 +170,12 @@ function goIDE(incomingD, summary){
 			return d.time; 
 		})
 		.sortKeys(d3.ascending)
-		.key(function(d) { 
-			return d.data_id; 
-		})		
-		.key(function(d) { 
-			return d.action_id; 
-		})
+		// .key(function(d) { 
+		// 	return d.data_id; 
+		// })		
+		// .key(function(d) { 
+		// 	return d.mod; 
+		// })
 		.entries(ideData)
 }
 
