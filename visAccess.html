@@ -23,7 +23,7 @@ var svg = d3.select("body").append("svg").attr("width",w).attr("height",h);
 var nest_again;
 var ideData;
 
-
+var ide_nest;
 
 
 
@@ -165,7 +165,7 @@ function goIDE(incomingD, summary){
 			ideData[i].oc = ideData[i].action_id.substr(1, 1);
 		}
 	}
-	var ide_nest = d3.nest()
+	ide_nest = d3.nest()
 		.key(function(d) { 
 			return d.time; 
 		})
@@ -177,6 +177,27 @@ function goIDE(incomingD, summary){
 		// 	return d.mod; 
 		// })
 		.entries(ideData)
+
+	var g = svg.selectAll(".ide")
+		.data(ide_nest)
+		.enter()
+	  	.append("g")
+	  	.attr("class","ide");
+		// now marks, initiated to default values
+		g.selectAll("circle")
+		// we are getting the values of the countries like this:
+		.data(function(d) {
+			return d.values;
+		}) 
+		.enter()
+		.append("circle")
+		.attr("cx", function(d){
+			return timeX(d.time)
+		})
+		.attr("cy", function(d){
+			return h-100;
+		})
+		.attr("r", 3)
 }
 
 function goHands(incomingData, summary){	
