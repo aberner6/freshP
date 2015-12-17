@@ -2,7 +2,7 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery
 /1.3.2/jquery.min.js"></script>
 <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
-
+<script src="underscore-min.js"></script>
 <script type = "text/javascript" src = "http://pelars
 .sssup.it:8080/pelars/auth.js"></script>
 <body>
@@ -24,9 +24,14 @@ var nest_again;
 var ideData;
 
 var ide_nest;
+var open = [];
+var close = [];
 
 
-
+var timeMin, timeMax;
+var timeX = d3.scale.linear();
+var maxtime = [];
+var whatTime = [];	
 
 $(document).ready(function() {
 	var  token = pelars_authenticate();
@@ -41,13 +46,22 @@ $(document).ready(function() {
 			.key(function(d){ return d.num; })
 			.entries(data);
 
+		nested_face = d3.nest()
+			.key(function(d) { return d.type; })
+			.entries(data);
+
 		nest_again = d3.nest()
 			.key(function(d) { return d.type; })
 			.key(function(d){ return d.num; })
 			.rollup(function(leaves) { 
-				return { "max_time": d3.max(leaves, function(d) {
-					return parseFloat(d.time);
-					})} 
+				return { 
+						"max_time": d3.max(leaves, function(d) {
+							return parseFloat(d.time);
+						}),
+						"min_time": d3.min(leaves, function(d) {
+							return parseFloat(d.time);
+						})
+					} 
 				})
 			.entries(data)
 
@@ -57,9 +71,9 @@ $(document).ready(function() {
 					console.log(nested_data[i].key)
 					goHands(nested_data[i], nest_again[i].values);
 				}
-				if(nested_data[i].key&&nest_again[i].key==types[3]){
-					console.log(nested_data[i].key)
-					goFace(nested_data[i], nest_again[i].values);
+				if(nested_face[i].key&&nest_again[i].key==types[3]){
+					console.log(nested_face[i].key)
+					goFace(nested_face[i], nest_again[i].values);
 				}
 				if(nested_data[i].key&&nest_again[i].key=="ide"){
 					console.log(nested_data[i].key)
@@ -115,6 +129,7 @@ var fy=d3.scale.linear().range([cheight-cmargin,cmargin]);
 
 var rows = 2;
 
+var radSize = 3;
 //probably have to fix this
 svg.on("click", function(){
 	toggling = !toggling;
@@ -125,11 +140,11 @@ svg.on("click", function(){
 			.attr("transform",function(d,i) {
 		  		return "translate("+cmargin+",0)";
 		  	});
-		d3.selectAll(".face")
-			.transition()
-			.attr("transform",function(d,i) {
-		  		return "translate("+cmargin+",0)";
-		  	});
+		// d3.selectAll(".face")
+		// 	.transition()
+		// 	.attr("transform",function(d,i) {
+		//   		return "translate("+cmargin+",0)";
+		//   	});
 		$(".rectText").hide();
 		$(".faceText").hide();
 	}
@@ -139,11 +154,11 @@ svg.on("click", function(){
 			.attr("transform",function(d,i) {
 		  		return "translate("+cwidth*i+",0)";
 		  	});
-		d3.selectAll(".face")
-			.transition()
-			.attr("transform",function(d,i) {
-	  		return "translate("+(cwidth*i)+","+(cheight*rows)+")";
-		  	});
+		// d3.selectAll(".face")
+		// 	.transition()
+		// 	.attr("transform",function(d,i) {
+	 //  		return "translate("+(cwidth*i)+","+(cheight*rows)+")";
+		//   	});
 		$(".rectText").show();
 		$(".faceText").show();
 	}
@@ -164,6 +179,7 @@ function goIDE(incomingD, summary){
 			ideData[i].mod = ideData[i].action_id.substr(0, 1);
 			ideData[i].oc = ideData[i].action_id.substr(1, 1);
 		}
+		ideData[i].special_id = ideData[i].mod+ideData[i].opt;
 	}
 	ide_nest = d3.nest()
 		.key(function(d) { 
@@ -179,27 +195,168 @@ function goIDE(incomingD, summary){
 		.entries(ideData)
 
 	var g = svg.selectAll(".ide")
+	// var g = nextSesh.selectAll(".ide")
 		.data(ide_nest)
 		.enter()
 	  	.append("g")
 	  	.attr("class","ide");
 		// now marks, initiated to default values
-		g.selectAll("circle")
+		g.selectAll("rect")
 		// we are getting the values of the countries like this:
 		.data(function(d) {
 			return d.values;
 		}) 
 		.enter()
-		.append("circle")
-		.attr("cx", function(d){
+		.append("rect")
+		.attr("x", function(d){
 			return timeX(d.time)
 		})
-		.attr("cy", function(d){
+		.attr("y", function(d){
 			return h-100;
 		})
-		.attr("r", 3)
-}
+		.attr("width",function(d,i){
+			// console.lo g(d.special_id+"  "+d.oc)
+			if(parseInt(d.oc)==1){
+				open.push(d);
+			}
+			for(j=0; j<open.length; j++){
+				if(d.oc==2&&d.special_id==open[j].special_id){
+					console.log(d.special_id+" "+open[j].special_id)
+				}
+			}
 
+			// if(parseInt(d.oc)==1){
+			// 	open.push(d);
+			// } 
+			// else {
+			// 	close.push(d);
+			// }
+			// for (var j=0; j<open.length; j++){
+			// 	for (var k=0; k<close.length; k++){
+			// 		if(open[j].special_id===close[k].special_id){
+			// 			console.log(open[j].special_id)
+			// 		}else{}				
+			// 	}
+			// }
+
+			// speci.push(d.special_id);
+		 	// matches = _.findWhere(speci, "M12 POT");
+return 5;
+		})
+		.attr("height",5)
+		// .attr("r", 5)
+		.attr("fill", function(d){
+			if(d.oc==1){
+				return "green";
+			}else{
+				return "red";
+			}
+		})
+		.attr("opacity",.3)
+}
+var miniTime = [];
+function goFace(incomingData, summary){
+	var toD = incomingData;
+	console.log(toD)
+	var summary = summary;
+	console.log(summary);
+	for(j=0; j<summary.length; j++){
+		miniTime.push(summary[j].values.min_time)
+		whatTime.push(summary[j].values.max_time)
+	}
+	timeMin = d3.min(miniTime);
+	timeMax = d3.max(whatTime);
+	timeX.domain([timeMin, timeMax]).range([cmargin, w-cwidth+cmargin]);
+	// One cell for each face tracked (hands are in nested data @ at 1)
+	var g = svg.selectAll(".face")
+		.data(toD.values)
+		.enter()
+	  	.append("circle")
+	  	.attr("class","face")
+		    .attr("cx",function(d) {
+			  	return timeX(d.time) //cmargin)
+			})
+		    	// return fx(d['distance from camera']);;
+		    // })
+		    .attr("cy",function(d) {
+			  	return h/2-d.num*10;
+		    	// return fy(d['distance from camera']);;
+		    })
+		    .attr("fill","blue")
+		    .attr("opacity",.5)
+		    .attr("r",radSize)
+	  	// .attr("transform",function(d,i) {
+	  	// 	if(d.key==summary[i].key){
+		  // 		return "translate("+(timeX(whatTime[i]))+","+(cheight*rows)+")";
+		  // 		// return "translate("+(cwidth*i)+","+(cheight*rows)+")";
+	  	// 	}
+	  	// });
+		// g
+		//   .append("rect")
+		//   // .attr("class","faceBox")
+		//   .attr("x",cmargin)
+		//   .attr("y",cmargin)
+		//   .attr("width",cwidth)//-2*cmargin)
+		//   .attr("height",cheight)//-2*cmargin)
+		//   .attr("fill","none")
+		//   .attr("stroke","lightgray");
+		// we also write its name below.
+		// g
+		//   .append("text")
+		//   .attr("class","faceText")
+		//   .attr("y",cheight+10)
+		//   .attr("x",cmargin)
+		//   .text(function(d,i) {
+	 //  		if(d.key==summary[i].key){
+	 //  			// return (summary[i].values.max_time);
+	 //  		}
+		//   	// return d.values.length+" "+d.key;
+		//   })
+		
+		// now marks, initiated to default values
+		// g.selectAll(".faceCircle")
+		// we are getting the values of the countries like this:
+		// .data(function(d) {
+			// return d;
+		// }) 
+		// .enter()
+		//   .append("circle")
+		//   .attr("class","faceCircle")
+		//   .attr("cx", cmargin)
+		//   .attr("cy", h/2)//cheight-cmargin)
+		//   .attr("fill","pink")
+		//   // .attr("stroke","pink")
+		//   .attr("r",5)
+		    // throwing in a title element
+		  //   .append("title")
+		  //     .text(function(d) {
+		  //     	xIs.push(d['distance from camera']);
+				// minFX = d3.min(xIs);
+				// maxFX = d3.max(xIs);
+		      	
+		  //     	yIs.push(d['distance from camera']);
+				// minFY = d3.min(yIs);
+				// maxFY = d3.max(yIs);
+
+				// fy.domain([minFY, maxFY])
+				// fx.domain([minFX, maxFX])
+		  //     	return d.num;
+		  //     });
+		 
+		// finally, we animate our marks in position
+		// g.selectAll("circle").transition().delay(100)
+		// .duration(1000)
+		//     .attr("r",1)
+		//     .attr("cx",function(d) {
+		// 	  	return timeX(d.time) //cmargin)
+		// 	})
+		//     	// return fx(d['distance from camera']);;
+		//     // })
+		//     .attr("cy",function(d) {
+		// 	  	return h/2+d.num*10;
+		//     	// return fy(d['distance from camera']);;
+		//     })
+}
 function goHands(incomingData, summary){	
 	console.log(summary)
 	var toD = incomingData;
@@ -245,7 +402,7 @@ function goHands(incomingData, summary){
 		  .attr("cx",cmargin)
 		  .attr("cy",cheight-cmargin)
 		  .attr("fill","none")
-		  .attr("stroke","teal")
+		  .attr("stroke","grey")
 		  .attr("r",1)
 		    // throwing in a title element
 		    .append("title")
@@ -266,7 +423,7 @@ function goHands(incomingData, summary){
 		 
 		// finally, we animate our marks in position
 		g.selectAll("circle").transition().delay(100).duration(1000)
-		    .attr("r",3)
+		    .attr("r",radSize)
 		    .attr("cx",function(d) {
 		    	return x(d.rx);
 		    })
@@ -275,95 +432,6 @@ function goHands(incomingData, summary){
 		    })
 }
 
-var timeMin, timeMax;
-var timeX = d3.scale.linear();
-var maxtime = [];
-var whatTime = [];	
-function goFace(incomingData, summary){
-	var toD = incomingData;
-	var summary = summary;
-	console.log(summary);
-	for(j=0; j<summary.length; j++){
-		whatTime.push(summary[j].values.max_time)
-	}
-	timeMin = d3.min(whatTime);
-	timeMax = d3.max(whatTime);
-	timeX.domain([timeMin, timeMax]).range([cmargin, w-cwidth-cwidth/2]);
-	// One cell for each face tracked (hands are in nested data @ at 1)
-	var g = svg.selectAll(".face")
-		.data(toD.values)
-		.enter()
-	  	.append("g")
-	  	.attr("class","face")
-	  	.attr("transform",function(d,i) {
-	  		if(d.key==summary[i].key){
-		  		return "translate("+(timeX(whatTime[i]))+","+(cheight*rows)+")";
-		  		// return "translate("+(cwidth*i)+","+(cheight*rows)+")";
-	  		}
-	  	});
-		g
-		  .append("rect")
-		  // .attr("class","faceBox")
-		  .attr("x",cmargin)
-		  .attr("y",cmargin)
-		  .attr("width",cwidth)//-2*cmargin)
-		  .attr("height",cheight)//-2*cmargin)
-		  .attr("fill","none")
-		  .attr("stroke","lightgray");
-		// we also write its name below.
-		g
-		  .append("text")
-		  .attr("class","faceText")
-		  .attr("y",cheight+10)
-		  .attr("x",cmargin)
-		  .text(function(d,i) {
-	  		if(d.key==summary[i].key){
-	  			// return (summary[i].values.max_time);
-	  		}
-		  	// return d.values.length+" "+d.key;
-		  })
-		
-		// now marks, initiated to default values
-		g.selectAll("circle")
-		// we are getting the values of the countries like this:
-		.data(function(d) {
-			return d.values;
-		}) 
-		.enter()
-		  .append("circle")
-		  .attr("class","faceCirc")
-		  .attr("cx",cmargin)
-		  .attr("cy",cheight-cmargin)
-		  .attr("fill","none")
-		  .attr("stroke","pink")
-		  .attr("r",1)
-		    // throwing in a title element
-		    .append("title")
-		      .text(function(d) {
-		      	xIs.push(d.pos_x0+(d.pos_y0-d.pos_x0)/2);
-				minFX = d3.min(xIs);
-				maxFX = d3.max(xIs);
-		      	
-		      	yIs.push(d.pos_x1+(d.pos_y1-d.pos_x1)/2);
-				minFY = d3.min(yIs);
-				maxFY = d3.max(yIs);
-
-				fy.domain([minFY, maxFY])
-				fx.domain([minFX, maxFX])
-		      	// console.log(minRX);
-		      	return d.num;
-		      });
-		 
-		// finally, we animate our marks in position
-		g.selectAll("circle").transition().delay(100).duration(1000)
-		    .attr("r",3)
-		    .attr("cx",function(d) {
-		    	return fx(d.pos_x0+(d.pos_y0-d.pos_x0)/2);;
-		    })
-		    .attr("cy",function(d) {
-		    	return fy(d.pos_x1+(d.pos_y1-d.pos_x1)/2);
-		    })
-}
 
 function compress(){
 	d3.selectAll(".hand")
@@ -371,11 +439,11 @@ function compress(){
 		.attr("transform",function(d,i) {
 	  		return "translate("+cmargin+",0)";
 	  	});
-	d3.selectAll(".face")
-		.transition().delay(1000).duration(2000)
-		.attr("transform",function(d,i) {
-	  		return "translate("+cmargin+",0)";
-	  	});
+	// d3.selectAll(".face")
+	// 	.transition().delay(1000).duration(2000)
+	// 	.attr("transform",function(d,i) {
+	//   		return "translate("+cmargin+",0)";
+	//   	});
 	$(".rectText").hide();
 	$(".faceText").hide();
 }
