@@ -29,7 +29,7 @@ var close = [];
 var letspush = [];
 var letsadjust = [];
 var arr = [];
-
+var only1 = [];
 
 var timeMin, timeMax;
 var timeX = d3.scale.linear();
@@ -197,8 +197,28 @@ function goIDE(incomingD, summary){
 		})		
 		.entries(ideData);
 
+		for(i=0; i<ide_nest2.length; i++){
+			for(j=0; j<ide_nest2[i].values.length-1; j++){
+				// console.log(ide_nest2[i].values[j].oc);
+				if(ide_nest2[i].values[j].oc==1 && ide_nest2[i].values[j+1].oc==2){
+					var firstguy = ide_nest2[i].values[j].time;
+					var secondguy = ide_nest2[i].values[j+1].time;
+					// console.log(thisguy);
+					// console.log(ide_nest2[i].values[j].special_id+"same as"+ide_nest2[i].values[j+1].special_id)
+					ide_nest2[i].values[j].end = secondguy;
+				} else{ 
+					// ide_nest2[i].values[j].end = +Date.now(); 
+				}
+				// only1.push(ide_nest2[i].values[j])
+			}
+		}
+
+        // only1 = ide_nest2.filter(function(d) {
+        //     if (d.values.oc == 1) {
+        //         return d;
+        //     }
+        // })
 	var g = svg.selectAll(".ide")
-	// var g = nextSesh.selectAll(".ide")
 		.data(ide_nest2)
 		.enter()
 	  	.append("g")
@@ -208,6 +228,14 @@ function goIDE(incomingD, summary){
 		// we are getting the values of the countries like this:
 		.data(function(d) {
 			return d.values;
+			// if(d.values.length>0){
+			// console.log(d.values.length);
+			// 	for(j=0; j<d.values.length; j++){
+			// 		if(d.values[j].oc==1){
+			// 			return d.values;
+			// 		}else{}
+			// 	}
+			// }else{}
 		}) 
 		.enter()
 		.append("rect")
@@ -217,34 +245,18 @@ function goIDE(incomingD, summary){
 		.attr("y", function(d){
 			return h-100;
 		})
-
-    // g.selectAll('.section')
-    //   .data(ide_nest2)
-    //   .enter()
-    //     .append('g')
-    //     .classed('section', true)	
-        // g.selectAll("rect")
-        // .data(function(d){
-        // 	return d.values;
-        // })	
 		.attr("width",function(d,i){
-			for(j=0; j<ide_nest2[i].values.length-1; j++){
-				console.log(ide_nest2[i].values[j].oc);
-				if(ide_nest2[i].values[j].oc==1 && ide_nest2[i].values[j+1].oc==2){
-					var thisguy = ide_nest2[i].values[j+1].time;
-					console.log(thisguy);
-					console.log(ide_nest2[i].values[j].special_id+"same as"+ide_nest2[i].values[j+1].special_id)
-				}
+			// console.log(d.end)
+			if(d.end){
+				return timeX(d.end)-timeX(d.time);		//SOMETHING PRE-ESTABLISHED
 			}
-return 5;
 		})
 		.attr("height",5)
-		// .attr("r", 5)
 		.attr("fill", function(d){
 			if(d.oc==1){
 				return "green";
 			}else{
-				return "red";
+				return "none";
 			}
 		})
 		.attr("opacity",.3)
@@ -277,8 +289,9 @@ function goFace(incomingData, summary){
 			  	return h/2-d.num*10;
 		    	// return fy(d['distance from camera']);;
 		    })
-		    .attr("fill","blue")
-		    .attr("opacity",.5)
+		    .attr("stroke","gray")
+		    .attr("fill","none")
+		    // .attr("opacity",.5)
 		    .attr("r",radSize)
 	  	// .attr("transform",function(d,i) {
 	  	// 	if(d.key==summary[i].key){
