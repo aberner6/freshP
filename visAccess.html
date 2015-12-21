@@ -202,7 +202,7 @@ function goIDE(incomingD, summary){
     var patt1 = /[A-Z]/gi; 
 	// console.log(ideData);
 	for(i=0; i<ideData.length; i++){
-		ideData[i].name= ideData[i].opt.match(patt1).join().replace(/,/g, '');
+		ideData[i].name= (ideData[i].opt.match(patt1).join().replace(/,/g, '')).toUpperCase();
 		if(ideData[i].action_id.length>2){
 			ideData[i].mod = ideData[i].action_id.substr(0, 2);
 			ideData[i].oc = ideData[i].action_id.substr(2, 2);
@@ -249,43 +249,49 @@ function goIDE(incomingD, summary){
 		}) 
 		.enter()
 		.append("rect")
+		.attr("class", function(d){
+			if(d.mod=="L" || d.mod == "CC"){
+				console.log(d.mod);
+			}
+			return "mod is "+d.mod+"index of "+i+" name of "+d.name;
+		})
 		.attr("x", function(d){
 			return timeX(d.time)
 		})
 		.attr("y", function(d){
 	      for(j=0; j<programming.length; j++){
-	          if(d.name==programming[j]){
-	          return y_p;
+	          if(d.name==programming[j] || d.mod=="L" || d.mod == "CC"){
+	          	return y_p;
 	          }
 	      }
 	      for(j=0; j<outputs.length; j++){
 	          if(d.name==outputs[j]){
-	          return y_o;
+	          	return y_o;
 	          }
 	      }
 	      for(j=0; j<inputs.length; j++){
 	          if(d.name==inputs[j]){
-	          return y_i;
+	          	return y_i;
 	          }
 	      }
 	      for(j=0; j<games.length; j++){
 	          if(d.name==games[j]){
-	          return y_g;
+	          	return y_g;
 	          }
 	      }
 			// return h-100;
 		})
 		.attr("width",function(d,i){
 			if(d.end){
-				return timeX(d.time)+(timeX(d.end)-timeX(d.time));
+				return timeX(d.end)-timeX(d.time);
 			}
 		})
 		.attr("height",5)
 		.attr("fill", function(d){
-			if(d.oc==1){
-				return "green";
-			}else{
+			if(d.oc==2){
 				return "none";
+			} else{
+				return colorScale(d.mod);
 			}
 		})
 		.attr("opacity",.3)
