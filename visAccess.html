@@ -2,7 +2,7 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery
 /1.3.2/jquery.min.js"></script>
 <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<script src="underscore-min.js"></script>
+<script type = "text/javascript" src="underscore-min.js"></script>
 <script type = "text/javascript" src = "http://pelars
 .sssup.it:8080/pelars/auth.js"></script>
 <body>
@@ -23,9 +23,12 @@ var svg = d3.select("body").append("svg").attr("width",w).attr("height",h);
 var nest_again;
 var ideData;
 
-var ide_nest;
+var ide_nest, ide_nest2;
 var open = [];
 var close = [];
+var letspush = [];
+var letsadjust = [];
+var arr = [];
 
 
 var timeMin, timeMax;
@@ -186,17 +189,17 @@ function goIDE(incomingD, summary){
 			return d.time; 
 		})
 		.sortKeys(d3.ascending)
-		// .key(function(d) { 
-		// 	return d.data_id; 
-		// })		
-		// .key(function(d) { 
-		// 	return d.mod; 
-		// })
-		.entries(ideData)
+		.entries(ideData);
+
+	ide_nest2 = d3.nest()
+		.key(function(d) { 
+			return d.special_id; 
+		})		
+		.entries(ideData);
 
 	var g = svg.selectAll(".ide")
 	// var g = nextSesh.selectAll(".ide")
-		.data(ide_nest)
+		.data(ide_nest2)
 		.enter()
 	  	.append("g")
 	  	.attr("class","ide");
@@ -214,33 +217,25 @@ function goIDE(incomingD, summary){
 		.attr("y", function(d){
 			return h-100;
 		})
+
+    // g.selectAll('.section')
+    //   .data(ide_nest2)
+    //   .enter()
+    //     .append('g')
+    //     .classed('section', true)	
+        // g.selectAll("rect")
+        // .data(function(d){
+        // 	return d.values;
+        // })	
 		.attr("width",function(d,i){
-			// console.lo g(d.special_id+"  "+d.oc)
-			if(parseInt(d.oc)==1){
-				open.push(d);
-			}
-			for(j=0; j<open.length; j++){
-				if(d.oc==2&&d.special_id==open[j].special_id){
-					console.log(d.special_id+" "+open[j].special_id)
+			for(j=0; j<ide_nest2[i].values.length-1; j++){
+				console.log(ide_nest2[i].values[j].oc);
+				if(ide_nest2[i].values[j].oc==1 && ide_nest2[i].values[j+1].oc==2){
+					var thisguy = ide_nest2[i].values[j+1].time;
+					console.log(thisguy);
+					console.log(ide_nest2[i].values[j].special_id+"same as"+ide_nest2[i].values[j+1].special_id)
 				}
 			}
-
-			// if(parseInt(d.oc)==1){
-			// 	open.push(d);
-			// } 
-			// else {
-			// 	close.push(d);
-			// }
-			// for (var j=0; j<open.length; j++){
-			// 	for (var k=0; k<close.length; k++){
-			// 		if(open[j].special_id===close[k].special_id){
-			// 			console.log(open[j].special_id)
-			// 		}else{}				
-			// 	}
-			// }
-
-			// speci.push(d.special_id);
-		 	// matches = _.findWhere(speci, "M12 POT");
 return 5;
 		})
 		.attr("height",5)
