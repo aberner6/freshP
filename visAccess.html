@@ -10,6 +10,9 @@
 var data;
 var types = ["hand","ide","particle","face"];
 var handData = [];
+var moduleTypes = ["B","CC","BM","M","L"];
+var interactionTypes = ["inputs","outputs","programming","games"];
+
 
 var cwidth=200,cheight=200,cmargin=25,maxr=5;
 
@@ -35,6 +38,31 @@ var timeMin, timeMax;
 var timeX = d3.scale.linear();
 var maxtime = [];
 var whatTime = [];	
+
+
+
+var inputs = [];
+var outputs = [];
+var programming = [];
+var games = [];
+inputs.push("BTN","POT","TMP","ACR","COL","ROT","LDR")
+outputs.push("LED","PEZ", "RGB")
+programming.push("IF", "Interval", "Fade", "Swap", "Map", "Counter", "Trigger")
+games.push("Note", "Random", "PONG", "SimonSays")
+var radiusMin = 5;
+var spaceFactor = radiusMin;
+var colorScale = d3.scale.ordinal()
+    .domain(moduleTypes)
+    .range(d3.scale.category20c().range());
+var yspace = radiusMin*2.5;
+var y_i = h/1.7,
+y_o = h/1.7+yspace,
+y_p = h/1.7+yspace*2,
+y_g = h/1.7+yspace*3;
+
+var y = d3.scale.ordinal()
+    .domain(interactionTypes)
+    .rangePoints([h/2, (h/2)+yspace*3]);
 
 $(document).ready(function() {
 	var  token = pelars_authenticate();
@@ -199,25 +227,15 @@ function goIDE(incomingD, summary){
 
 		for(i=0; i<ide_nest2.length; i++){
 			for(j=0; j<ide_nest2[i].values.length-1; j++){
-				// console.log(ide_nest2[i].values[j].oc);
 				if(ide_nest2[i].values[j].oc==1 && ide_nest2[i].values[j+1].oc==2){
-					var firstguy = ide_nest2[i].values[j].time;
 					var secondguy = ide_nest2[i].values[j+1].time;
-					// console.log(thisguy);
-					// console.log(ide_nest2[i].values[j].special_id+"same as"+ide_nest2[i].values[j+1].special_id)
 					ide_nest2[i].values[j].end = secondguy;
 				} else{ 
-					// ide_nest2[i].values[j].end = +Date.now(); 
+					// idenest2[i].values[j].end = +Date.now(); 
 				}
-				// only1.push(ide_nest2[i].values[j])
 			}
 		}
 
-        // only1 = ide_nest2.filter(function(d) {
-        //     if (d.values.oc == 1) {
-        //         return d;
-        //     }
-        // })
 	var g = svg.selectAll(".ide")
 		.data(ide_nest2)
 		.enter()
@@ -228,14 +246,6 @@ function goIDE(incomingD, summary){
 		// we are getting the values of the countries like this:
 		.data(function(d) {
 			return d.values;
-			// if(d.values.length>0){
-			// console.log(d.values.length);
-			// 	for(j=0; j<d.values.length; j++){
-			// 		if(d.values[j].oc==1){
-			// 			return d.values;
-			// 		}else{}
-			// 	}
-			// }else{}
 		}) 
 		.enter()
 		.append("rect")
@@ -243,12 +253,31 @@ function goIDE(incomingD, summary){
 			return timeX(d.time)
 		})
 		.attr("y", function(d){
-			return h-100;
+	      for(j=0; j<programming.length; j++){
+	          if(d.name==programming[j]){
+	          return y_p;
+	          }
+	      }
+	      for(j=0; j<outputs.length; j++){
+	          if(d.name==outputs[j]){
+	          return y_o;
+	          }
+	      }
+	      for(j=0; j<inputs.length; j++){
+	          if(d.name==inputs[j]){
+	          return y_i;
+	          }
+	      }
+	      for(j=0; j<games.length; j++){
+	          if(d.name==games[j]){
+	          return y_g;
+	          }
+	      }
+			// return h-100;
 		})
 		.attr("width",function(d,i){
-			// console.log(d.end)
 			if(d.end){
-				return timeX(d.end)-timeX(d.time);		//SOMETHING PRE-ESTABLISHED
+				return timeX(d.time)+(timeX(d.end)-timeX(d.time));
 			}
 		})
 		.attr("height",5)
