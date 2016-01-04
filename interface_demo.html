@@ -1,0 +1,40 @@
+<head>
+<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="style.css" rel = "stylesheet">
+</head>
+
+
+<div class="navbar navbar-default navbar-static-top" role="navigation">
+  <!-- <a href=""><img src="assets/img/logo.png" style="display:block; margin:auto; height:100%; position:absolute; left:0; right:0"></a> -->
+  <canvas id="myChart" width="75" height="75" style="width: 75px; height: 75px;"></canvas>
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" id="hamburger" class="navbar-toggle pull-left" data-toggle="offcanvas" data-target=".navbar-offcanvas" data-canvas=".canvas">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-offcanvas offcanvas navmenu-fixed-left" id="madison-nav">
+      <h3 id="nav-tagline">Madison</h3>
+      <ul class="nav navbar-nav navbar-left">
+        <li><a id="nav-find" class="find selected-task" href="#" data-task="find" style="background-color: rgb(237, 248, 251);"><span class="nav-icon">s</span>FIND ADS</a></li>
+        <li><a id="nav-tag" class="tag" href="#" data-task="tag"><span class="nav-icon">J</span>TAG ADS</a></li>
+        <li><a id="nav-transcribe" class="transcribe" data-task="transcribe" href="#"><span class="nav-icon">e</span>TRANSCRIBE ADS</a></li>
+      </ul>
+      <div class="line"></div>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="/gallery/" class="gallery">Gallery</a></li>
+        <li><a href="/about/" class="about">About</a></li>
+        <li><a href="#" class="login logout-click">Log out of NYT</a></li>
+        <li id="login-link"><a href="/user/">My Profile</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div>
+  <p class="stat-task-num navbar-text" id="stat-desktop" data-toggle="tooltip" title="Total Complete" style="display: block; visibility: hidden;">0</p>
+</div>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+</body>
+</html>
