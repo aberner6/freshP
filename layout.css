@@ -29,12 +29,9 @@ body{
     vertical-align: top;
     display: inline-block;
     margin-left: 24px;
-    /* padding: 12px; */
     color: #A4A4A4;
     margin-top: 0px;
     margin-right: 24px;
-    /* background-color: white; */
-    /* background-color: #e7e7e7; */
     margin-bottom: 0px;
     border-bottom: 5px solid;
 }
@@ -43,6 +40,13 @@ body{
     display: inline-block;
     font-size: 0;
     line-height: 0
+}
+
+p#logo{
+    color: #A4A4A4;
+    top: 0px;
+    position: absolute;
+    left: 55px;
 }
 .logo{
 	width: 150px;
@@ -53,6 +57,7 @@ body{
     margin-bottom: 0;
     padding-left: 0;
 }
+
 #menu{
 	font-family: HelveticaNeue-Bold;
 	font-size: 18px;
