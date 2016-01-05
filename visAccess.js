@@ -5,6 +5,8 @@ var handData = [];
 var moduleTypes = ["B","CC","BM","M","L"];
 var interactionTypes = ["inputs","outputs","programming","games"];
 
+var toggling = true;
+
 
 var cwidth=200,cheight=200,cmargin=25,maxr=5;
 
@@ -56,6 +58,25 @@ var y = d3.scale.ordinal()
     .domain(interactionTypes)
     .rangePoints([h/2, (h/2)+yspace*3]);
 
+
+//hands face stuff
+var radSize = 3;
+var summaryHands;
+var summaryFace;
+var minRX, maxRX, minRY, maxRY, minFX, minFY, maxFX, maxFY;
+var rx = [];
+var ry = [];
+var xIs = [];
+var yIs = [];
+var x=d3.scale.linear().range([cmargin,cwidth-cmargin]);
+var y=d3.scale.linear().range([cheight-cmargin,cmargin]);
+var o=d3.scale.linear().domain([0,300000]).range([.5,1]);
+
+var fx=d3.scale.linear().range([cmargin,cwidth-cmargin]);
+var fy=d3.scale.linear().range([cheight-cmargin,cmargin]);
+
+var rows = 2;
+
 $(document).ready(function() {
 	var  token = pelars_authenticate();
 	$.getJSON("http://pelars.sssup.it:8080/pelars/data/615/session?token="+token ,function(json){
@@ -83,6 +104,12 @@ $(document).ready(function() {
 						}),
 						"min_time": d3.min(leaves, function(d) {
 							return parseFloat(d.time);
+						}),
+						"meanX": d3.mean(leaves, function(d) {
+							return parseFloat(d.rx);
+						}),
+						"meanY": d3.mean(leaves, function(d) {
+							return parseFloat(d.ry);
 						})
 					} 
 				})
@@ -134,25 +161,6 @@ function pelars_authenticate(){
 	return res;
 }
 
-
-var minRX, maxRX, minRY, maxRY, minFX, minFY, maxFX, maxFY;
-var rx = [];
-var ry = [];
-var xIs = [];
-var yIs = [];
-
-var toggling = true;
-
-var x=d3.scale.linear().range([cmargin,cwidth-cmargin]);
-var y=d3.scale.linear().range([cheight-cmargin,cmargin]);
-var o=d3.scale.linear().domain([0,300000]).range([.5,1]);
-
-var fx=d3.scale.linear().range([cmargin,cwidth-cmargin]);
-var fy=d3.scale.linear().range([cheight-cmargin,cmargin]);
-
-var rows = 2;
-
-var radSize = 3;
 //probably have to fix this
 svg.on("click", function(){
 	toggling = !toggling;
@@ -227,8 +235,162 @@ function goIDE(incomingD, summary){
 				}
 			}
 		}
+}
 
-	var g = svg.selectAll(".ide")
+var miniTime = [];
+function goFace(incomingData, summary){
+	faceData = incomingData;
+	// console.log(toD)
+	summaryFace = summary;
+	// console.log(summary);
+	for(j=0; j<summaryFace.length; j++){
+		miniTime.push(summaryFace[j].values.min_time)
+		whatTime.push(summaryFace[j].values.max_time)
+	}
+	timeMin = d3.min(miniTime);
+	timeMax = d3.max(whatTime);
+	timeX.domain([timeMin, timeMax]).range([cmargin, w-cwidth+cmargin]);
+}
+
+function goHands(incomingData, summary){	
+	console.log(summary+"summaryHands")
+	handData = incomingData;
+	summaryHands = summary;
+	// One cell for each hand tracked (hands are in nested data @ at 1)
+}
+
+
+function compress(){
+	d3.selectAll(".hand")
+		.transition().delay(1000).duration(2000)
+		.attr("transform",function(d,i) {
+	  		return "translate("+cmargin+",0)";
+	  	});
+	// d3.selectAll(".face")
+	// 	.transition().delay(1000).duration(2000)
+	// 	.attr("transform",function(d,i) {
+	//   		return "translate("+cmargin+",0)";
+	//   	});
+	$(".rectText").hide();
+	$(".faceText").hide();
+}
+// }
+})
+
+function showHands(){
+	var thisData;
+	var g = svg.selectAll(".hand")
+		.data(handData.values)
+		.enter()
+	  	.append("g")
+	  	.attr("class","hand")
+	  	.attr("transform",function(d,i) {
+	  		thisData = d;
+	  		return "translate("+(cwidth*i)+",0)";
+	  	});
+
+		g
+		  .append("rect")
+		  .attr("x",cmargin)
+		  .attr("y",cmargin)
+		  .attr("width",cwidth)//-2*cmargin)
+		  .attr("height",cheight)//-2*cmargin)
+		  .attr("fill","none")
+		  .attr("stroke","lightgray");
+		// we also write its name below.
+		g
+		  .append("text")
+		  .attr("class","rectText")
+		  .attr("y",cheight+10)
+		  .attr("x",cmargin)
+		  .text(function(d,i) {
+	  		if(d.key==summaryHands[i].key){
+	  			// return (summary[i].values.max_time);
+	  		}
+		  })
+		
+		// now marks, initiated to default values
+		g.selectAll("circle")
+		// we are getting the values of the countries like this:
+		.data(function(d) {
+			return d.values;
+		}) 
+		.enter()
+		  .append("circle")
+		  .attr("class","miniCircs")
+		  .attr("cx",cmargin)
+		  .attr("cy",cheight-cmargin)
+		  .attr("fill","none")
+		  .attr("stroke","grey")
+		  .attr("r",1)
+		    // throwing in a title element
+		    .append("title")
+		      .text(function(d) {
+		      	rx.push(d.rx);
+				minRX = d3.min(rx);
+				maxRX = d3.max(rx);
+		      	
+		      	ry.push(d.ry);
+				minRY = d3.min(ry);
+				maxRY = d3.max(ry);
+
+				// console.log(meanX+"meanx")
+				y.domain([minRY, maxRY])
+				x.domain([minRX, maxRX])
+		      	// console.log(minRX);
+		      	// return d.num;
+		      });
+		 
+		// finally, we animate our marks in position
+		g.selectAll("circle.miniCircs").transition().delay(100).duration(1000)
+		    .attr("r",radSize)
+		    .attr("cx",function(d) {
+		    	return x(d.rx);
+		    })
+		    .attr("cy",function(d) {
+		    	return y(d.ry);
+		    })
+
+		g.append("circle")
+		.attr("class","bigCircs")
+		.attr("cx", function(d,i){
+	  		if(d.key==summaryHands[i].key){
+	  			return x(summaryHands[i].values.meanX);
+	  		}
+	  	})
+		.attr("cy", function(d,i){
+	  		if(d.key==summaryHands[i].key){
+	  			return y(summaryHands[i].values.meanY);
+	  		}
+	  	})
+	  	.attr("r",50)
+		.attr("fill","pink")
+//try to find average spot
+}
+
+function showFace(){
+	// One cell for each face tracked (hands are in nested data @ at 1)
+	var g = svg.selectAll(".face")
+		.data(faceData.values)
+		.enter()
+	  	.append("circle")
+	  	.attr("class","face")
+		    .attr("cx",function(d) {
+			  	return timeX(d.time) //cmargin)
+			})
+		    	// return fx(d['distance from camera']);;
+		    // })
+		    .attr("cy",function(d) {
+			  	return h/2-d.num*10;
+		    	// return fy(d['distance from camera']);;
+		    })
+		    .attr("stroke","gray")
+		    .attr("fill","none")
+		    // .attr("opacity",.5)
+		    .attr("r",radSize)
+}
+function showIDE(){
+		var g = svg.selectAll(".ide")
 		.data(ide_nest2)
 		.enter()
 	  	.append("g")
@@ -271,7 +433,6 @@ function goIDE(incomingD, summary){
 	          	return y_g;
 	          }
 	      }
-			// return h-100;
 		})
 		.attr("width",function(d,i){
 			if(d.end){
@@ -288,199 +449,3 @@ function goIDE(incomingD, summary){
 		})
 		.attr("opacity",.3)
 }
-var miniTime = [];
-function goFace(incomingData, summary){
-	var toD = incomingData;
-	console.log(toD)
-	var summary = summary;
-	console.log(summary);
-	for(j=0; j<summary.length; j++){
-		miniTime.push(summary[j].values.min_time)
-		whatTime.push(summary[j].values.max_time)
-	}
-	timeMin = d3.min(miniTime);
-	timeMax = d3.max(whatTime);
-	timeX.domain([timeMin, timeMax]).range([cmargin, w-cwidth+cmargin]);
-	// One cell for each face tracked (hands are in nested data @ at 1)
-	var g = svg.selectAll(".face")
-		.data(toD.values)
-		.enter()
-	  	.append("circle")
-	  	.attr("class","face")
-		    .attr("cx",function(d) {
-			  	return timeX(d.time) //cmargin)
-			})
-		    	// return fx(d['distance from camera']);;
-		    // })
-		    .attr("cy",function(d) {
-			  	return h/2-d.num*10;
-		    	// return fy(d['distance from camera']);;
-		    })
-		    .attr("stroke","gray")
-		    .attr("fill","none")
-		    // .attr("opacity",.5)
-		    .attr("r",radSize)
-	  	// .attr("transform",function(d,i) {
-	  	// 	if(d.key==summary[i].key){
-		  // 		return "translate("+(timeX(whatTime[i]))+","+(cheight*rows)+")";
-		  // 		// return "translate("+(cwidth*i)+","+(cheight*rows)+")";
-	  	// 	}
-	  	// });
-		// g
-		//   .append("rect")
-		//   // .attr("class","faceBox")
-		//   .attr("x",cmargin)
-		//   .attr("y",cmargin)
-		//   .attr("width",cwidth)//-2*cmargin)
-		//   .attr("height",cheight)//-2*cmargin)
-		//   .attr("fill","none")
-		//   .attr("stroke","lightgray");
-		// we also write its name below.
-		// g
-		//   .append("text")
-		//   .attr("class","faceText")
-		//   .attr("y",cheight+10)
-		//   .attr("x",cmargin)
-		//   .text(function(d,i) {
-	 //  		if(d.key==summary[i].key){
-	 //  			// return (summary[i].values.max_time);
-	 //  		}
-		//   	// return d.values.length+" "+d.key;
-		//   })
-		
-		// now marks, initiated to default values
-		// g.selectAll(".faceCircle")
-		// we are getting the values of the countries like this:
-		// .data(function(d) {
-			// return d;
-		// }) 
-		// .enter()
-		//   .append("circle")
-		//   .attr("class","faceCircle")
-		//   .attr("cx", cmargin)
-		//   .attr("cy", h/2)//cheight-cmargin)
-		//   .attr("fill","pink")
-		//   // .attr("stroke","pink")
-		//   .attr("r",5)
-		    // throwing in a title element
-		  //   .append("title")
-		  //     .text(function(d) {
-		  //     	xIs.push(d['distance from camera']);
-				// minFX = d3.min(xIs);
-				// maxFX = d3.max(xIs);
-		      	
-		  //     	yIs.push(d['distance from camera']);
-				// minFY = d3.min(yIs);
-				// maxFY = d3.max(yIs);
-
-				// fy.domain([minFY, maxFY])
-				// fx.domain([minFX, maxFX])
-		  //     	return d.num;
-		  //     });
-		 
-		// finally, we animate our marks in position
-		// g.selectAll("circle").transition().delay(100)
-		// .duration(1000)
-		//     .attr("r",1)
-		//     .attr("cx",function(d) {
-		// 	  	return timeX(d.time) //cmargin)
-		// 	})
-		//     	// return fx(d['distance from camera']);;
-		//     // })
-		//     .attr("cy",function(d) {
-		// 	  	return h/2+d.num*10;
-		//     	// return fy(d['distance from camera']);;
-		//     })
-}
-function goHands(incomingData, summary){	
-	console.log(summary)
-	var toD = incomingData;
-	var summary = summary;
-	// One cell for each hand tracked (hands are in nested data @ at 1)
-	var g = svg.selectAll(".hand")
-		.data(toD.values)
-		.enter()
-	  	.append("g")
-	  	.attr("class","hand")
-	  	.attr("transform",function(d,i) {
-	  		return "translate("+(cwidth*i)+",0)";
-	  	});
-
-		g
-		  .append("rect")
-		  .attr("x",cmargin)
-		  .attr("y",cmargin)
-		  .attr("width",cwidth)//-2*cmargin)
-		  .attr("height",cheight)//-2*cmargin)
-		  .attr("fill","none")
-		  .attr("stroke","lightgray");
-		// we also write its name below.
-		g
-		  .append("text")
-		  .attr("class","rectText")
-		  .attr("y",cheight+10)
-		  .attr("x",cmargin)
-		  .text(function(d,i) {
-	  		if(d.key==summary[i].key){
-	  			// return (summary[i].values.max_time);
-	  		}
-		  })
-		
-		// now marks, initiated to default values
-		g.selectAll("circle")
-		// we are getting the values of the countries like this:
-		.data(function(d) {
-			return d.values;
-		}) 
-		.enter()
-		  .append("circle")
-		  .attr("cx",cmargin)
-		  .attr("cy",cheight-cmargin)
-		  .attr("fill","none")
-		  .attr("stroke","grey")
-		  .attr("r",1)
-		    // throwing in a title element
-		    .append("title")
-		      .text(function(d) {
-		      	rx.push(d.rx);
-				minRX = d3.min(rx);
-				maxRX = d3.max(rx);
-		      	
-		      	ry.push(d.ry);
-				minRY = d3.min(ry);
-				maxRY = d3.max(ry);
-
-				y.domain([minRY, maxRY])
-				x.domain([minRX, maxRX])
-		      	// console.log(minRX);
-		      	// return d.num;
-		      });
-		 
-		// finally, we animate our marks in position
-		g.selectAll("circle").transition().delay(100).duration(1000)
-		    .attr("r",radSize)
-		    .attr("cx",function(d) {
-		    	return x(d.rx);
-		    })
-		    .attr("cy",function(d) {
-		    	return y(d.ry);
-		    })
-}
-
-
-function compress(){
-	d3.selectAll(".hand")
-		.transition().delay(1000).duration(2000)
-		.attr("transform",function(d,i) {
-	  		return "translate("+cmargin+",0)";
-	  	});
-	// d3.selectAll(".face")
-	// 	.transition().delay(1000).duration(2000)
-	// 	.attr("transform",function(d,i) {
-	//   		return "translate("+cmargin+",0)";
-	//   	});
-	$(".rectText").hide();
-	$(".faceText").hide();
-}
-// }
-})

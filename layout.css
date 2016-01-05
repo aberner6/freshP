@@ -3,7 +3,8 @@ body{
     font-size: 14px;
     line-height: 1.42857143;
     color: #333;
-    background-color: #fff;	
+    background-color: #f4f4f4;
+    /*background-color: #fff;	*/
 }
 
 .navbar{
@@ -20,7 +21,7 @@ body{
 }
 #thumbs {   
     width: 540px;
-    margin-top: 54px;
+    margin-top: 49px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
