@@ -10,7 +10,7 @@ body{
 .navbar{
 	margin-bottom: 20px;
 	box-shadow: 2px 4px 6px #e2e2e2;    
-	height: 73px;
+	height: 90px;
 	background-color: #fff;    
 	border-color: #e7e7e7;    
 	border-radius: 0;z-index: 1000;
@@ -21,7 +21,7 @@ body{
 }
 #thumbs {   
     width: 540px;
-    margin-top: 49px;
+    margin-top: 66px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
@@ -53,6 +53,8 @@ p#logo{
 	width: 150px;
     position: relative;
     float: left;
+    top: 10px;
+    left: 10px;
 }
 .nav {
     margin-bottom: 0;

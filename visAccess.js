@@ -48,6 +48,11 @@ var spaceFactor = radiusMin;
 var colorScale = d3.scale.ordinal()
     .domain(moduleTypes)
     .range(d3.scale.category20c().range());
+
+var handColor = d3.scale.ordinal()
+    // .domain()
+    .range(d3.scale.category20c().range());
+
 var yspace = radiusMin*2.5;
 var y_i = h/1.7,
 y_o = h/1.7+yspace,
@@ -93,7 +98,8 @@ $(document).ready(function() {
 		nested_face = d3.nest()
 			.key(function(d) { return d.type; })
 			.entries(data);
-
+var rex = [];
+var rey = [];
 		nest_again = d3.nest()
 			.key(function(d) { return d.type; })
 			.key(function(d){ return d.num; })
@@ -110,6 +116,12 @@ $(document).ready(function() {
 						}),
 						"meanY": d3.mean(leaves, function(d) {
 							return parseFloat(d.ry);
+						}),
+						"deviationX": d3.deviation(leaves, function(d){ 
+							return parseFloat(d.rx) 
+						}),
+						"deviationY": d3.deviation(leaves, function(d){ 
+							return parseFloat(d.ry) 
 						})
 					} 
 				})
@@ -278,14 +290,15 @@ function compress(){
 })
 
 function showHands(){
-	var thisData;
+	// var thisData;
 	var g = svg.selectAll(".hand")
 		.data(handData.values)
 		.enter()
 	  	.append("g")
 	  	.attr("class","hand")
 	  	.attr("transform",function(d,i) {
-	  		thisData = d;
+	  		handColor.domain([d.key])
+	  		// thisData = d;
 	  		return "translate("+(cwidth*i)+",0)";
 	  	});
 
@@ -340,7 +353,6 @@ function showHands(){
 		      	// console.log(minRX);
 		      	// return d.num;
 		      });
-		 
 		// finally, we animate our marks in position
 		g.selectAll("circle.miniCircs").transition().delay(100).duration(1000)
 		    .attr("r",radSize)
@@ -363,8 +375,15 @@ function showHands(){
 	  			return y(summaryHands[i].values.meanY);
 	  		}
 	  	})
-	  	.attr("r",50)
-		.attr("fill","pink")
+	  	.attr("r", function(d,i){
+	  		if(d.key==summaryHands[i].key){
+	  			return 200*((summaryHands[i].values.deviationX+summaryHands[i].values.deviationY)/2);
+	  		}
+	  	})
+		.attr("fill",function(d){
+			return handColor(d.key);//"pink";
+		})
+		.attr("opacity",.6)
 //try to find average spot
 }
 
