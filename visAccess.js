@@ -117,10 +117,10 @@ var rey = [];
 						"meanY": d3.mean(leaves, function(d) {
 							return parseFloat(d.ry);
 						}),
-						"deviationX": d3.deviation(leaves, function(d){ 
+						"deviationX": d3.variance(leaves, function(d){ 
 							return parseFloat(d.rx) 
 						}),
-						"deviationY": d3.deviation(leaves, function(d){ 
+						"deviationY": d3.variance(leaves, function(d){ 
 							return parseFloat(d.ry) 
 						})
 					} 
@@ -290,6 +290,16 @@ function compress(){
 })
 
 function showHands(){
+var numPanels = handData.values.length;
+
+    backRect = svg.append("g").attr("class","backRect")
+    	.append("rect")
+    	.attr("class","backRect")
+    	.attr("x", cmargin)
+    	.attr("y", cmargin)
+    	.attr("width", cwidth*numPanels)//(timeX(timeMin)-timeX(timeMax)))
+    	.attr("height", cheight)
+    	.attr("fill","white")
 	// var thisData;
 	var g = svg.selectAll(".hand")
 		.data(handData.values)
@@ -386,48 +396,152 @@ function showHands(){
 		.attr("opacity",.6)
 //try to find average spot
 }
+var path, line;
+var thisData = [];
 
 function showFace(){
+	var minTotal, maxTotal;
+	var thisMany = [];
+// thisData.push(faceData.values)
+	maxTotal = 4;
+	// for(var i=0; i<thisData[0].length; i++){
+	// 	maxTotal = d3.max(thisData[0][i].num);
+	// }
+
 	// One cell for each face tracked (hands are in nested data @ at 1)
-	var g = svg.selectAll(".face")
-		.data(faceData.values)
-		.enter()
-	  	.append("circle")
-	  	.attr("class","face")
-		    .attr("cx",function(d) {
-			  	return timeX(d.time) //cmargin)
-			})
-		    	// return fx(d['distance from camera']);;
-		    // })
-		    .attr("cy",function(d) {
-			  	return h/2-d.num*10;
-		    	// return fy(d['distance from camera']);;
-		    })
-		    .attr("stroke","gray")
-		    .attr("fill","none")
-		    // .attr("opacity",.5)
-		    .attr("r",radSize)
+	// var g = svg.selectAll(".face")
+	// 	.data(faceData.values)
+	// 	.enter()
+	//   	.append("circle")
+	//   	.attr("class",function(d){
+	//   		thisMany.push(d.num);
+	//     	minTotal = d3.min(thisMany);
+	//     	maxTotal = d3.max(thisMany);
+	//   		return "face"
+	//   	})
+	//     .attr("cx",function(d) {
+	// 	  	return timeX(d.time) //cmargin)
+	// 	})
+	//     .attr("cy",function(d) {
+	// 	  	return h/2-d.num*10;
+	//     	// return fy(d['distance from camera']);;
+	//     })
+	//     .attr("stroke","gray")
+	//     .attr("fill","none")
+	//     .attr("r",radSize)
+
+  var yOffset = h/2;
+  var mini = 4;
+  var heightPanel = 100;
+  var yPath = d3.scale.linear()
+	  .domain([-1, maxTotal])
+      .range([yOffset, yOffset-heightPanel]);
+
+// cmargin, w-cwidth+cmargin
+    backRect = svg.append("g").attr("class","backRect")
+    	.append("rect")
+    	.attr("class","backRect")
+    	.attr("x", cmargin)
+    	.attr("y", yOffset-heightPanel)
+    	.attr("width", w-cwidth+cmargin)//(timeX(timeMin)-timeX(timeMax)))
+    	.attr("height", heightPanel)
+    	.attr("fill","white")
+		.attr("stroke","lightgray")
+		.attr("filter","url(#f1)");
+
+  	line = d3.svg.line()
+      .x(function(d, i) { return timeX(d.time); })
+      .y(function(d, i) { return yPath(d.num); })
+      .interpolate("cardinal");
+	path = svg.append("g").attr("class","paths")
+    	.append("path")
+    	.attr("class","path")
+		.attr("d", line(faceData.values))
+		.attr("stroke-width",.5)
+		.attr("stroke","grey")
+		.attr("fill","none")
+// svg.selectAll(".dot")
+	dot = svg.append("g").attr("class","dots").selectAll(".dot")
+	    .data(faceData.values)
+	  	.enter().append("circle")
+	    .attr("class", "dot")
+	    .attr("cx", line.x())
+	    .attr("cy", line.y())
+	    .attr("fill","none")
+			.attr("stroke-width",.5)
+			.attr("stroke","grey")
+	    .attr("r", radSize);
+
+
+	// path
+		// .datum(faceData.values)
+		// .attr("d", line);
 }
+
+
+
+
+
+
+
+var xStart = 15;
+var xEnd = xStart*spaceFactor;
+var xI = d3.scale.ordinal()
+    .domain(inputs)
+    .rangePoints([xStart, xEnd]);
+var xO = d3.scale.ordinal()
+    .domain(outputs)
+    .rangePoints([xStart, xEnd]);
+var xP = d3.scale.ordinal()
+    .domain(programming)
+    .rangePoints([xStart, xEnd]);
+var xG = d3.scale.ordinal()
+    .domain(games)
+    .rangePoints([xStart, xEnd]);
 function showIDE(){
 		var g = svg.selectAll(".ide")
 		.data(ide_nest2)
 		.enter()
 	  	.append("g")
 	  	.attr("class","ide");
+
+  // enteringDay
+  //   .selectAll(".lineOut")
+  //   .data(interactionTypes)
+  //   // .data(moduleTypes)
+  //   .enter()
+  //   .append("line")
+  //   .classed("lineOut",true)
+  //   .attr("x1", xStart)
+  //   .attr("x2", xEnd)
+  //   .attr("y1", function(d,i){
+  //     return y(d);
+  //   })
+  //   .attr("y2", function(d,i){
+  //     return y(d);
+  //   })
+  //   .attr("stroke",function(){
+  //     return "grey"
+  //   })
+  //   .attr("opacity", opacityLine)
+  //   .attr("stroke-width", .2);
+
+
+
+
+
+
+
+
 		// now marks, initiated to default values
-		g.selectAll("rect")
+		g.selectAll(".logs")
 		// we are getting the values of the countries like this:
 		.data(function(d) {
 			return d.values;
 		}) 
 		.enter()
 		.append("rect")
-		.attr("class", function(d){
-			if(d.mod=="L" || d.mod == "CC"){
-				console.log(d.mod);
-			}
-			return "mod is "+d.mod+"index of "+i+" name of "+d.name;
-		})
+		.attr("class","logs")
 		.attr("x", function(d){
 			return timeX(d.time)
 		})
@@ -467,4 +581,37 @@ function showIDE(){
 			}
 		})
 		.attr("opacity",.3)
+
+		svg.on("click", function(d){
+			d3.selectAll(".logs")
+			.transition()
+			.attr("width",function(d){
+				if(d.end){
+					return 10;
+				}
+			})
+		    .attr("x",function(d){
+		      for(j=0; j<programming.length; j++){
+		          if(d.name==programming[j]){
+		          return xP(d.name);
+		          }
+		      }
+		      for(j=0; j<inputs.length; j++){
+		          if(d.name==inputs[j]){
+		          return xI(d.name);
+		          }
+		      }
+		      for(j=0; j<outputs.length; j++){
+		          if(d.name==outputs[j]){
+		          return xO(d.name);
+		          }
+		      }
+		      for(j=0; j<games.length; j++){
+		          if(d.name==games[j]){
+		          return xG(d.name);
+		          }
+		      }
+		    })
+	
+	})
 }

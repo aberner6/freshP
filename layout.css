@@ -7,6 +7,17 @@ body{
     /*background-color: #fff;	*/
 }
 
+    .line {
+      fill: none;
+      stroke: #000;
+      stroke-width: 1.5px;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
 .navbar{
 	margin-bottom: 20px;
 	box-shadow: 2px 4px 6px #e2e2e2;    
