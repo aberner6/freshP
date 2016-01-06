@@ -448,7 +448,6 @@ function showFace(){
     	.attr("height", heightPanel)
     	.attr("fill","white")
 		.attr("stroke","lightgray")
-		.attr("filter","url(#f1)");
 
   	line = d3.svg.line()
       .x(function(d, i) { return timeX(d.time); })
@@ -482,9 +481,10 @@ function showFace(){
 
 
 
-
-        var yOther = d3.scale.ordinal()
-            .rangePoints([200, 600]);
+var topY = 200;
+var bottomY = 500;
+var yOther = d3.scale.ordinal()
+    .rangePoints([topY, bottomY]);
 
 var xStart = 15;
 var xEnd = xStart*spaceFactor;
@@ -503,6 +503,16 @@ var xG = d3.scale.ordinal()
 
 
 function showIDE(){
+    backRect = svg.append("g").attr("class","backRect")
+    	.append("rect")
+    	.attr("class","backRect")
+    	.attr("x", cmargin-14)
+    	.attr("y", topY-24)
+    	.attr("width", w-cwidth+cmargin)//(timeX(timeMin)-timeX(timeMax)))
+    	.attr("height", bottomY-topY+50)
+    	.attr("fill","white")
+		.attr("stroke","lightgray")
+
 		var g = svg.selectAll(".ide")
 		.data(ide_nest2)
 		.enter()
@@ -530,9 +540,6 @@ function showIDE(){
   //   .attr("opacity", opacityLine)
   //   .attr("stroke-width", .2);
 
-
-
-
 		// now marks, initiated to default values
 		g.selectAll(".logs")
 		// we are getting the values of the countries like this:
@@ -547,7 +554,7 @@ function showIDE(){
 			theseNames.push(d.name);
 			uniqueNames = unique(theseNames);			
 			yOther.domain(uniqueNames);
-			return d.name+" "+d.mod+" "+d.oc;
+			return d.name;
 		})
 		.attr("x", function(d){
 			return timeX(d.time)
@@ -566,6 +573,7 @@ function showIDE(){
 		.attr("fill", function(d){
 			return colorScale(d.mod);
 		})
+		.attr("stroke","white")
 		.attr("opacity",.3);
 
 		var g = svg.selectAll(".logText")
@@ -575,7 +583,7 @@ function showIDE(){
 		.attr("class","logText")
 		.attr("x", cmargin)
         .attr("y", function(d) {
-            return yOther(d);
+            return yOther(d)+6;
         })
         .text(function(d){
         	return d;
@@ -687,3 +695,6 @@ function showIDE(){
             return uniques;
         }
 
+var moveToFront = function() { 
+    this.parentNode.appendChild(this); 
+}
