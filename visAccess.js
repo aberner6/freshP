@@ -4,7 +4,8 @@ var types = ["hand","ide","particle","face"];
 var handData = [];
 var moduleTypes = ["B","CC","BM","M","L"];
 var interactionTypes = ["inputs","outputs","programming","games"];
-
+var uniqueNames;
+var theseNames = [];
 var toggling = true;
 
 
@@ -41,7 +42,7 @@ var programming = [];
 var games = [];
 inputs.push("BTN","POT","TMP","ACR","COL","ROT","LDR")
 outputs.push("LED","PEZ", "RGB")
-programming.push("IF", "Interval", "Fade", "Swap", "Map", "Counter", "Trigger")
+programming.push("IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger")
 games.push("Note", "Random", "PONG", "SimonSays")
 var radiusMin = 5;
 var spaceFactor = radiusMin;
@@ -81,7 +82,7 @@ var fx=d3.scale.linear().range([cmargin,cwidth-cmargin]);
 var fy=d3.scale.linear().range([cheight-cmargin,cmargin]);
 
 var rows = 2;
-
+var endTime;
 $(document).ready(function() {
 	var  token = pelars_authenticate();
 	$.getJSON("http://pelars.sssup.it:8080/pelars/data/615/session?token="+token ,function(json){
@@ -89,7 +90,7 @@ $(document).ready(function() {
 	// $.getJSON( "http://pelars.sssup.it:8080/pelars/data/615/session?token="+token,function(json) { 
 		// document.getElementById("id").innerHTML = JSON.stringify(json); 
 		data = (json);
-
+endTime = data[data.length-1].time;
 		nested_data = d3.nest()
 			.key(function(d) { return d.type; })
 			.key(function(d){ return d.num; })
@@ -482,7 +483,8 @@ function showFace(){
 
 
 
-
+        var yOther = d3.scale.ordinal()
+            .rangePoints([200, 600]);
 
 var xStart = 15;
 var xEnd = xStart*spaceFactor;
@@ -498,6 +500,8 @@ var xP = d3.scale.ordinal()
 var xG = d3.scale.ordinal()
     .domain(games)
     .rangePoints([xStart, xEnd]);
+
+
 function showIDE(){
 		var g = svg.selectAll(".ide")
 		.data(ide_nest2)
@@ -529,89 +533,157 @@ function showIDE(){
 
 
 
-
-
-
-
 		// now marks, initiated to default values
 		g.selectAll(".logs")
 		// we are getting the values of the countries like this:
 		.data(function(d) {
-			return d.values;
+			if(d.oc!=2){
+				return d.values;				
+			}
 		}) 
 		.enter()
 		.append("rect")
-		.attr("class","logs")
+		.attr("class",function(d){
+			theseNames.push(d.name);
+			uniqueNames = unique(theseNames);			
+			yOther.domain(uniqueNames);
+			return d.name+" "+d.mod+" "+d.oc;
+		})
 		.attr("x", function(d){
 			return timeX(d.time)
 		})
-		.attr("y", function(d){
-	      for(j=0; j<programming.length; j++){
-	          if(d.name==programming[j] || d.mod=="L" || d.mod == "CC"){
-	          	return y_p;
-	          }
-	      }
-	      for(j=0; j<outputs.length; j++){
-	          if(d.name==outputs[j]){
-	          	return y_o;
-	          }
-	      }
-	      for(j=0; j<inputs.length; j++){
-	          if(d.name==inputs[j]){
-	          	return y_i;
-	          }
-	      }
-	      for(j=0; j<games.length; j++){
-	          if(d.name==games[j]){
-	          	return y_g;
-	          }
-	      }
-		})
+        .attr("y", function(d, i) {
+            return yOther(d.name);
+        })
 		.attr("width",function(d,i){
 			if(d.end){
 				return timeX(d.end)-timeX(d.time);
+			}else{
+				return timeX(endTime)-timeX(d.time);				
 			}
 		})
-		.attr("height",5)
+		.attr("height", 5)
 		.attr("fill", function(d){
-			if(d.oc==2){
-				return "none";
-			} else{
-				return colorScale(d.mod);
-			}
+			return colorScale(d.mod);
 		})
-		.attr("opacity",.3)
+		.attr("opacity",.3);
 
-		svg.on("click", function(d){
-			d3.selectAll(".logs")
-			.transition()
-			.attr("width",function(d){
-				if(d.end){
-					return 10;
-				}
-			})
-		    .attr("x",function(d){
-		      for(j=0; j<programming.length; j++){
-		          if(d.name==programming[j]){
-		          return xP(d.name);
-		          }
-		      }
-		      for(j=0; j<inputs.length; j++){
-		          if(d.name==inputs[j]){
-		          return xI(d.name);
-		          }
-		      }
-		      for(j=0; j<outputs.length; j++){
-		          if(d.name==outputs[j]){
-		          return xO(d.name);
-		          }
-		      }
-		      for(j=0; j<games.length; j++){
-		          if(d.name==games[j]){
-		          return xG(d.name);
-		          }
-		      }
-		    })
-	
-	})
+		var g = svg.selectAll(".logText")
+		.data(uniqueNames)
+		.enter()
+		.append("text")
+		.attr("class","logText")
+		.attr("x", cmargin)
+        .attr("y", function(d) {
+            return yOther(d);
+        })
+        .text(function(d){
+        	return d;
+        })
+		// // now marks, initiated to default values
+		// g.selectAll(".logs")
+		// // we are getting the values of the countries like this:
+		// .data(function(d) {
+		// 	return d.values;
+		// }) 
+		// .enter()
+		// .append("rect")
+		// .attr("class",function(d){
+		// 	return d.name+" "+d.mod;
+		// })
+		// .attr("x", function(d){
+		// 	return timeX(d.time)
+		// })
+		// .attr("y", function(d){
+	 //      for(j=0; j<programming.length; j++){
+	 //          if(d.name==programming[j] || d.mod=="L" || d.mod == "CC"){
+	 //          	return y_p;
+	 //          }
+	 //      }
+	 //      for(j=0; j<outputs.length; j++){
+	 //          if(d.name==outputs[j]){
+	 //          	return y_o;
+	 //          }
+	 //      }
+	 //      for(j=0; j<inputs.length; j++){
+	 //          if(d.name==inputs[j]){
+	 //          	return y_i;
+	 //          }
+	 //      }
+	 //      for(j=0; j<games.length; j++){
+	 //          if(d.name==games[j]){
+	 //          	return y_g;
+	 //          }
+	 //      }
+		// })
+		// .attr("width",function(d,i){
+		// 	if(d.end){
+		// 		return timeX(d.end)-timeX(d.time);
+		// 	}else{
+		// 		return timeX(endTime)-timeX(d.time);				
+		// 	}
+		// })
+		// .attr("height",5)
+		// .attr("fill", function(d){
+		// 	if(d.oc==2){
+		// 		return "none";
+		// 	} else{
+		// 		return colorScale(d.mod);
+		// 	}
+		// })
+		// .attr("opacity",.3)
+
+		// svg.on("click", function(d){
+		// 	d3.selectAll(".logs")
+		// 	.transition()
+		// 	.attr("width",function(d){
+		// 		// if(d.end){
+		// 			return 10;
+		// 		// }
+		// 	})
+		//     .attr("x",function(d){
+		//       for(j=0; j<programming.length; j++){
+		//           if(d.name==programming[j]){
+		//           return xP(d.name);
+		//           }
+		//       }
+		//       for(j=0; j<inputs.length; j++){
+		//           if(d.name==inputs[j]){
+		//           return xI(d.name);
+		//           }
+		//       }
+		//       for(j=0; j<outputs.length; j++){
+		//           if(d.name==outputs[j]){
+		//           return xO(d.name);
+		//           }
+		//       }
+		//       for(j=0; j<games.length; j++){
+		//           if(d.name==games[j]){
+		//           return xG(d.name);
+		//           }
+		//       }
+		//     })
 }
+
+
+        function unique(obj) {
+            var uniques = [];
+            var stringify = {};
+            for (var i = 0; i < obj.length; i++) {
+                var keys = Object.keys(obj[i]);
+                keys.sort(function(a, b) {
+                    return a - b
+                });
+                var str = '';
+                for (var j = 0; j < keys.length; j++) {
+                    str += JSON.stringify(keys[j]);
+                    str += JSON.stringify(obj[i][keys[j]]);
+                }
+                if (!stringify.hasOwnProperty(str)) {
+                    uniques.push(obj[i]);
+                    stringify[str] = true;
+                }
+            }
+            return uniques;
+        }
+
