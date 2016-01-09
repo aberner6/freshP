@@ -23,26 +23,26 @@ var m = [15, 20, 40, 120], //top right bottom left
 
 var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h);
 
-var menu = d3.select(".menu").append("svg").attr("width",100).attr("height",100);
+var menu = d3.select(".menu").append("svg").attr("width",30).attr("height",30);
 menu.append("rect")
 	.attr("class", "rectLine")
-	.attr("width",16)
+	.attr("width",25)
 	.attr("height",25)
 	.attr("x", 0)
 	.attr("y", 0)
 	.attr("fill","white")
 menu.selectAll(".menuLine")
-	.data(d3.range(5))
+	.data(d3.range(4))
 	.enter()
 	.append("line")
 	.attr("class","menuLine")
-	.attr("x1",2)
-	.attr("x2",14)
+	.attr("x1",4)
+	.attr("x2",21)
 	.attr("y1",function(d,i){
-		return 2+5*i;
+		return 5+5*i;
 	})
 	.attr("y2",function(d,i){
-		return 2+5*i;
+		return 5+5*i;
 	})
 	.attr("stroke","grey")
 	.attr("stroke-width",.25);
@@ -54,17 +54,12 @@ menu.on("click", function(){
 		.transition()
 		// .attr("transform", "translate("+(-14)+",0)")
       .attr("x1",function(d,i){
-		return 2+5*i;
+		return 5+5*i;
 	})
       .attr("x2",function(d,i){
-		return 2+5*i;
+		return 5+5*i;
 	})
-      .attr("y1",2).attr("y2",23)
-	d3.selectAll(".rectLine")
-		.transition()
-		// .attr("transform", "translate("+(-14)+",0)")
-		.attr("height",25)
-		.attr("width", 25)
+      .attr("y1",4).attr("y2",21)
 })
 
 
