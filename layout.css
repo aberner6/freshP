@@ -1,3 +1,4 @@
+
 body{
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size: 14px;
@@ -7,22 +8,30 @@ body{
     /*background-color: #fff;	*/
 }
 
-    .line {
-      fill: none;
-      stroke: #000;
-      stroke-width: 1.5px;
-    }
-    .axis path,
-    .axis line {
-      fill: none;
-      stroke: #000;
-      shape-rendering: crispEdges;
-    }
+.menu{
+    width: 20px;
+    position: absolute;
+    right: 10px;
+    top: 20px;
+}
+
+
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
 .navbar{
 	margin-bottom: 20px;
 	box-shadow: 2px 4px 6px #e2e2e2;    
-	height: 90px;
-	background-color: #fff;    
+	height: 50px;
+	/*background-color: #fff;    */
 	border-color: #e7e7e7;    
 	border-radius: 0;z-index: 1000;
     border-width: 0 0 1px;position: relative;
@@ -88,6 +97,53 @@ p#logo{
     -webkit-padding-start: 40px;
 }
 
-/* Line Copy 4: */
-background: #F8F8F8;
-border: 1px solid #979797;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Style 1
+ *
+ * Rotating hamburger icon (rot), that simply rotates 90 degrees when activated.
+ * Nothing too fancy, simple transition.
+ */
+.c-hamburger--rot {
+  background-color: lightgrey;
+}
+
+.c-hamburger--rot span {
+  -webkit-transition: -webkit-transform 0.3s;
+          transition: transform 0.3s;
+}
+
+/* active state, i.e. menu open */
+.c-hamburger--rot.is-active {
+  background-color: #7D97EC;
+}
+
+.c-hamburger--rot.is-active span {
+  -webkit-transform: rotate(90deg);
+      -ms-transform: rotate(90deg);
+          transform: rotate(90deg);
+}
