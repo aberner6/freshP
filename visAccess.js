@@ -14,16 +14,22 @@ var onlyalpha = [];
 var links = [];
 var nodes = {};
 var newData = [];
-
+var newguy2 = [];
+var links2 = [];
+var nodes2 = {};
 
 var cwidth=200,cheight=200,cmargin=25,maxr=5;
 
 var nested_data;
 var m = [15, 20, 40, 120], //top right bottom left
-    w = window.innerWidth-cmargin,
+    w = (window.innerWidth-cmargin)/2,
     h = window.innerHeight;
 var goAhead;
-var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h);
+var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h)            
+.attr("transform", "translate(" + 0 + "," + 0 + ")");
+
+var svg2 = d3.select("#container").append("svg").attr("width",w).attr("height",h)
+.attr("transform", "translate(" + 0 + "," + 0 + ")");
 
 var nest_again;
 var ideData;
@@ -121,6 +127,16 @@ endTime = data[data.length-1].time;
 			.key(function(d){ return d.num; })
 			.entries(data);
 
+
+		data2 = (data2);
+endTime2 = data2[data2.length-1].time;
+		nested_data2 = d3.nest()
+			.key(function(d) { return d.type; })
+			.key(function(d){ return d.num; })
+			.entries(data2);
+
+
+
 		nested_face = d3.nest()
 			.key(function(d) { return d.type; })
 			.entries(data);
@@ -153,6 +169,34 @@ var rey = [];
 				})
 			.entries(data)
 
+		nest_again2 = d3.nest()
+			.key(function(d) { return d.type; })
+			.key(function(d){ return d.num; })
+			.rollup(function(leaves) { 
+				return { 
+						"max_time": d3.max(leaves, function(d) {
+							return parseFloat(d.time);
+						}),
+						"min_time": d3.min(leaves, function(d) {
+							return parseFloat(d.time);
+						}),
+						"meanX": d3.mean(leaves, function(d) {
+							return parseFloat(d.rx);
+						}),
+						"meanY": d3.mean(leaves, function(d) {
+							return parseFloat(d.ry);
+						}),
+						"deviationX": d3.variance(leaves, function(d){ 
+							return parseFloat(d.rx) 
+						}),
+						"deviationY": d3.variance(leaves, function(d){ 
+							return parseFloat(d.ry) 
+						})
+					} 
+				})
+			.entries(data2)
+
+
 		if (typeof nested_data !== "undefined"){
 			for(i=0; i<nested_data.length; i++){
 				if(nested_data[i].key&&nest_again[i].key==types[0]){
@@ -169,6 +213,16 @@ var rey = [];
 				}
 				compress();
 				// else{ console.log("nope")}
+			}	
+		}
+
+
+		if (typeof nested_data2 !== "undefined"){
+			for(i=0; i<nested_data2.length; i++){
+				if(nested_data2[i].key&&nest_again2[i].key=="ide"){
+					console.log(nested_data2[i].key)
+					goIDE2(nested_data2[i].values);
+				}
 			}	
 		}
 	};
@@ -267,17 +321,6 @@ function goIDE(incomingD, summary){
 		.entries(ideData);
 
 
-
-
-
-
-
-
-
-
-
-
-
 		//trying to figure out links here
         links = ideData.filter(function(d) {
             return d.mod == "L";
@@ -288,61 +331,53 @@ function goIDE(incomingD, summary){
 			links[i].target = newguy[i][3];
 		}
 
+	        //TOTAL JOB COUNT FOR EACH PAPER TYPE
+	            // for (j=0;j<paperTypes.length; j++){
+	            //     for (i=0; i<totalJobs; i++) {
+	            //                 if (data[i].JobType == paperTypes[j].name) {
+	            //                     paperTypes[j].totalJobCount = paperTypes[j].totalJobCount + 1;
+	            //                 } else {
+	            //                 }
+	            //             }
+	            //                console.log("Totals" + paperTypes[j].totalJobCount);
+	            //         }
+	var circle, path, text;
+	var force;
+	// Compute the distinct nodes from the links.
+	links.forEach(function(link) {
+	  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
+	  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+	});
 
+	force = d3.layout.force()
+	    .nodes(d3.values(nodes))
+	    .links(links)
+	    .size([w, h])
+	    .linkDistance(100)
+	    .charge(-200)
+	    .on("tick", tick)
+	    .start();  
+	path = svg.selectAll("path")
+	    .data(force.links())
+	    .enter().append("path")
+	    .attr("class","link") 
+	    .attr("stroke","gray")
+	    .attr("fill","none")
 
-
-
-
-        //TOTAL JOB COUNT FOR EACH PAPER TYPE
-            // for (j=0;j<paperTypes.length; j++){
-            //     for (i=0; i<totalJobs; i++) {
-            //                 if (data[i].JobType == paperTypes[j].name) {
-            //                     paperTypes[j].totalJobCount = paperTypes[j].totalJobCount + 1;
-            //                 } else {
-            //                 }
-            //             }
-            //                console.log("Totals" + paperTypes[j].totalJobCount);
-            //         }
-var circle, path, text;
-var force;
-// Compute the distinct nodes from the links.
-links.forEach(function(link) {
-  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
-  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
-});
-
-force = d3.layout.force()
-    .nodes(d3.values(nodes))
-    .links(links)
-    .size([w, h])
-    .linkDistance(100)
-    .charge(-200)
-    .on("tick", tick)
-    .start();  
-path = svg.selectAll("path")
-    .data(force.links())
-    .enter().append("path")
-    .attr("class","link") 
-    .attr("stroke","gray")
-    .attr("fill","none")
-
-makeChords(force.nodes(), force.links());
-
-
-var rMap;
-var maxWeight;
-var thisWeight = [];
-circle = svg.selectAll("node")
-    .data(force.nodes())
-    .enter().append("circle")
-    .attr("class",function(d){
-        thisWeight.push(d.weight);
-        maxWeight = d3.max(thisWeight, function(d){ return d; })
-        rMap = d3.scale.linear()
-            .domain([0,maxWeight])
-            .range([radiusMin, radiusMin*10])   
-    	return "node"
-    })
+	var rMap;
+	var maxWeight;
+	var thisWeight = [];
+	circle = svg.selectAll("node")
+	    .data(force.nodes())
+	    .enter().append("circle")
+	    .attr("class",function(d){
+	        thisWeight.push(d.weight);
+	        maxWeight = d3.max(thisWeight, function(d){ return d; })
+	        rMap = d3.scale.linear()
+	            .domain([0,maxWeight])
+	            .range([radiusMin, radiusMin*10])   
+	    	return "node"
+	    })
     circle
 	    .attr("r", function(d){
 	    	// console.log(d.weight);
@@ -351,234 +386,166 @@ circle = svg.selectAll("node")
 	    .attr("fill", function(d){
 	    	return colorNet(d.name);
 	    })
-text= svg.selectAll("labels")
-    .data(force.nodes())
-    .enter().append("text")
-    .attr("class","labels")
-    .attr("x", 8)
-    .attr("y", ".31em")
-    .text(function(d,i) {
-             return d.name;           
-    }) 
+	text= svg.selectAll("labels")
+	    .data(force.nodes())
+	    .enter().append("text")
+	    .attr("class","labels")
+	    .attr("x", 8)
+	    .attr("y", ".31em")
+	    .text(function(d,i) {
+	             return d.name;           
+	    }) 
 
-function tick() {
-  path.attr("d", linkArc);
-  circle
-  .attr("transform", transform);
-  text.attr("transform", transform);
-}
-function linkArc(d) {
-  var dx = d.target.x - d.source.x,
-      dy = d.target.y - d.source.y,
-      dr = Math.sqrt(dx * dx + dy * dy);
-  return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-}
-function transform(d) {
-  d.x = Math.max(radiusMin, Math.min(w - radiusMin, d.x));
-  d.y = Math.max(radiusMin, Math.min(h - radiusMin, d.y));  
-    // node.attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
-    //     .attr("cy", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); });    
-  return "translate(" + d.x+ "," + d.y + ")";
-}
-
-
-
-
-
-
-
-
-		for(i=0; i<ide_nest2.length; i++){
-			for(j=0; j<ide_nest2[i].values.length-1; j++){
-				if(ide_nest2[i].values[j].oc==1 && ide_nest2[i].values[j+1].oc==2){
-					var secondguy = ide_nest2[i].values[j+1].time;
-					ide_nest2[i].values[j].end = secondguy;
-				} else{ 
-					// idenest2[i].values[j].end = +Date.now(); 
-				}
+	function tick() {
+	  path.attr("d", linkArc);
+	  circle
+	  .attr("transform", transform);
+	  text.attr("transform", transform);
+	}
+	function linkArc(d) {
+	  var dx = d.target.x - d.source.x,
+	      dy = d.target.y - d.source.y,
+	      dr = Math.sqrt(dx * dx + dy * dy);
+	  return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+	}
+	function transform(d) {
+	  d.x = Math.max(radiusMin, Math.min(w - radiusMin, d.x));
+	  d.y = Math.max(radiusMin, Math.min(h - radiusMin, d.y));  
+	    // node.attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
+	    //     .attr("cy", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); });    
+	  return "translate(" + d.x+ "," + d.y + ")";
+	}
+	for(i=0; i<ide_nest2.length; i++){
+		for(j=0; j<ide_nest2[i].values.length-1; j++){
+			if(ide_nest2[i].values[j].oc==1 && ide_nest2[i].values[j+1].oc==2){
+				var secondguy = ide_nest2[i].values[j+1].time;
+				ide_nest2[i].values[j].end = secondguy;
+			} else{ 
+				// idenest2[i].values[j].end = +Date.now(); 
 			}
 		}
+	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function makeChords(data1, data2){
-	console.log(data2);
-   var mpr = chordMpr(data2);
-
-// action_id: "L1"
-// data_id: 74923
-// date: "11/18/2015 15:30:20"
-// mod: "L"
-// name: "COLIF"
-// oc: "1"
-// opt: "3 COL 16 IF 0 0"
-// session: 537
-// source: Object
-// index: 0
-// name: "COL"
-// px: 467.16906299322505
-// py: 342.2459058406161
-// weight: 6
-// x: 467.166596959635
-// y: 342.2727725576841
-// __proto__: Object
-// special_id: "L3 COL 16 IF 0 0"
-// target: Object
-// index: 1
-// name: "IF"
-// px: 450.1427695009287
-// py: 243.54770739468535
-// weight: 56
-// x: 450.14339860613967
-// y: 243.51789598176026
-// __proto__: Object
-// time: 1447857020370
-// type: "ide"
-for(i=0; i<data2.length; i++){
-	newData.push({
-		"has":data2[i].source.name,
-		"prefers":data2[i].target.name,
-		"count":data2[i].source.weight
-	})
-}
-console.log(newData);
-var mpr = chordMpr(newData);
-    mpr
-      .addValuesToMap('has')
-      .setFilter(function (row, a, b) {
-      	// console.log(row.has)
-         return (row.has === a.name && row.prefers === b.name)
-       })
-       .setAccessor(function (recs, a, b) {
-         if (!recs[0]) return 0;
-         return +recs[0].count;
+function goIDE2(incomingD2){
+	var ideData2;
+	ideData2 = incomingD2[0].values;
+	console.log(ideData);
+    var patt1 = /[A-Z]/gi; 
+	// console.log(ideData);
+	for(i=0; i<ideData2.length; i++){
+		if(ideData2[i].opt.match(patt1)!=null) {
+			ideData2[i].name= (ideData2[i].opt.match(patt1).join().replace(/,/g, '')).toUpperCase();	
+		}
+		if(ideData2[i].action_id.length>2){
+			ideData2[i].mod = ideData2[i].action_id.substr(0, 2);
+			ideData2[i].oc = ideData2[i].action_id.substr(2, 2);
+		}else{ //doesn't matter about the CC without open close
+			ideData2[i].mod = ideData2[i].action_id.substr(0, 1);
+			ideData2[i].oc = ideData2[i].action_id.substr(1, 1);
+		}
+		ideData2[i].special_id = ideData2[i].mod+ideData2[i].opt;
+	}
+		//trying to figure out links here
+        links2 = ideData2.filter(function(d) {
+            return d.mod == "L";
         });
+		for(i=0; i<links2.length; i++){
+			newguy2.push(links2[i].opt.split(" "));
+			links2[i].source = newguy2[i][1];
+			links2[i].target = newguy2[i][3];
+		}
 
-       // console.log(mpr.getMatrix())
-     drawChords(mpr.getMatrix(), mpr.getMap());
+var circle2, path2, text2;
+var force2;
+var nodes = {};
+
+// Compute the distinct nodes from the links.
+links2.forEach(function(link) {
+  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
+  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+});
+
+force2 = d3.layout.force()
+    .nodes(d3.values(nodes))
+    .links(links2)
+    .size([w, h])
+    .linkDistance(100)
+    .charge(-200)
+    .on("tick", tick2)
+    .start();  
+path2 = svg2.selectAll("path.linkPath")
+    .data(force2.links())
+    .enter().append("path")
+    .attr("class","linkPath") 
+    .attr("stroke","gray")
+    .attr("fill","none")
+
+var rMap;
+var maxWeight;
+var thisWeight = [];
+	circle2 = svg2.selectAll("node")
+	    .data(force2.nodes())
+	    .enter().append("circle")
+	    .attr("class",function(d){
+	        thisWeight.push(d.weight);
+	        maxWeight = d3.max(thisWeight, function(d){ return d; })
+	        rMap = d3.scale.linear()
+	            .domain([0,maxWeight])
+	            .range([radiusMin, radiusMin*10])   
+	    	return "node"
+	    })
+    circle2
+	    .attr("r", function(d){
+	    	// console.log(d.weight);
+	    	return rMap(d.weight);
+	    })
+	    .attr("fill", function(d){
+	    	return colorNet(d.name);
+	    })
+	text2 = svg2.selectAll("labels")
+	    .data(force2.nodes())
+	    .enter().append("text")
+	    .attr("class","labels")
+	    .attr("x", 8)
+	    .attr("y", ".31em")
+	    .text(function(d,i) {
+	             return d.name;           
+	    }) 
+
+	function tick2() {
+	  path2.attr("d", linkArc2);
+	  circle2
+	  .attr("transform", transform2);
+	  text2.attr("transform", transform2);
+	}
+	function linkArc2(d) {
+	  var dx = d.target.x - d.source.x,
+	      dy = d.target.y - d.source.y,
+	      dr = Math.sqrt(dx * dx + dy * dy);
+	  return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+	}
+	function transform2(d) {
+	  d.x = Math.max(radiusMin, Math.min(w - radiusMin, d.x));
+	  d.y = Math.max(radiusMin, Math.min(h - radiusMin, d.y));  
+	    // node.attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
+	    //     .attr("cy", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); });    
+	  return "translate(" + d.x+ "," + d.y + ")";
+	}
+
 }
-      //*******************************************************************
-      //  DRAW THE CHORD DIAGRAM
-      //*******************************************************************
-      function drawChords (matrix, mmap) {
-        var w = 980, h = 800, r1 = h / 2, r0 = r1 - 100;
 
-        var fill = d3.scale.ordinal()
-            .range(['#c7b570','#c6cdc7','#335c64','#768935','#507282','#5c4a56','#aa7455','#574109','#837722','#73342d','#0a5564','#9c8f57','#7895a4','#4a5456','#b0a690','#0a3542',]);
 
-        var chord = d3.layout.chord()
-            .padding(.02)
-            .sortSubgroups(d3.descending)
 
-        var arc = d3.svg.arc()
-            .innerRadius(r0)
-            .outerRadius(r0 + 20);
 
-        var svg = d3.select("body").append("svg:svg")
-            .attr("width", w)
-            .attr("height", h)
-          .append("svg:g")
-            .attr("id", "circle")
-            .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")");
 
-            svg.append("circle")
-                .attr("r", r0 + 20);
 
-        var rdr = chordRdr(matrix, mmap);
-        chord.matrix(matrix);
-        console.log(chord.chords())
-        var g = svg.selectAll("g.group")
-            .data(chord.groups())
-          .enter().append("svg:g")
-            .attr("class", "group")
-            .on("mouseover", mouseover)
-            .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
 
-        g.append("svg:path")
-            .style("stroke", "black")
-            .style("fill", function(d) { return rdr(d).gdata == "state" ? "black": "grey"; })
-            .attr("d", arc);
 
-        g.append("svg:text")
-            .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
-            .attr("dy", ".35em")
-            .style("font-family", "helvetica, arial, sans-serif")
-            .style("font-size", "10px")
-            .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
-            .attr("transform", function(d) {
-              return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
-                  + "translate(" + (r0 + 26) + ")"
-                  + (d.angle > Math.PI ? "rotate(180)" : "");
-            })
-            .text(function(d) { return rdr(d).gname; });
 
-          var chordPaths = svg.selectAll("path.chord")
-                .data(chord.chords())
-              .enter().append("svg:path")
-                .attr("class", "chord")
-                .style("stroke", "black")
-                .style("fill", function(d) { return rdr(d).tname == "Starbucks" ? "#00592d": "#ff6200"; })
-                .attr("d", d3.svg.chord().radius(r0))
-                .on("mouseover", function (d) {
-                  d3.select("#tooltip")
-                    .style("visibility", "visible")
-                    .html(chordTip(rdr(d)))
-                    .style("top", function () { return (d3.event.pageY - 170)+"px"})
-                    .style("left", function () { return (d3.event.pageX - 100)+"px";})
-                })
-                .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
 
-          function chordTip (d) {
-            var p = d3.format(".1%"), q = d3.format(",f")
-            return "Chord Info:<br/>"
-              +  d.sname + " → " + d.tname
-              + ": " + q(d.svalue) + "<br/>"
-              + p(d.svalue/d.stotal) + " of " + d.sname + "'s Total (" + q(d.stotal) + ")<br/>"
-              + p(d.svalue/(d.mtotal/2)) + " of Matrix Total (" + q(d.mtotal/2) + ")<br/>"
-              + "<br/>"
-              + d.tname + " → " + d.sname
-              + ": " + q(d.tvalue) + "<br/>"
-              + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s Total (" + q(d.ttotal) + ")<br/>"
-              + p(d.tvalue/(d.mtotal/2)) + " of Matrix Total (" + q(d.mtotal/2) + ")";
-          }
 
-          function groupTip (d) {
-            var p = d3.format(".1%"), q = d3.format(",f")
-            return "Group Info:<br/>"
-                + d.gname + " : " + q(d.gvalue) + "<br/>"
-                + p(d.gvalue/(d.mtotal/2)) + " of Matrix Total (" + q(d.mtotal/2) + ")"
-          }
 
-          function mouseover(d, i) {
-            d3.select("#tooltip")
-              .style("visibility", "visible")
-              .html(groupTip(rdr(d)))
-              .style("top", function () { return (d3.event.pageY - 80)+"px"})
-              .style("left", function () { return (d3.event.pageX - 130)+"px";})
-
-            chordPaths.classed("fade", function(p) {
-              return p.source.index != i
-                  && p.target.index != i;
-            });
-          }
-      }
 
 
 
@@ -664,7 +631,7 @@ function compress(){
 })
 
 function showHands(){
-var numPanels = handData.values.length;
+	var numPanels = handData.values.length;
 
     backRect = svg.append("g").attr("class","backRect")
     	.append("rect")
@@ -776,42 +743,15 @@ var thisData = [];
 function showFace(){
 	var minTotal, maxTotal;
 	var thisMany = [];
-// thisData.push(faceData.values)
 	maxTotal = 4;
-	// for(var i=0; i<thisData[0].length; i++){
-	// 	maxTotal = d3.max(thisData[0][i].num);
-	// }
 
-	// One cell for each face tracked (hands are in nested data @ at 1)
-	// var g = svg.selectAll(".face")
-	// 	.data(faceData.values)
-	// 	.enter()
-	//   	.append("circle")
-	//   	.attr("class",function(d){
-	//   		thisMany.push(d.num);
-	//     	minTotal = d3.min(thisMany);
-	//     	maxTotal = d3.max(thisMany);
-	//   		return "face"
-	//   	})
-	//     .attr("cx",function(d) {
-	// 	  	return timeX(d.time) //cmargin)
-	// 	})
-	//     .attr("cy",function(d) {
-	// 	  	return h/2-d.num*10;
-	//     	// return fy(d['distance from camera']);;
-	//     })
-	//     .attr("stroke","gray")
-	//     .attr("fill","none")
-	//     .attr("r",radSize)
+	  var yOffset = h/2;
+	  var mini = 4;
+	  var heightPanel = 100;
+	  var yPath = d3.scale.linear()
+		  .domain([-1, maxTotal])
+	      .range([yOffset, yOffset-heightPanel]);
 
-  var yOffset = h/2;
-  var mini = 4;
-  var heightPanel = 100;
-  var yPath = d3.scale.linear()
-	  .domain([-1, maxTotal])
-      .range([yOffset, yOffset-heightPanel]);
-
-// cmargin, w-cwidth+cmargin
     backRect = svg.append("g").attr("class","backRect")
     	.append("rect")
     	.attr("class","backRect")
@@ -833,7 +773,6 @@ function showFace(){
 		.attr("stroke-width",.5)
 		.attr("stroke","grey")
 		.attr("fill","none")
-// svg.selectAll(".dot")
 	dot = svg.append("g").attr("class","dots").selectAll(".dot")
 	    .data(faceData.values)
 	  	.enter().append("circle")
@@ -844,8 +783,6 @@ function showFace(){
 			.attr("stroke-width",.5)
 			.attr("stroke","grey")
 	    .attr("r", radSize);
-
-
 	// path
 		// .datum(faceData.values)
 		// .attr("d", line);
@@ -891,28 +828,6 @@ function showIDE(){
 		.enter()
 	  	.append("g")
 	  	.attr("class","ide");
-
-  // enteringDay
-  //   .selectAll(".lineOut")
-  //   .data(interactionTypes)
-  //   // .data(moduleTypes)
-  //   .enter()
-  //   .append("line")
-  //   .classed("lineOut",true)
-  //   .attr("x1", xStart)
-  //   .attr("x2", xEnd)
-  //   .attr("y1", function(d,i){
-  //     return y(d);
-  //   })
-  //   .attr("y2", function(d,i){
-  //     return y(d);
-  //   })
-  //   .attr("stroke",function(){
-  //     return "grey"
-  //   })
-  //   .attr("opacity", opacityLine)
-  //   .attr("stroke-width", .2);
-
 		// now marks, initiated to default values
 		g.selectAll(".logs")
 		// we are getting the values of the countries like this:
@@ -963,89 +878,6 @@ function showIDE(){
         .text(function(d){
         	return d;
         })
-		// // now marks, initiated to default values
-		// g.selectAll(".logs")
-		// // we are getting the values of the countries like this:
-		// .data(function(d) {
-		// 	return d.values;
-		// }) 
-		// .enter()
-		// .append("rect")
-		// .attr("class",function(d){
-		// 	return d.name+" "+d.mod;
-		// })
-		// .attr("x", function(d){
-		// 	return timeX(d.time)
-		// })
-		// .attr("y", function(d){
-	 //      for(j=0; j<programming.length; j++){
-	 //          if(d.name==programming[j] || d.mod=="L" || d.mod == "CC"){
-	 //          	return y_p;
-	 //          }
-	 //      }
-	 //      for(j=0; j<outputs.length; j++){
-	 //          if(d.name==outputs[j]){
-	 //          	return y_o;
-	 //          }
-	 //      }
-	 //      for(j=0; j<inputs.length; j++){
-	 //          if(d.name==inputs[j]){
-	 //          	return y_i;
-	 //          }
-	 //      }
-	 //      for(j=0; j<games.length; j++){
-	 //          if(d.name==games[j]){
-	 //          	return y_g;
-	 //          }
-	 //      }
-		// })
-		// .attr("width",function(d,i){
-		// 	if(d.end){
-		// 		return timeX(d.end)-timeX(d.time);
-		// 	}else{
-		// 		return timeX(endTime)-timeX(d.time);				
-		// 	}
-		// })
-		// .attr("height",5)
-		// .attr("fill", function(d){
-		// 	if(d.oc==2){
-		// 		return "none";
-		// 	} else{
-		// 		return colorScale(d.mod);
-		// 	}
-		// })
-		// .attr("opacity",.3)
-
-		// svg.on("click", function(d){
-		// 	d3.selectAll(".logs")
-		// 	.transition()
-		// 	.attr("width",function(d){
-		// 		// if(d.end){
-		// 			return 10;
-		// 		// }
-		// 	})
-		//     .attr("x",function(d){
-		//       for(j=0; j<programming.length; j++){
-		//           if(d.name==programming[j]){
-		//           return xP(d.name);
-		//           }
-		//       }
-		//       for(j=0; j<inputs.length; j++){
-		//           if(d.name==inputs[j]){
-		//           return xI(d.name);
-		//           }
-		//       }
-		//       for(j=0; j<outputs.length; j++){
-		//           if(d.name==outputs[j]){
-		//           return xO(d.name);
-		//           }
-		//       }
-		//       for(j=0; j<games.length; j++){
-		//           if(d.name==games[j]){
-		//           return xG(d.name);
-		//           }
-		//       }
-		//     })
 }
 
 
