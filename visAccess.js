@@ -22,6 +22,13 @@ var humanReadableTime;
 ///////summary
 
 
+////button stuff
+var buttonData = [];
+var button1 = [];
+var button2 = [];
+////
+
+
 var toggling = true;
 
 // var links;
@@ -181,7 +188,11 @@ function millisecondsToStr (milliseconds) {
 
 
 
-
+for(i=0; i<data.length; i++){
+	if(data[i].type == "particle"){
+		goButton(data[i]);
+	}
+}
 
 
 
@@ -272,6 +283,11 @@ var rey = [];
 					console.log(nested_face[i].key)
 					goFace(nested_face[i], nest_again[i].values);
 				}
+				// if(nested_data[i].key=="particle"){
+				// 	console.log("here")
+				// // }
+				// 	goButton(nested_data[i].values);
+				// }
 				if(nested_data[i].key&&nest_again[i].key=="ide"){
 					console.log(nested_data[i].key)
 					goIDE(nested_data[i].values, nest_again[i].values);
@@ -351,6 +367,19 @@ svg.on("click", function(){
 		$(".faceText").show();
 	}
 })
+
+function goButton(incomingData){
+	buttonData.push(incomingData);
+	console.log(incomingData);
+var getthis = [];
+	for(i=0; i<buttonData.length; i++){
+		getthis.push(buttonData[i].data);
+		button1.push(getthis[i].match(/button1/g));	
+		button2.push(getthis[i].match(/button2/g));	
+	}
+
+	// var res = getthis.match(/button1/g);
+}
 
 function goIDE(incomingD, summary){
 	ideData = incomingD[0].values;
