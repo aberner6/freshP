@@ -353,7 +353,7 @@ function goIDE(incomingD, summary){
 	    .nodes(d3.values(nodes))
 	    .links(links)
 	    .size([w, h])
-	    .linkDistance(100)
+	    .linkDistance(300)
 	    .charge(-200)
 	    .on("tick", tick)
 	    .start();  
@@ -470,8 +470,8 @@ force2 = d3.layout.force()
     .nodes(d3.values(nodes))
     .links(links2)
     .size([w, h])
-    .linkDistance(100)
-    .charge(-200)
+	    .linkDistance(300)
+	    .charge(-200)
     .on("tick", tick2)
     .start();  
 path2 = svg2.selectAll("path.linkPath")
@@ -861,7 +861,11 @@ function showIDE(){
 		})
 		.attr("height", 5)
 		.attr("fill", function(d){
-			return colorScale(d.mod);
+			if(yOther(d.name)!=undefined){
+				return colorScale(d.mod);
+			} else{
+				return "none";
+			}
 		})
 		.attr("stroke","white")
 		.attr("opacity",.3);
