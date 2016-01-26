@@ -6,6 +6,12 @@ var moduleTypes = ["B","CC","BM","M","L"];
 var interactionTypes = ["inputs","outputs","programming","games"];
 var uniqueNames;
 var theseNames = [];
+
+var uniqueHards;
+var uniqueSofts;
+var hardNames = [];
+var softNames = [];
+
 var toggling = true;
 
 // var links;
@@ -430,7 +436,7 @@ function goIDE(incomingD, summary){
 function goIDE2(incomingD2){
 	var ideData2;
 	ideData2 = incomingD2[0].values;
-	console.log(ideData);
+	// console.log(ideData);
     var patt1 = /[A-Z]/gi; 
 	// console.log(ideData);
 	for(i=0; i<ideData2.length; i++){
@@ -840,8 +846,17 @@ function showIDE(){
 		.append("rect")
 		.attr("class",function(d){
 			if(d.name){
-			theseNames.push(d.name);
-				uniqueNames = unique(theseNames);			
+				theseNames.push(d.name);
+				uniqueNames = unique(theseNames);
+
+				if(d.mod=="M"){
+					hardNames.push(d.name);
+				}
+				if(d.mod=="B"){
+					softNames.push(d.name);
+				}
+
+
 				yOther.domain(uniqueNames);
 			}
 			return d.name;
@@ -882,6 +897,38 @@ function showIDE(){
         .text(function(d){
         	return d;
         })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // var hardware = ideData.filter(function(d) {
+        //     return d.mod == "M";
+        // });
+        // var software = ideData.filter(function(d) {
+        //     return d.mod == "B";
+        // });
+uniqueHards = unique(hardNames);
+uniqueSofts = unique(softNames);
+        console.log("hardware in use"+uniqueHards);
+        console.log("software in use"+uniqueSofts);
+		console.log("components in use"+uniqueNames)
+var whatIsThe = _.difference(uniqueSofts, uniqueHards);
+console.log("this is the difference between hard and soft"+whatIsThe)
+// console.log(uniqueHards.diff(uniqueSofts));  
+
 }
 
 
