@@ -7,10 +7,20 @@ var interactionTypes = ["inputs","outputs","programming","games"];
 var uniqueNames;
 var theseNames = [];
 
+
+///////summary
 var uniqueHards;
 var uniqueSofts;
+var uniqueManips;
 var hardNames = [];
 var softNames = [];
+var manipNames = [];
+var totalLinks;
+var totalLinks = [];
+var totalTime;
+var humanReadableTime;
+///////summary
+
 
 var toggling = true;
 
@@ -121,13 +131,62 @@ queue()
 	.await(ready);
 
 
-
 function ready(error, data1, data2) {
 
 // d3.json("assets/data.json", function(json) {
 		data = (data1);
 		// console.log(data2);
+startTime = data[0].time;
 endTime = data[data.length-1].time;
+totalTime = endTime-startTime;
+console.log(totalTime);
+// var minutes=(totalTime/(1000*60))%60;
+// var hours=(totalTime/(1000*60*60))%24;
+humanReadableTime = millisecondsToStr(totalTime);
+console.log(humanReadableTime)
+function millisecondsToStr (milliseconds) {
+    // TIP: to find current time in milliseconds, use:
+    // var  current_time_milliseconds = new Date().getTime();
+
+    function numberEnding (number) {
+        return (number > 1) ? 's' : '';
+    }
+
+    var temp = Math.floor(milliseconds / 1000);
+    var years = Math.floor(temp / 31536000);
+    if (years) {
+        return years + ' year' + numberEnding(years);
+    }
+    //TODO: Months! Maybe weeks? 
+    var days = Math.floor((temp %= 31536000) / 86400);
+    if (days) {
+        return days + ' day' + numberEnding(days);
+    }
+    var hours = Math.floor((temp %= 86400) / 3600);
+    if (hours) {
+        return hours + ' hour' + numberEnding(hours);
+    }
+    var minutes = Math.floor((temp %= 3600) / 60);
+    if (minutes) {
+        return minutes + ' minute' + numberEnding(minutes);
+    }
+    var seconds = temp % 60;
+    if (seconds) {
+        return seconds + ' second' + numberEnding(seconds);
+    }
+    return 'less than a second'; //'just now' //or other string you like;
+}
+
+
+
+
+
+
+
+
+
+
+
 		nested_data = d3.nest()
 			.key(function(d) { return d.type; })
 			.key(function(d){ return d.num; })
@@ -855,7 +914,9 @@ function showIDE(){
 				if(d.mod=="B"){
 					softNames.push(d.name);
 				}
-
+				// if(d.mod=="C"){
+				// 	manipNames.push(d.name);
+				// }
 
 				yOther.domain(uniqueNames);
 			}
@@ -922,13 +983,65 @@ function showIDE(){
         // });
 uniqueHards = unique(hardNames);
 uniqueSofts = unique(softNames);
+// uniqueManips = unique(manipNames);
+        // console.log("manipulations"+uniqueManips);
         console.log("hardware in use"+uniqueHards);
         console.log("software in use"+uniqueSofts);
 		console.log("components in use"+uniqueNames)
 var whatIsThe = _.difference(uniqueSofts, uniqueHards);
 console.log("this is the difference between hard and soft"+whatIsThe)
 // console.log(uniqueHards.diff(uniqueSofts));  
+        // var summaryL = lConsolidation(links);
+        // function lConsolidation(links) {
+        //     var total = 0;
+        //     for(j=0; j<links.length; j++){
+	       //      for (i = 0; i < uniqueNames.length; i++) {
+	       //          if (links[j].source.name == uniqueNames[i]) {
+	       //              total++;
+	       //              totalLinks.push(
+	       //              	total[i]:total
+	       //         			)
+	       //          } else {}
+	       //      }
+	       //      // console.log()
+        //     }
+        //     return total;
+        // }
+linksNames = Object.keys(nodes);
+	for (j = 0; j < linksNames.length; j++) {
+	    totalLinks[j] = ({
+	    		"totalFrom": linkTotalFrom(linksNames[j]),
+	    		"totalTo": linkTotalTo(linksNames[j]),
+	    		"linkName": linksNames[j]
+	    	})
 
+	    	// [j] = linkConsolidation(linksNames[j])
+
+	    // totalLinks[j] = linkConsolidation(linksNames[j])
+	}
+function linkTotalFrom(name) {
+    var total = 0;
+    for (i = 0; i < links.length; i++) {
+        if (links[i].source.name == name) {
+            total++;
+        } else {}
+    }
+    return total;
+}
+function linkTotalTo(name) {
+    var total = 0;
+    for (i = 0; i < links.length; i++) {
+        if (links[i].target.name == name) {
+            total++;
+        } else {}
+    }
+    return total;
+}
+// newObj = ({"total": 6, "name":"RGB" })
+
+        // console.log(summaryL)
+        console.log("total links made to and from")
+        console.log(totalLinks)
 }
 
 
