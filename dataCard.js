@@ -55,8 +55,31 @@ var goAhead;
 var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h)            
 .attr("transform", "translate(" + 0 + "," + 0 + ")");
 
-var netSVG = d3.select("#network").append("svg").attr("width",w/4).attr("height",h/2)            
-// .attr("transform", "translate(" + 10 + "," + h/2 + ")");
+
+
+var forcewidth = w/4;
+var forceheight = h/2-20;
+var netSVG = d3.select("#network")
+	.append("svg")
+	.attr("width",forcewidth)
+	.attr("height",forceheight)  
+	.style("border","1px solid white") 
+	.style("margin-top","10px");
+// build the arrow.
+netSVG.append("svg:defs").selectAll("marker")
+    .data(["end"])      // Different link/path types can be defined here
+  .enter().append("svg:marker")    // This section adds in the arrows
+    .attr("id", String)
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 15)
+    .attr("refY", -1.5)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto")
+    .attr("fill","white")
+  .append("svg:path")
+    .attr("d", "M0,-5L10,0L0,5");         
+	// .attr("transform", "translate(" + 0 + "," + 10 + ")");
 // var svg2 = d3.select("#container").append("svg").attr("width",w).attr("height",h)
 // .attr("transform", "translate(" + 0 + "," + 0 + ")");
 
@@ -138,20 +161,26 @@ var rows = 2;
 var endTime;
 $(document).ready(function() {
 	console.log("ready")
-	// var token = "NJ5_977mmIdWcA6rLa2Ha3X9pcAYXs8PakpS_iBYWK64bSfe6BLy4NBTyp3CviFtkBcqH18E_gY8uDQLfN39HJbySYDw-3bYfLX0BGMh89sv-B7luIE91A6Af3K1lD91";
+// var token = "xOlSArdMD3N_IEFy6pezxvlqLYHKYInWPwQoKDMo6A_TTfIRp0MlVFarwoHS7LQtkBcqH18E_gY8uDQLfN39HCd7uMyYakdwTKifWZOYKPwv-B7luIE91A6Af3K1lD91";
 	// var  token = pelars_authenticate();
-	// $.getJSON("http://pelars.sssup.it:8080/pelars/data/615/session?token="+token ,function(json){
-			// console.log("ready")
+	// $.getJSON("http://pelars.sssup.it:8080/pelars/data/537/session?token="+token ,function(json){
+	// 		console.log("ready")
+	// 		console.log(json)
+	// 		ready(json)
+	// 	})
 // console.log(json);
 // if(token){
 	// $.getJSON( "http://pelars.sssup.it:8080/pelars/data/615/session?token="+token,function(json) { 
 		// document.getElementById("id").innerHTML = JSON.stringify(json); 
+
+
+		//hard coded
 queue()
 	.defer(d3.json, "assets/data1.json")
 	.await(ready);
 
 
-function ready(error, data1) {
+function ready(error,data1) {
 
 // d3.json("assets/data.json", function(json) {
 		data = (data1);
@@ -414,20 +443,16 @@ function goIDE(incomingD, summary){
 	  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
 	});
 
+var linkdist = w/10;
 	force = d3.layout.force()
 	    .nodes(d3.values(nodes))
 	    .links(links)
-	    .size([w/4, h/2])
-	    .linkDistance(w/10)
-	    .charge(-500)
+	    .size([forcewidth, forceheight])
+	    .linkDistance(linkdist)
+	    .charge(-100)
 	    .on("tick", tick)
 	    .start();  
-	path = netSVG.selectAll("path")
-	    .data(force.links())
-	    .enter().append("path")
-	    .attr("class","link") 
-	    .attr("stroke","gray")
-	    .attr("fill","none")
+
 
 	var rMap;
 	var maxWeight;
@@ -440,7 +465,7 @@ function goIDE(incomingD, summary){
 	        maxWeight = d3.max(thisWeight, function(d){ return d; })
 	        rMap = d3.scale.linear()
 	            .domain([0,maxWeight])
-	            .range([radiusMin, radiusMin*10])   
+	            .range([radiusMin, forcewidth/4])   
 	    	return "node"
 	    })
     circle
@@ -451,6 +476,19 @@ function goIDE(incomingD, summary){
 	    .attr("fill", function(d){
 	    	return colorNet(d.name);
 	    })
+	    // .each(collide(0.5)); //Added 
+
+	path = netSVG.selectAll("path")
+	    .data(force.links())
+	    .enter().append("path")
+	    .attr("class",function(d){
+	    	// console.log(d);
+	    	return d.source.name+"link"+d.target.name;
+	    }) 
+	    .attr("stroke","white")
+	    .attr("fill","none")
+	    .attr("marker-end", "url(#end)");
+
 	text = netSVG.selectAll("labels")
 	    .data(force.nodes())
 	    .enter().append("text")
@@ -461,6 +499,7 @@ function goIDE(incomingD, summary){
 	             return d.name;           
 	    }) 
 	    .attr("fill","white")
+	    .attr("font-size",9)
 
 	function tick() {
 	  path.attr("d", linkArc);
@@ -492,124 +531,6 @@ function goIDE(incomingD, summary){
 		}
 	}
 }
-
-function goIDE2(incomingD2){
-	var ideData2;
-	ideData2 = incomingD2[0].values;
-	// console.log(ideData);
-    var patt1 = /[A-Z]/gi; 
-	// console.log(ideData);
-	for(i=0; i<ideData2.length; i++){
-		if(ideData2[i].opt.match(patt1)!=null) {
-			ideData2[i].name= (ideData2[i].opt.match(patt1).join().replace(/,/g, '')).toUpperCase();	
-		}
-		if(ideData2[i].action_id.length>2){
-			ideData2[i].mod = ideData2[i].action_id.substr(0, 2);
-			ideData2[i].oc = ideData2[i].action_id.substr(2, 2);
-		}else{ //doesn't matter about the CC without open close
-			ideData2[i].mod = ideData2[i].action_id.substr(0, 1);
-			ideData2[i].oc = ideData2[i].action_id.substr(1, 1);
-		}
-		ideData2[i].special_id = ideData2[i].mod+ideData2[i].opt;
-	}
-		//trying to figure out links here
-        links2 = ideData2.filter(function(d) {
-            return d.mod == "L";
-        });
-		for(i=0; i<links2.length; i++){
-			newguy2.push(links2[i].opt.split(" "));
-			links2[i].source = newguy2[i][1];
-			links2[i].target = newguy2[i][3];
-		}
-
-var circle2, path2, text2;
-var force2;
-var nodes = {};
-
-// Compute the distinct nodes from the links.
-links2.forEach(function(link) {
-  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
-  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
-});
-
-force2 = d3.layout.force()
-    .nodes(d3.values(nodes))
-    .links(links2)
-    .size([w, h])
-	    .linkDistance(300)
-	    .charge(-200)
-    .on("tick", tick2)
-    .start();  
-path2 = svg2.selectAll("path.linkPath")
-    .data(force2.links())
-    .enter().append("path")
-    .attr("class","linkPath") 
-    .attr("stroke","gray")
-    .attr("fill","none")
-
-var rMap;
-var maxWeight;
-var thisWeight = [];
-	circle2 = svg2.selectAll("node")
-	    .data(force2.nodes())
-	    .enter().append("circle")
-	    .attr("class",function(d){
-	        thisWeight.push(d.weight);
-	        maxWeight = d3.max(thisWeight, function(d){ return d; })
-	        rMap = d3.scale.linear()
-	            .domain([0,maxWeight])
-	            .range([radiusMin, radiusMin*10])   
-	    	return "node"
-	    })
-    circle2
-	    .attr("r", function(d){
-	    	// console.log(d.weight);
-	    	return rMap(d.weight);
-	    })
-	    .attr("fill", function(d){
-	    	return colorNet(d.name);
-	    })
-	text2 = svg2.selectAll("labels")
-	    .data(force2.nodes())
-	    .enter().append("text")
-	    .attr("class","labels")
-	    .attr("x", 8)
-	    .attr("y", ".31em")
-	    .text(function(d,i) {
-	             return d.name;           
-	    }) 
-
-	function tick2() {
-	  path2.attr("d", linkArc2);
-	  circle2
-	  .attr("transform", transform2);
-	  text2.attr("transform", transform2);
-	}
-	function linkArc2(d) {
-	  var dx = d.target.x - d.source.x,
-	      dy = d.target.y - d.source.y,
-	      dr = Math.sqrt(dx * dx + dy * dy);
-	  return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-	}
-	function transform2(d) {
-	  d.x = Math.max(radiusMin, Math.min(w - radiusMin, d.x));
-	  d.y = Math.max(radiusMin, Math.min(h - radiusMin, d.y));  
-	    // node.attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
-	    //     .attr("cy", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); });    
-	  return "translate(" + d.x+ "," + d.y + ")";
-	}
-
-}
-
-
-
-
-
-
-
-
-
-
 
 
 
