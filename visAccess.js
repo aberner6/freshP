@@ -23,6 +23,8 @@ var humanReadableTime;
 
 
 ////button stuff
+var particleOnly = [];
+var getthis = [];
 var buttonData = [];
 var button1 = [];
 var button2 = [];
@@ -190,9 +192,10 @@ function millisecondsToStr (milliseconds) {
 
 for(i=0; i<data.length; i++){
 	if(data[i].type == "particle"){
-		goButton(data[i]);
+		particleOnly.push(data[i]);
 	}
 }
+goButton(particleOnly);
 
 
 
@@ -371,12 +374,23 @@ svg.on("click", function(){
 function goButton(incomingData){
 	buttonData.push(incomingData);
 	console.log(incomingData);
-var getthis = [];
-	for(i=0; i<buttonData.length; i++){
-		getthis.push(buttonData[i].data);
-		button1.push(getthis[i].match(/button1/g));	
-		button2.push(getthis[i].match(/button2/g));	
+	for(i=0; i<buttonData[0].length; i++){
+		getthis.push(buttonData[0][i].data);
+		button1.push({
+			"button": getthis[i].match(/button1/g),
+			"time": buttonData[0][i].time
+		});	
+		button2.push({
+			"button": getthis[i].match(/button2/g),
+			"time": buttonData[0][i].time
+		});	
+		// button2.push(getthis[i].match(/button2/g));	
 	}
+button1 = button1.filter(function(n){ return n.button != undefined }); 
+button2 = button2.filter(function(n){ return n.button != undefined }); 
+
+	console.log(button1.length+"number of button1 presses")
+	console.log(button2.length+"number of button2 presses")
 
 	// var res = getthis.match(/button1/g);
 }
