@@ -46,15 +46,19 @@ var nodes2 = {};
 var cwidth=200,cheight=200,cmargin=25,maxr=5;
 
 var nested_data;
-var m = [15, 20, 40, 120], //top right bottom left
-    w = (window.innerWidth-cmargin)/2,
-    h = window.innerHeight;
+var m = [15, 20, 40, 120]; //top right bottom left
+var h = $("#container").height();//document.body.clientHeight;
+var w = $("#container").width();//document.body.clientWidth;
+
+
 var goAhead;
 var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h)            
 .attr("transform", "translate(" + 0 + "," + 0 + ")");
 
-var svg2 = d3.select("#container").append("svg").attr("width",w).attr("height",h)
-.attr("transform", "translate(" + 0 + "," + 0 + ")");
+var netSVG = d3.select("#network").append("svg").attr("width",w/4).attr("height",h/2)            
+// .attr("transform", "translate(" + 10 + "," + h/2 + ")");
+// var svg2 = d3.select("#container").append("svg").attr("width",w).attr("height",h)
+// .attr("transform", "translate(" + 0 + "," + 0 + ")");
 
 var nest_again;
 var ideData;
@@ -144,11 +148,10 @@ $(document).ready(function() {
 		// document.getElementById("id").innerHTML = JSON.stringify(json); 
 queue()
 	.defer(d3.json, "assets/data1.json")
-	.defer(d3.json, "assets/data2.json")
 	.await(ready);
 
 
-function ready(error, data1, data2) {
+function ready(error, data1) {
 
 // d3.json("assets/data.json", function(json) {
 		data = (data1);
@@ -215,14 +218,6 @@ goButton(particleOnly);
 			.entries(data);
 
 
-		data2 = (data2);
-endTime2 = data2[data2.length-1].time;
-		nested_data2 = d3.nest()
-			.key(function(d) { return d.type; })
-			.key(function(d){ return d.num; })
-			.entries(data2);
-
-
 
 		nested_face = d3.nest()
 			.key(function(d) { return d.type; })
@@ -256,33 +251,6 @@ var rey = [];
 				})
 			.entries(data)
 
-		nest_again2 = d3.nest()
-			.key(function(d) { return d.type; })
-			.key(function(d){ return d.num; })
-			.rollup(function(leaves) { 
-				return { 
-						"max_time": d3.max(leaves, function(d) {
-							return parseFloat(d.time);
-						}),
-						"min_time": d3.min(leaves, function(d) {
-							return parseFloat(d.time);
-						}),
-						"meanX": d3.mean(leaves, function(d) {
-							return parseFloat(d.rx);
-						}),
-						"meanY": d3.mean(leaves, function(d) {
-							return parseFloat(d.ry);
-						}),
-						"deviationX": d3.variance(leaves, function(d){ 
-							return parseFloat(d.rx) 
-						}),
-						"deviationY": d3.variance(leaves, function(d){ 
-							return parseFloat(d.ry) 
-						})
-					} 
-				})
-			.entries(data2)
-
 
 		if (typeof nested_data !== "undefined"){
 			for(i=0; i<nested_data.length; i++){
@@ -305,16 +273,6 @@ var rey = [];
 				}
 				compress();
 				// else{ console.log("nope")}
-			}	
-		}
-
-
-		if (typeof nested_data2 !== "undefined"){
-			for(i=0; i<nested_data2.length; i++){
-				if(nested_data2[i].key&&nest_again2[i].key=="ide"){
-					console.log(nested_data2[i].key)
-					goIDE2(nested_data2[i].values);
-				}
 			}	
 		}
 	};
@@ -447,16 +405,7 @@ function goIDE(incomingD, summary){
 			links[i].target = newguy[i][3];
 		}
 
-	        //TOTAL JOB COUNT FOR EACH PAPER TYPE
-	            // for (j=0;j<paperTypes.length; j++){
-	            //     for (i=0; i<totalJobs; i++) {
-	            //                 if (data[i].JobType == paperTypes[j].name) {
-	            //                     paperTypes[j].totalJobCount = paperTypes[j].totalJobCount + 1;
-	            //                 } else {
-	            //                 }
-	            //             }
-	            //                console.log("Totals" + paperTypes[j].totalJobCount);
-	            //         }
+
 	var circle, path, text;
 	var force;
 	// Compute the distinct nodes from the links.
@@ -468,12 +417,12 @@ function goIDE(incomingD, summary){
 	force = d3.layout.force()
 	    .nodes(d3.values(nodes))
 	    .links(links)
-	    .size([w, h])
-	    .linkDistance(300)
-	    .charge(-200)
+	    .size([w/4, h/2])
+	    .linkDistance(w/10)
+	    .charge(-500)
 	    .on("tick", tick)
 	    .start();  
-	path = svg.selectAll("path")
+	path = netSVG.selectAll("path")
 	    .data(force.links())
 	    .enter().append("path")
 	    .attr("class","link") 
@@ -483,7 +432,7 @@ function goIDE(incomingD, summary){
 	var rMap;
 	var maxWeight;
 	var thisWeight = [];
-	circle = svg.selectAll("node")
+	circle = netSVG.selectAll("node")
 	    .data(force.nodes())
 	    .enter().append("circle")
 	    .attr("class",function(d){
@@ -502,7 +451,7 @@ function goIDE(incomingD, summary){
 	    .attr("fill", function(d){
 	    	return colorNet(d.name);
 	    })
-	text= svg.selectAll("labels")
+	text = netSVG.selectAll("labels")
 	    .data(force.nodes())
 	    .enter().append("text")
 	    .attr("class","labels")
@@ -511,6 +460,7 @@ function goIDE(incomingD, summary){
 	    .text(function(d,i) {
 	             return d.name;           
 	    }) 
+	    .attr("fill","white")
 
 	function tick() {
 	  path.attr("d", linkArc);
