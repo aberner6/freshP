@@ -22,6 +22,8 @@ var humanReadableTime;
 ///////summary
 
 
+var colorText = "black";
+
 ////button stuff
 var particleOnly = [];
 var getthis = [];
@@ -75,8 +77,9 @@ netSVG.append("svg:defs").selectAll("marker")
     .attr("refY", -1.5)
     .attr("markerWidth", 6)
     .attr("markerHeight", 6)
+    // .attr("stroke-width",1)
     .attr("orient", "auto")
-    .attr("fill","white")
+    .attr("fill",colorText)
   .append("svg:path")
     .attr("d", "M0,-5L10,0L0,5");         
 	// .attr("transform", "translate(" + 0 + "," + 10 + ")");
@@ -481,12 +484,10 @@ var linkdist = w/10;
 	path = netSVG.selectAll("path")
 	    .data(force.links())
 	    .enter().append("path")
-	    .attr("class",function(d){
-	    	// console.log(d);
-	    	return d.source.name+"link"+d.target.name;
-	    }) 
-	    .attr("stroke","white")
+	    .attr("class","link")
+	    .attr("stroke",colorText)
 	    .attr("fill","none")
+	    .attr("opacity",.05)
 	    .attr("marker-end", "url(#end)");
 
 	text = netSVG.selectAll("labels")
@@ -498,7 +499,7 @@ var linkdist = w/10;
 	    .text(function(d,i) {
 	             return d.name;           
 	    }) 
-	    .attr("fill","white")
+	    .attr("fill",colorText)
 	    .attr("font-size",9)
 
 	function tick() {
