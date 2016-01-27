@@ -12,7 +12,7 @@
     @font-face {
       font-family: 'Officina';
       font-style: normal;
-      font-weight: 400;
+      font-weight: 100;
       src: url('assets/itc-officina-sans-lt-book.ttf') format('truetype');
     }
     body {
@@ -24,6 +24,7 @@
       background-repeat: no-repeat;
       font-family: Officina;
       color:white;
+      font-size:10pt;
     }
     #container {
       text-align: center;
@@ -35,15 +36,36 @@
       background-color: #15989C;
     }
     #network{
-      margin-top:1.3in;
+      margin-top:2in;
       position:absolute;
       margin-left:10px;
       background-color:white;
+      color:black;
     }
-    #logo, img{
+    #ardinfo{
+      margin-top:2in;
+      float:left;
+      /*position:absolute;*/
+      /*margin-left:10px;*/
+      background-color:white;
+      color:black;
+    }
+    img{
+      float:left;
       margin-left: 10px;
       margin-top:10px;
-      width:50px;
+      width:70px;
+    }
+    .date{
+      float:left;
+      /*margin-right:10px;*/
+      /*margin-left: 70px;*/
+      margin-top:27px;   
+      text-align:left;   
+    }
+    .boxname{
+      margin-top: 5px;
+      font-size:10px;
     }
 </style>  
 </head>  
@@ -51,10 +73,24 @@
 <div id="container"> 
 <div id = "logo">
   <img src="assets/PELARSlogo_WhiteCentered.png">
+<div class="date">
+  PELARS<br>
+  Wednesday @ 10<br>
+  MakerFaire BCN</div>
 </div> 
 <!-- Hello -->
   <div id = "network">
+    <div class="boxname">
+      What did you link?
+    </div>
   </div>
+
+  <div id = "ardinfo">
+    <div class="boxname">
+      What did you use? 
+    </div>
+  </div>
+
 </div>  
 </body>
 <script type = "text/javascript" src="dataCard.js"></script>  

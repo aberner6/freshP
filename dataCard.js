@@ -60,13 +60,20 @@ var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h)
 
 
 var forcewidth = w/4;
-var forceheight = h/2-20;
+var forceheight = h/4;
 var netSVG = d3.select("#network")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
 	.style("margin-top","10px");
+var ardSVG = d3.select("#ardinfo")
+	.append("svg")
+	.attr("width",forcewidth)
+	.attr("height",forceheight)  
+	.style("border","1px solid white") 
+	.style("margin-top","10px");
+
 // build the arrow.
 netSVG.append("svg:defs").selectAll("marker")
     .data(["end"])      // Different link/path types can be defined here
@@ -468,7 +475,7 @@ var linkdist = w/10;
 	        maxWeight = d3.max(thisWeight, function(d){ return d; })
 	        rMap = d3.scale.linear()
 	            .domain([0,maxWeight])
-	            .range([radiusMin, forcewidth/4])   
+	            .range([radiusMin, forcewidth/8])   
 	    	return "node"
 	    })
     circle
@@ -951,6 +958,35 @@ uniqueSofts = unique(softNames);
 		console.log("components in use"+uniqueNames)
 var whatIsThe = _.difference(uniqueSofts, uniqueHards);
 console.log("this is the difference between hard and soft"+whatIsThe)
+var textHardware;
+	textHardware = ardSVG.selectAll("textHard")
+	    .data(uniqueHards)
+	    .enter().append("text")
+	    .attr("class", "textHard")
+	    .attr("x", function(d,i){
+	    	return 10+i*30;
+	    })
+	    .attr("y",20)
+	    .text(function(d){
+	    	return d;
+	    })
+	    .attr("fill","black")
+var textSoftware;
+	textSoftware = ardSVG.selectAll("textSoft")
+	    .data(uniqueSofts)
+	    .enter().append("text")
+	    .attr("class", "textSoft")
+	    .attr("x", function(d,i){
+	    	return 10+i*30;
+	    })
+	    .attr("y",40)
+	    .text(function(d){
+	    	return d;
+	    })
+	    .attr("fill","black")
+
+
+
 // console.log(uniqueHards.diff(uniqueSofts));  
         // var summaryL = lConsolidation(links);
         // function lConsolidation(links) {
