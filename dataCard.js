@@ -20,7 +20,7 @@ var totalLinks = [];
 var totalTime;
 var humanReadableTime;
 ///////summary
-
+var diffSoftHard;
 
 var colorText = "black";
 
@@ -55,24 +55,32 @@ var w = $("#container").width();//document.body.clientWidth;
 
 var goAhead;
 var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h)            
-.attr("transform", "translate(" + 0 + "," + 0 + ")");
+	.attr("transform", "translate(" + 0 + "," + 0 + ")");
 
 
 
-var forcewidth = w/4;
-var forceheight = h/4;
+var forcewidth = w/4-10;
+var forceheight = h/4-10;
 var netSVG = d3.select("#network")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
-	.style("margin-top","10px");
+	.style("margin-top","10px")
+
 var ardSVG = d3.select("#ardinfo")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
-	.style("margin-top","10px");
+	.style("margin-top","10px")
+
+var ardTimeSVG = d3.select("#ardtime")
+	.append("svg")
+	.attr("width",forcewidth)
+	.attr("height",forceheight)  
+	.style("border","1px solid white") 
+	.style("margin-top","10px")
 
 // build the arrow.
 netSVG.append("svg:defs").selectAll("marker")
@@ -846,24 +854,12 @@ var xG = d3.scale.ordinal()
 
 
 function showIDE(){
-    backRect = svg.append("g").attr("class","backRect")
-    	.append("rect")
-    	.attr("class","backRect")
-    	.attr("x", cmargin-14)
-    	.attr("y", topY-24)
-    	.attr("width", w-cwidth+cmargin)//(timeX(timeMin)-timeX(timeMax)))
-    	.attr("height", bottomY-topY+50)
-    	.attr("fill","white")
-		.attr("stroke","lightgray")
-
 		var g = svg.selectAll(".ide")
 		.data(ide_nest2)
 		.enter()
 	  	.append("g")
 	  	.attr("class","ide");
-		// now marks, initiated to default values
 		g.selectAll(".logs")
-		// we are getting the values of the countries like this:
 		.data(function(d) {
 			if(d.oc!=2){
 				return d.values;				
@@ -875,17 +871,12 @@ function showIDE(){
 			if(d.name){
 				theseNames.push(d.name);
 				uniqueNames = unique(theseNames);
-
 				if(d.mod=="M"){
 					hardNames.push(d.name);
 				}
 				if(d.mod=="B"){
 					softNames.push(d.name);
 				}
-				// if(d.mod=="C"){
-				// 	manipNames.push(d.name);
-				// }
-
 				yOther.domain(uniqueNames);
 			}
 			return d.name;
@@ -941,8 +932,6 @@ function showIDE(){
 
 
 
-
-
         // var hardware = ideData.filter(function(d) {
         //     return d.mod == "M";
         // });
@@ -951,59 +940,147 @@ function showIDE(){
         // });
 uniqueHards = unique(hardNames);
 uniqueSofts = unique(softNames);
-// uniqueManips = unique(manipNames);
-        // console.log("manipulations"+uniqueManips);
+
         console.log("hardware in use"+uniqueHards);
         console.log("software in use"+uniqueSofts);
 		console.log("components in use"+uniqueNames)
-var whatIsThe = _.difference(uniqueSofts, uniqueHards);
-console.log("this is the difference between hard and soft"+whatIsThe)
+diffSoftHard = _.difference(uniqueSofts, uniqueHards);
+console.log("this is the difference between hard and soft"+diffSoftHard)
+
+// var uniquesXS = d3.scale.ordinal()
+// 	uniquesXS
+// 	.domain(diffSoftHard)
+// 	.rangePoints([10, forcewidth-40]);
+// var uniquesXH = d3.scale.ordinal()
+// 	uniquesXH
+// 	.domain(uniqueHards)
+// 	.rangePoints([10, forcewidth-40]);
+var both = uniqueHards.concat(diffSoftHard);
+var both2 = diffSoftHard.concat(uniqueHards);
+
+var topMarg = 10;
+var textH = 30;
+// var yUniqueH = d3.scale.ordinal()
+// 	.domain(both)
+//     .rangePoints([topMarg, forceheight-topMarg/2]);
+// var yUniqueS = d3.scale.ordinal()
+// 	.domain(both2)
+//     .rangePoints([topMarg, forceheight-topMarg/2]);
+var bothLength;
+if(uniqueHards.length>=diffSoftHard.length){
+	bothLength = uniqueHards.length;
+} else{
+	bothLength = diffSoftHard.length;
+}
+var yUniqueH = d3.scale.linear()
+	.domain([0,bothLength])
+    .range([topMarg, forceheight-topMarg/2]);
+var yUniqueS = d3.scale.linear()
+	.domain([0,bothLength])
+    .range([topMarg, forceheight-topMarg/2]);
+
+
+var iconW = 20;
+var iconLMarg = 27;
+        var icons;
+           icons = ardSVG.selectAll(".icons")
+               .data(uniqueHards)
+           icons.enter().append("image")
+               .attr("class", "icons")
+               .attr("xlink:href", function(d, i) {
+                   return "assets/icons/"+d.toLowerCase() + ".png";
+               })
+               .attr("y", function(d,i) {
+                   return yUniqueH(i)-12;
+               })
+               .attr("width", iconW)
+               .attr("height", iconW)
+               .attr("x", iconLMarg)
+
+// var rectHardware;
+// 	rectHardware = ardSVG.selectAll("rectHard")
+// 	    .data(uniqueHards)
+// 	    .enter().append("rect")
+// 	    .attr("class", "rectHard")
+// 	    .attr("x", function(d,i){
+// 	    	return uniquesX(i)-3;//10+i*30;
+// 	    })
+// 	    .attr("y",10)
+// 	    .attr("fill", function(d,i){
+// 	    	for(j=0; j<uniqueSofts.length; j++){
+// 		    	if(d==uniqueSofts[j]){
+// 		    		return "teal";
+// 		    	} 
+// 		    	else{
+// 		    		// return "blue"
+// 		    	}
+// 	    	}
+// 	    })
+// 	    .attr("width",19)
+// 	    .attr("height",15)
+// 	    .attr("stroke","white")
+// 	    .attr("stroke-width",.5)
 var textHardware;
 	textHardware = ardSVG.selectAll("textHard")
 	    .data(uniqueHards)
 	    .enter().append("text")
 	    .attr("class", "textHard")
-	    .attr("x", function(d,i){
-	    	return 10+i*30;
+	    .attr("x", 10)
+	    .attr("y",function(d,i){
+	    	return yUniqueH(i) //not d
 	    })
-	    .attr("y",20)
+    	.attr("text-anchor", "start") // set anchor y justification
+	    .attr("fill", "black")
 	    .text(function(d){
 	    	return d;
 	    })
-	    .attr("fill","black")
+// var rectSoftware;
+// 	rectSoftware = ardSVG.selectAll("rectSoft")
+// 	    .data(whatIsThe)
+// 	    .enter().append("rect")
+// 	    .attr("class", "rectSoft")
+// 	    .attr("x", function(d,i){
+// 	    	return uniquesX(i)-3;//10+i*30;
+// 	    })
+// 	    .attr("y",30)
+// 	    .attr("fill", "#B19B80")
+// 	    .attr("width",19)
+// 	    .attr("height",15)
+// 	    .attr("stroke","white")
+// 	    .attr("stroke-width",.5)
 var textSoftware;
 	textSoftware = ardSVG.selectAll("textSoft")
-	    .data(uniqueSofts)
+	    .data(diffSoftHard)
 	    .enter().append("text")
 	    .attr("class", "textSoft")
-	    .attr("x", function(d,i){
-	    	return 10+i*30;
+    	.attr("text-anchor", "start") // set anchor y justification
+	    .attr("x", forcewidth/2)
+	    .attr("y", function(d,i){
+	    	return yUniqueS(i) //not d
 	    })
-	    .attr("y",40)
 	    .text(function(d){
 	    	return d;
 	    })
 	    .attr("fill","black")
+var iconsSoft;
+   iconsSoft = ardSVG.selectAll(".iconsS")
+       .data(diffSoftHard)
+   iconsSoft.enter().append("image")
+       .attr("class", "iconsS")
+       .attr("xlink:href", function(d, i) {
+       	// console.log(d.toLowerCase());
+           return "assets/icons/"+d.toLowerCase() + ".png";
+       })
+       .attr("y", function(d,i) {
+           return yUniqueS(i)-12;
+       })
+       .attr("width", iconW)
+       .attr("height", iconW)
+       .attr("x", (forcewidth/2)+iconLMarg)
+//alphabetize these or order them in terms of time of connection?
 
 
 
-// console.log(uniqueHards.diff(uniqueSofts));  
-        // var summaryL = lConsolidation(links);
-        // function lConsolidation(links) {
-        //     var total = 0;
-        //     for(j=0; j<links.length; j++){
-	       //      for (i = 0; i < uniqueNames.length; i++) {
-	       //          if (links[j].source.name == uniqueNames[i]) {
-	       //              total++;
-	       //              totalLinks.push(
-	       //              	total[i]:total
-	       //         			)
-	       //          } else {}
-	       //      }
-	       //      // console.log()
-        //     }
-        //     return total;
-        // }
 linksNames = Object.keys(nodes);
 	for (j = 0; j < linksNames.length; j++) {
 	    totalLinks[j] = ({
@@ -1011,10 +1088,6 @@ linksNames = Object.keys(nodes);
 	    		"totalTo": linkTotalTo(linksNames[j]),
 	    		"linkName": linksNames[j]
 	    	})
-
-	    	// [j] = linkConsolidation(linksNames[j])
-
-	    // totalLinks[j] = linkConsolidation(linksNames[j])
 	}
 function linkTotalFrom(name) {
     var total = 0;
@@ -1034,9 +1107,6 @@ function linkTotalTo(name) {
     }
     return total;
 }
-// newObj = ({"total": 6, "name":"RGB" })
-
-        // console.log(summaryL)
         console.log("total links made to and from")
         console.log(totalLinks)
 }
