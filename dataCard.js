@@ -68,29 +68,35 @@ var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h)
 
 
 
-var forcewidth = w/4-10;
-var forceheight = h/4-10;
+var forcewidth = w/4-9;
+var forceheight = h/4;
 var netSVG = d3.select("#ardinfo")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
-	.style("margin-top","10px")
+	.style("margin-top","1px")
 
 var ardSVG = d3.select("#network")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
-	.style("margin-top","10px")
+	.style("margin-top","1px")
 
 var buttonSVG = d3.select("#buttonuse")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
-	.style("margin-top","10px")
+	.style("margin-top","1px")
 
+var activeSVG = d3.select("#facehand")
+	.append("svg")
+	.attr("width",forcewidth)
+	.attr("height",forceheight)  
+	.style("border","1px solid white") 
+	.style("margin-top","1px")
 // build the arrow.
 netSVG.append("svg:defs").selectAll("marker")
     .data(["end"])      // Different link/path types can be defined here
@@ -517,7 +523,7 @@ var linkdist = w/10;
 	force = d3.layout.force()
 	    .nodes(d3.values(nodes))
 	    .links(links)
-	    .size([forcewidth, forceheight])
+	    .size([forcewidth, forceheight-20])
 	    .linkDistance(linkdist)
 	    .charge(-100)
 	    .on("tick", tick)
