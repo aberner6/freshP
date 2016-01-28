@@ -36,23 +36,33 @@
       background-color: #15989C;
     }
     #network{
-      margin-top:2in;
+      margin-top:2.5in;
       position:absolute;
       margin-left:10px;
       background-color:white;
       color:black;
     }
     #ardinfo{
-      margin-top:2in;
+      margin-top:2.5in;
       margin-right:10px;
       float:left;
       background-color:white;
       color:black;
     }
-    #ardtime{
-      margin-top:2in;
+    #buttonuse{
+      margin-top:2.5in;
       margin-left:10px;
       float:left;
+      background-color:white;
+      color:black;
+    }
+    #comments{
+      margin-top:3.9in;
+      margin-left:10px;
+      height: .3in;
+      width: 3.16in;
+      /*margin-bottom:10px;*/
+      position:absolute;
       background-color:white;
       color:black;
     }
@@ -73,8 +83,16 @@
       text-align:left;   
     }
     .boxname{
-      margin-top: 5px;
-      font-size:10px;
+    margin-top: 5px;
+    font-size: 10px;
+    margin-left: 5px;
+    text-align: left;
+/*      margin-top: 5px;
+      font-size:10px;*/
+    }
+    text.button1, text.button2{
+      font-size:18px;
+      font-weight:bold;
     }
 </style>  
 </head>  
@@ -92,22 +110,26 @@
 <!-- Hello -->
   <div id = "network">
     <div class="boxname">
-      What did you link?
+      What did you use?
     </div>
   </div>
 
   <div id = "ardinfo">
     <div class="boxname">
-      What did you use? 
+      What did you link? 
     </div>
   </div>
   
-  <div id = "ardtime">
+  <div id = "buttonuse">
     <div class="boxname">
-      In what order? 
+      Button Press? 
     </div>
   </div>
-
+  <div id = "comments">
+    <div class="boxname">
+      In this session we saw this and this and this 
+    </div>
+  </div>
 </div>  
 </body>
 <script type = "text/javascript" src="dataCard.js"></script>  

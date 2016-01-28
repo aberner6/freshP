@@ -8,6 +8,15 @@ var uniqueNames;
 var theseNames = [];
 
 
+
+
+
+
+var topMarg = 10;
+var textH = 30;
+var iconW = 20;
+var iconLMarg = 27;
+var textL = 10;
 ///////summary
 var uniqueHards;
 var uniqueSofts;
@@ -61,21 +70,21 @@ var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h)
 
 var forcewidth = w/4-10;
 var forceheight = h/4-10;
-var netSVG = d3.select("#network")
+var netSVG = d3.select("#ardinfo")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
 	.style("margin-top","10px")
 
-var ardSVG = d3.select("#ardinfo")
+var ardSVG = d3.select("#network")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
 	.style("margin-top","10px")
 
-var ardTimeSVG = d3.select("#ardtime")
+var buttonSVG = d3.select("#buttonuse")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
@@ -255,10 +264,6 @@ for(i=0; i<data.length; i++){
 }
 goButton(particleOnly);
 
-
-
-
-
 		nested_data = d3.nest()
 			.key(function(d) { return d.type; })
 			.key(function(d){ return d.num; })
@@ -405,7 +410,54 @@ button2 = button2.filter(function(n){ return n.button != undefined });
 	console.log(button1.length+"number of button1 presses")
 	console.log(button2.length+"number of button2 presses")
 
-	// var res = getthis.match(/button1/g);
+var buttonTot;
+if(button2.length>button1.length){
+	buttonTot = button2.length;
+}else{ buttonTot = button1.length; }
+console.log(buttonTot)
+var iconW = (forcewidth/1.5)/buttonTot
+	var xSpace = d3.scale.linear()
+		.domain([0, buttonTot+1])
+		.range([textL, forcewidth-iconW])
+
+buttonSVG.append("text")
+	.attr("class","button1")
+	.attr("x", textL)
+	.attr("y", topMarg+iconW/4)
+	.text(button1.length)
+	.attr("fill","black")
+var iconBut = buttonSVG.selectAll(".button1")	
+	.data(d3.range(button1.length+1))
+	iconBut.enter()
+	.append("image")
+	.attr("class","button1")
+	.attr("xlink:href", "assets/icons/idea.png")
+	.attr("x", function(d,i){
+		return xSpace(i);
+	})
+	.attr("y", topMarg-iconW/2)
+	.attr("width",iconW)
+	.attr("height",iconW);
+
+buttonSVG.append("text")
+	.attr("class","button2")
+	.attr("x", textL)
+	.attr("y", topMarg+iconW*1.7)
+	.text(button2.length)
+	.attr("fill","black");
+
+var iconBut = buttonSVG.selectAll(".button2")	
+	.data(d3.range(button2.length+1))
+	iconBut.enter()
+	.append("image")
+	.attr("class","button2")
+	.attr("xlink:href", "assets/icons/thunder.png")
+	.attr("x", function(d,i){
+		return xSpace(i);
+	})
+	.attr("y", topMarg+iconW)
+	.attr("width",iconW)
+	.attr("height",iconW);
 }
 
 function goIDE(incomingD, summary){
@@ -546,6 +598,7 @@ var linkdist = w/10;
 			}
 		}
 	}
+	showIDE();
 }
 
 
@@ -902,7 +955,13 @@ function showIDE(){
 				return "none";
 			}
 		})
-		.attr("stroke","white")
+		.attr("fill", function(d){
+			if(yOther(d.name)!=undefined){
+				return "white"
+			} else{
+				return "none";
+			}
+		})
 		.attr("opacity",.3);
 
 		var g = svg.selectAll(".logText")
@@ -938,50 +997,48 @@ function showIDE(){
         // var software = ideData.filter(function(d) {
         //     return d.mod == "B";
         // });
-uniqueHards = unique(hardNames);
-uniqueSofts = unique(softNames);
+	uniqueHards = unique(hardNames);
+	uniqueSofts = unique(softNames);
 
-        console.log("hardware in use"+uniqueHards);
-        console.log("software in use"+uniqueSofts);
-		console.log("components in use"+uniqueNames)
-diffSoftHard = _.difference(uniqueSofts, uniqueHards);
-console.log("this is the difference between hard and soft"+diffSoftHard)
+	        console.log("hardware in use"+uniqueHards);
+	        console.log("software in use"+uniqueSofts);
+			console.log("components in use"+uniqueNames)
+	diffSoftHard = _.difference(uniqueSofts, uniqueHards);
+	console.log("this is the difference between hard and soft"+diffSoftHard)
 
-// var uniquesXS = d3.scale.ordinal()
-// 	uniquesXS
-// 	.domain(diffSoftHard)
-// 	.rangePoints([10, forcewidth-40]);
-// var uniquesXH = d3.scale.ordinal()
-// 	uniquesXH
-// 	.domain(uniqueHards)
-// 	.rangePoints([10, forcewidth-40]);
-var both = uniqueHards.concat(diffSoftHard);
-var both2 = diffSoftHard.concat(uniqueHards);
-
-var topMarg = 10;
-var textH = 30;
-// var yUniqueH = d3.scale.ordinal()
-// 	.domain(both)
-//     .rangePoints([topMarg, forceheight-topMarg/2]);
-// var yUniqueS = d3.scale.ordinal()
-// 	.domain(both2)
-//     .rangePoints([topMarg, forceheight-topMarg/2]);
-var bothLength;
-if(uniqueHards.length>=diffSoftHard.length){
-	bothLength = uniqueHards.length;
-} else{
-	bothLength = diffSoftHard.length;
-}
-var yUniqueH = d3.scale.linear()
-	.domain([0,bothLength])
-    .range([topMarg, forceheight-topMarg/2]);
-var yUniqueS = d3.scale.linear()
-	.domain([0,bothLength])
-    .range([topMarg, forceheight-topMarg/2]);
+	// var uniquesXS = d3.scale.ordinal()
+	// 	uniquesXS
+	// 	.domain(diffSoftHard)
+	// 	.rangePoints([10, forcewidth-40]);
+	// var uniquesXH = d3.scale.ordinal()
+	// 	uniquesXH
+	// 	.domain(uniqueHards)
+	// 	.rangePoints([10, forcewidth-40]);
+	var both = uniqueHards.concat(diffSoftHard);
+	var both2 = diffSoftHard.concat(uniqueHards);
 
 
-var iconW = 20;
-var iconLMarg = 27;
+	// var yUniqueH = d3.scale.ordinal()
+	// 	.domain(both)
+	//     .rangePoints([topMarg, forceheight-topMarg/2]);
+	// var yUniqueS = d3.scale.ordinal()
+	// 	.domain(both2)
+	//     .rangePoints([topMarg, forceheight-topMarg/2]);
+	var bothLength;
+	if(uniqueHards.length>=diffSoftHard.length){
+		bothLength = uniqueHards.length;
+	} else{
+		bothLength = diffSoftHard.length;
+	}
+	var yUniqueH = d3.scale.linear()
+		.domain([0,bothLength])
+	    .range([topMarg, forceheight-topMarg/2]);
+	var yUniqueS = d3.scale.linear()
+		.domain([0,bothLength])
+	    .range([topMarg, forceheight-topMarg/2]);
+
+
+
         var icons;
            icons = ardSVG.selectAll(".icons")
                .data(uniqueHards)
@@ -997,35 +1054,12 @@ var iconLMarg = 27;
                .attr("height", iconW)
                .attr("x", iconLMarg)
 
-// var rectHardware;
-// 	rectHardware = ardSVG.selectAll("rectHard")
-// 	    .data(uniqueHards)
-// 	    .enter().append("rect")
-// 	    .attr("class", "rectHard")
-// 	    .attr("x", function(d,i){
-// 	    	return uniquesX(i)-3;//10+i*30;
-// 	    })
-// 	    .attr("y",10)
-// 	    .attr("fill", function(d,i){
-// 	    	for(j=0; j<uniqueSofts.length; j++){
-// 		    	if(d==uniqueSofts[j]){
-// 		    		return "teal";
-// 		    	} 
-// 		    	else{
-// 		    		// return "blue"
-// 		    	}
-// 	    	}
-// 	    })
-// 	    .attr("width",19)
-// 	    .attr("height",15)
-// 	    .attr("stroke","white")
-// 	    .attr("stroke-width",.5)
 var textHardware;
 	textHardware = ardSVG.selectAll("textHard")
 	    .data(uniqueHards)
 	    .enter().append("text")
 	    .attr("class", "textHard")
-	    .attr("x", 10)
+	    .attr("x", textL)
 	    .attr("y",function(d,i){
 	    	return yUniqueH(i) //not d
 	    })
