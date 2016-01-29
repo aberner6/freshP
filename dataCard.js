@@ -13,7 +13,7 @@ var theseNames = [];
 
 var xPath;
 
-
+var startMin, endMin, totalTime;
 
 
 
@@ -293,6 +293,7 @@ goButton(particleOnly);
 		nested_data = d3.nest()
 			.key(function(d) { return d.type; })
 			.key(function(d){ return d.num; })
+			// .key(function(d){ return d.time; })
 			.entries(data);
 
 
@@ -691,6 +692,10 @@ function goFace(incomingData, summary){
 
 function goHands(incomingData, summary){	
 	console.log(summary+"summaryHands")
+	console.log(incomingData)
+	// incomingData = d3.nest()
+	// 		.key(function(d) { return d.time; }).sortKeys(d3.ascending)
+	// 		.entries(incomingData);
 	handData = incomingData;
 	summaryHands = summary;
 	// One cell for each hand tracked (hands are in nested data @ at 1)
@@ -718,7 +723,7 @@ function showHands(){
 	var numPanels = handData.values.length;
 
 	var g = svg.selectAll(".hand")
-		.data(handData.values)
+		.data(handData.values.sort(d3.ascending))
 		.enter()
 	  	.append("g")
 	  	.attr("class","hand")
@@ -740,6 +745,9 @@ function showHands(){
 		    // throwing in a title element
 		    .append("title")
 		      .text(function(d) {
+		    		if(d.num==576){ //64
+
+		      	// console.log(d.time)
 		      	rtime.push(d.time)
 		      	thisid.push(d.num)
 
@@ -752,58 +760,79 @@ function showHands(){
 				maxRY = d3.max(ry);
 				y.domain([minRY, maxRY])
 				x.domain([minRX, maxRX])
+					}
 		      });
 		// finally, we animate our marks in position
 		g.selectAll("circle.miniCircs").transition().delay(100).duration(1000)
 		    .attr("cx",function(d,i) {
-		    	if(i<0){
-			    	newThing.push({
-			    		"changeDist": Math.sqrt(Math.pow((rx[i]-rx[i-1]), 2) + Math.pow((ry[i]-ry[i-1]),2)),
-			    		"changeTime": rtime[i]-rtime[i-1],
-			    		"thisTime": rtime[i],
-			    		"specialID": d.num		    		
-			    	})
+		    	// console.log()
+		    	if(i>0){
+		    		if(d.num==576){ //64
+				    	newThing.push({
+				    		"changeDist": Math.sqrt(Math.pow((rx[i]-rx[i-1]), 2) + Math.pow((ry[i]-ry[i-1]),2)),
+				    		"changeTime": rtime[i]-rtime[i-1],
+				    		"thisTime": rtime[i],
+				    		"specialID": d.num		    		
+				    	})
+			    	}
 			    }
 		    })
 
-
-// totalComps[j] = ardUseTotals(j);
-//order by key? 
-
-// idName = Object.keys(handData.values);
-// newThing[idName]=({})
-// blah["newthing"]=({"this":1})
 for (i=0; i<newThing.length; i++){
 	changes.push({
-		"time": new Date(newThing[i].thisTime).getMinutes(),
-		"delta":(newThing[i].changeDist)/(newThing[i].changeTime),
+		"time": newThing[i].thisTime, //minutes //new Date(newThing[i].thisTime).getMinutes()
+		"delta":newThing[i].changeDist,
+		"speed":(newThing[i].changeDist)/(newThing[i].changeTime),
 		"specialID":newThing[i].specialID
 	})
 }
 var justDelta = [];
+var justSpeed = [];
 for(i=0; i<changes.length; i++){
 	justDelta.push(changes[i].delta)
+	justSpeed.push(changes[i].speed)
 }
-var maxActive = d3.max(justDelta);
+
+var wtf = justDelta;//[]; //CUMULATIVE
+    _.map(wtf,function(num,i){ if(i > 0) wtf[i] += wtf[i-1]; });
+    console.log(wtf);
+    console.log(changes.length)
+
+var interval = 160;
+var softSpeed = [];
+for(i=0; i<wtf.length; i++){
+	if(i>interval){
+		softSpeed.push((wtf[i]-wtf[i-interval])/(changes[i].time-changes[i-interval].time))
+	}
+}
+console.log(softSpeed)
+console.log(softSpeed.length+"softspeedlength")
+console.log(changes.length+"changeslength")
+
+var maxActive = d3.max(softSpeed)//d3.max(justSpeed);//d3.max(justDelta);
+var minActive = d3.min(softSpeed)//d3.min(justSpeed);//d3.min(justDelta);
 console.log(maxActive+"maxactive")
 var pathActive, lineActive;
 var yActivePath;
-// var xPath, yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
-  // xPath = d3.scale.linear()
-  //     .domain([0,60]).range([10, w-40]);
   yActivePath = d3.scale.linear()
-      .domain([0,maxActive]).range([h/4-64, 0]);
+      .domain([minActive,maxActive]).range([h/4-15, 0]);
+
+  xActivePath = d3.scale.linear() //startTime, endTime
+      .domain([startTime, endTime]).range([10, w-40]);
+
   lineActive = d3.svg.line()
-      .x(function(d, i) { return xPath(d.time); })
-      .y(function(d, i) { return yActivePath(d.delta); })
-      .interpolate("linear");
+      .x(function(d, i) { return xActivePath(changes[i].time); })
+      .y(function(d, i) { return yActivePath(d); })
+      .interpolate("linear")
+      // .interpolate("bundle")
+      // .tension(.87);
   pathActive = timeSVG.append("g")
     .append("path")
     .attr("class","activepath")
     .attr("fill","none")
     .attr("stroke","lightgreen")
   	pathActive
-  		.datum(changes)
+  		.datum(softSpeed)
     	.attr("transform", function(d,i){
         return "translate(" + 0 + ", "+50+")";
     	})
@@ -1013,9 +1042,9 @@ function showIDE(){
 		// .attr("opacity",.3);
 
 
-var startMin = new Date(startTime).getMinutes();
-var endMin = new Date(endTime).getMinutes()
-var totalTime = endMin-startMin;
+startMin = new Date(startTime).getMinutes();
+endMin = new Date(endTime).getMinutes()
+totalTime = endMin-startMin;
 console.log("startMin"+startMin+"endMin"+endMin+"totalTime"+totalTime)
 // var newTime = new Date(totalTime).getMinutes();
 
@@ -1046,7 +1075,9 @@ var yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
   xPath = d3.scale.linear()
       .domain([startMin,endMin]).range([10, w-40]);
   yPath = d3.scale.linear()
-      .domain([0,maxComps]).range([h/4-64, 0]);
+      .domain([0,maxComps])
+      // .range([h/4-64, 0]);
+      .range([h/4-15, 0]);
 
   lineT = d3.svg.line()
       .x(function(d, i) { 
