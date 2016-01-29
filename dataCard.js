@@ -30,6 +30,7 @@ var totalTime;
 var humanReadableTime;
 ///////summary
 var diffSoftHard;
+var totalComps = [];
 
 var colorText = "black";
 
@@ -40,6 +41,7 @@ var buttonData = [];
 var button1 = [];
 var button2 = [];
 ////
+var thisMinute = [];
 
 
 var toggling = true;
@@ -89,14 +91,21 @@ var buttonSVG = d3.select("#buttonuse")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
-	.style("margin-top","1px")
+	.style("margin-top","1px");
 
 var activeSVG = d3.select("#facehand")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
-	.style("margin-top","1px")
+	.style("margin-top","1px");
+
+var timeSVG = d3.select("#timeline")
+	.append("svg")
+	.attr("width",w-40)
+	.attr("height",h/2-64)  
+	.style("border","1px solid white") 
+	.style("margin-top","1px");
 // build the arrow.
 netSVG.append("svg:defs").selectAll("marker")
     .data(["end"])      // Different link/path types can be defined here
@@ -485,6 +494,8 @@ function goIDE(incomingD, summary){
 			ideData[i].oc = ideData[i].action_id.substr(1, 1);
 		}
 		ideData[i].special_id = ideData[i].mod+ideData[i].opt;
+		ideData[i].hour = (new Date(ideData[i].time)).getHours();
+		ideData[i].minute = (new Date(ideData[i].time)).getMinutes();
 	}
 	ide_nest = d3.nest()
 		.key(function(d) { 
@@ -893,8 +904,7 @@ function showFace(){
 
 var topY = 200;
 var bottomY = 500;
-var yOther = d3.scale.ordinal()
-    .rangePoints([topY, bottomY]);
+
 
 var xStart = 15;
 var xEnd = xStart*spaceFactor;
@@ -911,9 +921,49 @@ var xG = d3.scale.ordinal()
     .domain(games)
     .rangePoints([xStart, xEnd]);
 
-
 function showIDE(){
-		var g = svg.selectAll(".ide")
+    var xAxisCall = timeSVG.append('g');
+
+    var xAxis = d3.svg.axis();
+    var xAxisScale = d3.time.scale()
+        .domain([startTime, endTime])
+        .range([10, w-40]);
+    var timeFormat = d3.time.format("%H:%M");
+
+	timeX.domain([startTime, endTime]).range([10, w-40]);
+
+    xAxis
+        .scale(xAxisScale)
+        .orient("top")
+        .ticks(5)
+        .tickPadding(1)
+        .tickFormat(timeFormat);
+    xAxisCall.call(xAxis)
+        .attr("class", "axis") //Assign "axis" class
+        .attr('transform', 'translate(0, ' + 140 + ')');
+
+	var yOther = d3.scale.ordinal()
+    	.rangePoints([topMarg, 115]);
+
+
+
+
+// var interval = (endTime-startTime);
+
+
+
+			// 	return timeX(d.end)-timeX(d.time);
+			// }else{
+			// 	return timeX(endTime)-timeX(d.time);				
+			// }
+
+
+
+
+
+
+
+	var g = timeSVG.selectAll(".ide")
 		.data(ide_nest2)
 		.enter()
 	  	.append("g")
@@ -947,6 +997,26 @@ function showIDE(){
             return yOther(d.name);
         })
 		.attr("width",function(d,i){
+	// for(i=0; i<ideData.length; i++){ 
+		// var index = 0;	
+		// var thisTime = startTime;
+		// var addTime = 240000*i;
+		// var thisTime = startTime+addTime;
+		// if(d.end){
+		// 	if(thisTime>=ideData[i].time && thisTime+240000 <= d.end){
+		// 		thisMinute.push(d.mod)
+		// 	}		
+		// }else{
+		// 	if(thisTime>=ideData[i].time && thisTime+240000 <= endTime){
+		// 		thisMinute.push(d.mod)
+		// 	}				
+		// }
+		// index++;
+//WRONG APPROACH
+//TRY DOING THE PHOTO CONSOLIDATION APPROACH
+
+
+
 			if(d.end){
 				return timeX(d.end)-timeX(d.time);
 			}else{
@@ -961,7 +1031,7 @@ function showIDE(){
 				return "none";
 			}
 		})
-		.attr("fill", function(d){
+		.attr("stroke", function(d){
 			if(yOther(d.name)!=undefined){
 				return "white"
 			} else{
@@ -970,27 +1040,37 @@ function showIDE(){
 		})
 		.attr("opacity",.3);
 
-		var g = svg.selectAll(".logText")
-		.data(uniqueNames)
-		.enter()
-		.append("text")
-		.attr("class","logText")
-		.attr("x", cmargin)
-        .attr("y", function(d) {
-            return yOther(d)+6;
-        })
-        .text(function(d){
-        	return d;
-        })
+		// var g = svg.selectAll(".logText")
+		// .data(uniqueNames)
+		// .enter()
+		// .append("text")
+		// .attr("class","logText")
+		// .attr("x", cmargin)
+  //       .attr("y", function(d) {
+  //           return yOther(d)+6;
+  //       })
+  //       .text(function(d){
+  //       	return d;
+  //       })
 
 
 
 
 
 
-
-
-
+for(j=0; j<60; j++){
+	totalComps[j] = ardUseTotals(j);
+}
+        function ardUseTotals(index) {
+            var total = 0;
+            for (i = 0; i < ideData.length; i++) {
+                if (ideData[i].minute == index) {
+                    total++;
+                } else {}
+            }
+            return total;
+        }
+// }
 
 
 
@@ -1172,6 +1252,8 @@ function linkTotalTo(name) {
             }
             return uniques;
         }
+
+
 
 var moveToFront = function() { 
     this.parentNode.appendChild(this); 
