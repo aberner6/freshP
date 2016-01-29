@@ -237,6 +237,18 @@ function ready(error,data1) {
 // function ready(data1) {
 // d3.json("assets/data.json", function(json) {
 		data = (data1);
+		for(i=0; i<data.length; i++){
+			if(data[i].type=="hand"){
+				data[i].num = 0;
+				if(i>0){
+					count = 0;
+					if(data[i].num != data[i-1].num){
+						count++;
+						data[i].num = count;
+					} //has to be set to 0 1 or 2
+				}
+			}
+		}
 		// console.log(data2);
 startTime = data[0].time;
 endTime = data[data.length-1].time;
