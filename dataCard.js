@@ -11,6 +11,11 @@ var theseNames = [];
 
 
 
+var xPath;
+
+
+
+
 
 var topMarg = 10;
 var textH = 30;
@@ -45,6 +50,7 @@ var button1 = [];
 var button2 = [];
 ////
 var thisMinute = [];
+var changes = [];
 
 
 var toggling = true;
@@ -207,7 +213,8 @@ var endTime;
 $(document).ready(function() {
 	console.log("ready")
 // var token = "xOlSArdMD3N_IEFy6pezxvlqLYHKYInWPwQoKDMo6A_TTfIRp0MlVFarwoHS7LQtkBcqH18E_gY8uDQLfN39HCd7uMyYakdwTKifWZOYKPwv-B7luIE91A6Af3K1lD91";
-	// var  token = pelars_authenticate();
+	// var  token = "y_ETVWjdDYA7qLr3MHdUUEhTxthgb8e_bY02PaIJ9wIudaGhQdLM_-p67aSQRiMSkBcqH18E_gY8uDQLfN39HPVR8Ws7d3fnPQf_BhNIce4v-B7luIE91A6Af3K1lD91"
+	//pelars_authenticate();
 	// $.getJSON("http://pelars.sssup.it:8080/pelars/data/537/session?token="+token ,function(json){
 	// 		console.log("ready")
 	// 		console.log(json)
@@ -227,6 +234,7 @@ queue()
 
 function ready(error,data1) {
 
+// function ready(data1) {
 // d3.json("assets/data.json", function(json) {
 		data = (data1);
 		// console.log(data2);
@@ -709,15 +717,6 @@ function compress(){
 function showHands(){
 	var numPanels = handData.values.length;
 
-    backRect = svg.append("g").attr("class","backRect")
-    	.append("rect")
-    	.attr("class","backRect")
-    	.attr("x", cmargin)
-    	.attr("y", cmargin)
-    	.attr("width", cwidth*numPanels)//(timeX(timeMin)-timeX(timeMax)))
-    	.attr("height", cheight)
-    	.attr("fill","white")
-	// var thisData;
 	var g = svg.selectAll(".hand")
 		.data(handData.values)
 		.enter()
@@ -729,26 +728,6 @@ function showHands(){
 	  		return "translate("+(cwidth*i)+",0)";
 	  	});
 
-		g
-		  .append("rect")
-		  .attr("x",cmargin)
-		  .attr("y",cmargin)
-		  .attr("width",cwidth)//-2*cmargin)
-		  .attr("height",cheight)//-2*cmargin)
-		  .attr("fill","none")
-		  .attr("stroke","lightgray");
-		// we also write its name below.
-		g
-		  .append("text")
-		  .attr("class","rectText")
-		  .attr("y",cheight+10)
-		  .attr("x",cmargin)
-		  .text(function(d,i) {
-	  		if(d.key==summaryHands[i].key){
-	  			// return (summary[i].values.max_time);
-	  		}
-		  })
-		
 		// now marks, initiated to default values
 		g.selectAll("circle")
 		// we are getting the values of the countries like this:
@@ -756,13 +735,8 @@ function showHands(){
 			return d.values;
 		}) 
 		.enter()
-		  .append("circle")
-		  .attr("class","miniCircs")
-		  .attr("cx",cmargin)
-		  .attr("cy",cheight-cmargin)
-		  .attr("fill","none")
-		  .attr("stroke","grey")
-		  .attr("r",1)
+		.append("circle")
+		.attr("class","miniCircs")
 		    // throwing in a title element
 		    .append("title")
 		      .text(function(d) {
@@ -776,37 +750,67 @@ function showHands(){
 		      	ry.push(d.ry);
 				minRY = d3.min(ry);
 				maxRY = d3.max(ry);
-
-				// console.log(meanX+"meanx")
 				y.domain([minRY, maxRY])
 				x.domain([minRX, maxRX])
-		      	// console.log(minRX);
-		      	// return d.num;
 		      });
 		// finally, we animate our marks in position
 		g.selectAll("circle.miniCircs").transition().delay(100).duration(1000)
-		    .attr("r",radSize)
 		    .attr("cx",function(d,i) {
+		    	if(i<0){
 			    	newThing.push({
-			    		"distance": Math.sqrt(Math.pow((rx[i+1]-rx[i]), 2) + Math.pow((ry[i+1]-ry[i]),2)),
-			    		"time": rtime[i+1],
-			    		"num": thisid[i+1]		    		
+			    		"changeDist": Math.sqrt(Math.pow((rx[i]-rx[i-1]), 2) + Math.pow((ry[i]-ry[i-1]),2)),
+			    		"changeTime": rtime[i]-rtime[i-1],
+			    		"thisTime": rtime[i],
+			    		"specialID": d.num		    		
 			    	})
-		    	return x(d.rx);
-		    })
-		    .attr("cy",function(d) {
-		    	return y(d.ry);
+			    }
 		    })
 
 
+// totalComps[j] = ardUseTotals(j);
+//order by key? 
+
+// idName = Object.keys(handData.values);
+// newThing[idName]=({})
+// blah["newthing"]=({"this":1})
+for (i=0; i<newThing.length; i++){
+	changes.push({
+		"time": new Date(newThing[i].thisTime).getMinutes(),
+		"delta":(newThing[i].changeDist)/(newThing[i].changeTime),
+		"specialID":newThing[i].specialID
+	})
+}
+var justDelta = [];
+for(i=0; i<changes.length; i++){
+	justDelta.push(changes[i].delta)
+}
+var maxActive = d3.max(justDelta);
+console.log(maxActive+"maxactive")
+var pathActive, lineActive;
+var yActivePath;
+// var xPath, yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
+  // xPath = d3.scale.linear()
+  //     .domain([0,60]).range([10, w-40]);
+  yActivePath = d3.scale.linear()
+      .domain([0,maxActive]).range([h/4-64, 0]);
+  lineActive = d3.svg.line()
+      .x(function(d, i) { return xPath(d.time); })
+      .y(function(d, i) { return yActivePath(d.delta); })
+      .interpolate("linear");
+  pathActive = timeSVG.append("g")
+    .append("path")
+    .attr("class","activepath")
+    .attr("fill","none")
+    .attr("stroke","lightgreen")
+  	pathActive
+  		.datum(changes)
+    	.attr("transform", function(d,i){
+        return "translate(" + 0 + ", "+50+")";
+    	})
+  		.attr("d", lineActive);
 
 
 
-//figuring out activity of hands - velocity of hands
-//rx1 = rx one more in index
-//rx0 = rx current index
-//square root of: ((rx1-rx0)squared+(ry1-ry0)squared)
-//also associate time of one more in index
 
 
 
@@ -828,27 +832,28 @@ function showHands(){
 
 
 
-		g.append("circle")
-		.attr("class","bigCircs")
-		.attr("cx", function(d,i){
-	  		if(d.key==summaryHands[i].key){
-	  			return x(summaryHands[i].values.meanX);
-	  		}
-	  	})
-		.attr("cy", function(d,i){
-	  		if(d.key==summaryHands[i].key){
-	  			return y(summaryHands[i].values.meanY);
-	  		}
-	  	})
-	  	.attr("r", function(d,i){
-	  		if(d.key==summaryHands[i].key){
-	  			return 200*((summaryHands[i].values.deviationX+summaryHands[i].values.deviationY)/2);
-	  		}
-	  	})
-		.attr("fill",function(d){
-			return handColor(d.key);//"pink";
-		})
-		.attr("opacity",.6)
+
+		// g.append("circle")
+		// .attr("class","bigCircs")
+		// .attr("cx", function(d,i){
+	 //  		if(d.key==summaryHands[i].key){
+	 //  			return x(summaryHands[i].values.meanX);
+	 //  		}
+	 //  	})
+		// .attr("cy", function(d,i){
+	 //  		if(d.key==summaryHands[i].key){
+	 //  			return y(summaryHands[i].values.meanY);
+	 //  		}
+	 //  	})
+	 //  	.attr("r", function(d,i){
+	 //  		if(d.key==summaryHands[i].key){
+	 //  			return 200*((summaryHands[i].values.deviationX+summaryHands[i].values.deviationY)/2);
+	 //  		}
+	 //  	})
+		// .attr("fill",function(d){
+		// 	return handColor(d.key);//"pink";
+		// })
+		// .attr("opacity",.6)
 //try to find average spot
 }
 var path, line;
@@ -1008,30 +1013,61 @@ function showIDE(){
 		// .attr("opacity",.3);
 
 
+var startMin = new Date(startTime).getMinutes();
+var endMin = new Date(endTime).getMinutes()
+var totalTime = endMin-startMin;
+console.log("startMin"+startMin+"endMin"+endMin+"totalTime"+totalTime)
+// var newTime = new Date(totalTime).getMinutes();
 
 
-for(j=0; j<60; j++){
+
+
+
+
+for(j=startMin; j<endMin; j++){
 	totalComps[j] = ardUseTotals(j);
-	hardUseComp[j] = hardUseTotals(j);
+
+	hardUseComp[j] = ({ 
+		"total":hardUseTotals(j), 
+		"time":j 
+	});
+
 	softUseComp[j] = softUseTotals(j);
 }
+
+
+
+
+
 var maxComps = d3.max(totalComps)
 console.log(maxComps)
-var xPath, yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
+var yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
 
   xPath = d3.scale.linear()
-      .domain([0,60]).range([10, w-40]);
+      .domain([startMin,endMin]).range([10, w-40]);
   yPath = d3.scale.linear()
       .domain([0,maxComps]).range([h/4-64, 0]);
 
   lineT = d3.svg.line()
-      .x(function(d, i) { return xPath(i); })
-      .y(function(d, i) { return yPath(d); })
+      .x(function(d, i) { 
+      	if(d==undefined){ return 0; }
+      		else{
+		       	return xPath(d.time);      			
+      		}
+      })
+      .y(function(d, i) { 
+      	if(d==undefined){return 0;}
+      		else{
+      			return yPath(d.total); 
+      		}
+      })
       .interpolate("linear");
 
   pathH = timeSVG.append("g")
     .append("path")
     .attr("class","timepath")
+  		.attr("fill","none")
+  		.attr("stroke","pink");
   	pathH
   		.datum(hardUseComp)
     	.attr("transform", function(d,i){
@@ -1050,7 +1086,7 @@ var xPath, yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
         }
         function hardUseTotals(index) {
             var total = 0;
-            for (i = 0; i < hardwareOnly.length; i++) {
+            for (i = 0; i < hardwareOnly.length-1; i++) {
                 if (hardwareOnly[i].minute == index) {
                     total++;
                 } else {}
