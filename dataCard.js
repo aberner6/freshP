@@ -23,6 +23,8 @@ var uniqueSofts;
 var uniqueManips;
 var hardNames = [];
 var softNames = [];
+var hardwareOnly = [];
+var softwareOnly = [];
 var manipNames = [];
 var totalLinks;
 var totalLinks = [];
@@ -31,7 +33,8 @@ var humanReadableTime;
 ///////summary
 var diffSoftHard;
 var totalComps = [];
-
+var	hardUseComp = [];
+var	softUseComp = [];
 var colorText = "black";
 
 ////button stuff
@@ -945,24 +948,6 @@ function showIDE(){
 	var yOther = d3.scale.ordinal()
     	.rangePoints([topMarg, 115]);
 
-
-
-
-// var interval = (endTime-startTime);
-
-
-
-			// 	return timeX(d.end)-timeX(d.time);
-			// }else{
-			// 	return timeX(endTime)-timeX(d.time);				
-			// }
-
-
-
-
-
-
-
 	var g = timeSVG.selectAll(".ide")
 		.data(ide_nest2)
 		.enter()
@@ -975,92 +960,85 @@ function showIDE(){
 			}
 		}) 
 		.enter()
-		.append("rect")
+		.append("g")
 		.attr("class",function(d){
 			if(d.name){
 				theseNames.push(d.name);
 				uniqueNames = unique(theseNames);
 				if(d.mod=="M"){
+					hardwareOnly.push(d);
 					hardNames.push(d.name);
 				}
 				if(d.mod=="B"){
+					softwareOnly.push(d);
 					softNames.push(d.name);
 				}
 				yOther.domain(uniqueNames);
 			}
 			return d.name;
 		})
-		.attr("x", function(d){
-			return timeX(d.time)
-		})
-        .attr("y", function(d, i) {
-            return yOther(d.name);
-        })
-		.attr("width",function(d,i){
-	// for(i=0; i<ideData.length; i++){ 
-		// var index = 0;	
-		// var thisTime = startTime;
-		// var addTime = 240000*i;
-		// var thisTime = startTime+addTime;
-		// if(d.end){
-		// 	if(thisTime>=ideData[i].time && thisTime+240000 <= d.end){
-		// 		thisMinute.push(d.mod)
-		// 	}		
-		// }else{
-		// 	if(thisTime>=ideData[i].time && thisTime+240000 <= endTime){
-		// 		thisMinute.push(d.mod)
-		// 	}				
-		// }
-		// index++;
-//WRONG APPROACH
-//TRY DOING THE PHOTO CONSOLIDATION APPROACH
-
-
-
-			if(d.end){
-				return timeX(d.end)-timeX(d.time);
-			}else{
-				return timeX(endTime)-timeX(d.time);				
-			}
-		})
-		.attr("height", 5)
-		.attr("fill", function(d){
-			if(yOther(d.name)!=undefined){
-				return colorScale(d.mod);
-			} else{
-				return "none";
-			}
-		})
-		.attr("stroke", function(d){
-			if(yOther(d.name)!=undefined){
-				return "white"
-			} else{
-				return "none";
-			}
-		})
-		.attr("opacity",.3);
-
-		// var g = svg.selectAll(".logText")
-		// .data(uniqueNames)
-		// .enter()
-		// .append("text")
-		// .attr("class","logText")
-		// .attr("x", cmargin)
-  //       .attr("y", function(d) {
-  //           return yOther(d)+6;
+		// .attr("x", function(d){
+		// 	return timeX(d.time)
+		// })
+  //       .attr("y", function(d, i) {
+  //           return yOther(d.name);
   //       })
-  //       .text(function(d){
-  //       	return d;
-  //       })
-
-
+		// .attr("width",function(d,i){
+		// 	if(d.end){
+		// 		return timeX(d.end)-timeX(d.time);
+		// 	}else{
+		// 		return timeX(endTime)-timeX(d.time);				
+		// 	}
+		// })
+		// .attr("height", 5)
+		// .attr("fill", function(d){
+		// 	if(yOther(d.name)!=undefined){
+		// 		return colorScale(d.mod);
+		// 	} else{
+		// 		return "none";
+		// 	}
+		// })
+		// .attr("stroke", function(d){
+		// 	if(yOther(d.name)!=undefined){
+		// 		return "white"
+		// 	} else{
+		// 		return "none";
+		// 	}
+		// })
+		// .attr("opacity",.3);
 
 
 
 
 for(j=0; j<60; j++){
 	totalComps[j] = ardUseTotals(j);
+	hardUseComp[j] = hardUseTotals(j);
+	softUseComp[j] = softUseTotals(j);
 }
+var maxComps = d3.max(totalComps)
+console.log(maxComps)
+var xPath, yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
+
+  xPath = d3.scale.linear()
+      .domain([0,60]).range([10, w-40]);
+  yPath = d3.scale.linear()
+      .domain([0,maxComps]).range([h/4-64, 0]);
+
+  lineT = d3.svg.line()
+      .x(function(d, i) { return xPath(i); })
+      .y(function(d, i) { return yPath(d); })
+      .interpolate("linear");
+
+  pathH = timeSVG.append("g")
+    .append("path")
+    .attr("class","timepath")
+  	pathH
+  		.datum(hardUseComp)
+    	.attr("transform", function(d,i){
+        return "translate(" + 0 + ", "+50+")";
+    	})
+  		.attr("d", lineT);
+
         function ardUseTotals(index) {
             var total = 0;
             for (i = 0; i < ideData.length; i++) {
@@ -1070,8 +1048,24 @@ for(j=0; j<60; j++){
             }
             return total;
         }
-// }
-
+        function hardUseTotals(index) {
+            var total = 0;
+            for (i = 0; i < hardwareOnly.length; i++) {
+                if (hardwareOnly[i].minute == index) {
+                    total++;
+                } else {}
+            }
+            return total;
+        }
+        function softUseTotals(index) {
+            var total = 0;
+            for (i = 0; i < softwareOnly.length; i++) {
+                if (softwareOnly[i].minute == index) {
+                    total++;
+                } else {}
+            }
+            return total;
+        }
 
 
 
