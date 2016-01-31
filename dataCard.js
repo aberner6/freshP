@@ -8,8 +8,10 @@ var uniqueNames;
 var theseNames = [];
 
 
-
-
+var theseTotals = [];
+var one = [];
+var two = [];
+var three = [];
 
 var xPath;
 
@@ -198,6 +200,7 @@ var thisid = [];
 var rnum
 var newThing = []; 
 
+var activeOne = [];
 
 var xIs = [];
 var yIs = [];
@@ -237,18 +240,21 @@ function ready(error,data1) {
 // function ready(data1) {
 // d3.json("assets/data.json", function(json) {
 		data = (data1);
-		for(i=0; i<data.length; i++){
-			if(data[i].type=="hand"){
-				data[i].num = 0;
-				if(i>0){
-					count = 0;
-					if(data[i].num != data[i-1].num){
-						count++;
-						data[i].num = count;
-					} //has to be set to 0 1 or 2
-				}
-			}
-		}
+
+
+		//how to split the data up so it shows each hand as a separate line?
+		// for(i=0; i<data.length; i++){
+		// 	if(data[i].type=="hand"){
+		// 		data[i].num = 0;
+		// 		if(i>0){
+		// 			count = 0;
+		// 			if(data[i].num != data[i-1].num){
+		// 				count++;
+		// 				data[i].num = count;
+		// 			} //has to be set to 0 1 or 2
+		// 		}
+		// 	}
+		// }
 		// console.log(data2);
 startTime = data[0].time;
 endTime = data[data.length-1].time;
@@ -332,12 +338,18 @@ var rey = [];
 						"meanY": d3.mean(leaves, function(d) {
 							return parseFloat(d.ry);
 						}),
-						"deviationX": d3.variance(leaves, function(d){ 
+						"deviationX": d3.mean(leaves, function(d){ 
 							return parseFloat(d.rx) 
 						}),
-						"deviationY": d3.variance(leaves, function(d){ 
+						"deviationY": d3.mean(leaves, function(d){ 
 							return parseFloat(d.ry) 
 						})
+						// "deviationX": d3.variance(leaves, function(d){ 
+						// 	return parseFloat(d.rx) 
+						// }),
+						// "deviationY": d3.variance(leaves, function(d){ 
+						// 	return parseFloat(d.ry) 
+						// })
 					} 
 				})
 			.entries(data)
@@ -640,6 +652,7 @@ var linkdist = w/10;
 		}
 	}
 	showIDE();
+	showHands();
 }
 
 
@@ -730,7 +743,6 @@ function compress(){
 }
 // }
 })
-
 function showHands(){
 	var numPanels = handData.values.length;
 
@@ -738,12 +750,84 @@ function showHands(){
 		.data(handData.values.sort(d3.ascending))
 		.enter()
 	  	.append("g")
-	  	.attr("class","hand")
+	  	// .attr("class","hand")
 	  	.attr("transform",function(d,i) {
 	  		handColor.domain([d.key])
-	  		// thisData = d;
+	  		theseTotals.push(d.values.length);
+			theseTotals.sort(d3.descending); 			
 	  		return "translate("+(cwidth*i)+",0)";
-	  	});
+	  	})
+	  	.attr("class", function(d,i){
+	  			if(d.values.length==theseTotals[0]){
+		  			one.push(d.values);
+		  		}
+	  			if(d.values.length==theseTotals[1]){
+		  			two.push(d.values);
+		  		}
+	  			if(d.values.length==theseTotals[2]){
+		  			three.push(d.values);
+		  		}
+		  		else{}	
+		  		return "hand";
+	  	})
+
+var rx1 = [];
+var ry1 = [];
+var time1 = [];
+if(one!="undefined"){
+	for(i=0; i<one[0].length; i++){
+	  	time1.push(one[0][i].time)
+	  	rx1.push(one[0][i].rx);
+	  	ry1.push(one[0][i].ry);
+	}
+	console.log(time1)
+	if(time1.length>0){ //check if array is full
+		for(i=0; i<one[0].length; i++){
+			if(i>0){
+		    	activeOne.push({
+		    		"changeDist": Math.sqrt(Math.pow((rx1[i]-rx1[i-1]), 2) + Math.pow((ry1[i]-ry1[i-1]),2)),
+		    		"changeTime": time1[i]-time1[i-1],
+		    		"thisTime": time1[i]
+		    	})
+		    }
+		}
+		// console.log(activeOne)
+	}
+	// for(i=0; i<two.length; i++){
+	// }
+	// for(i=0; i<three.length; i++){
+	// }
+	var delta1 = [];
+	if(activeOne){
+		console.log(activeOne)
+		for(i=0; i<activeOne.length; i++){
+			delta1.push(activeOne[i].changeDist);
+		}
+	}
+	var cumu1 = delta1;
+	    _.map(cumu1,function(num,i){ if(i > 0) cumu1[i] += cumu1[i-1]; });
+	var interval = 160;
+	var softS1 = [];
+	for(i=0; i<cumu1.length; i++){
+		if(i>interval){
+			softS1.push((cumu1[i]-cumu1[i-interval])/(activeOne[i].thisTime-activeOne[i-interval].thisTime))
+		}
+	}
+	// console.log(softSpeed)
+	console.log(softS1.length+"softspeedlength1")
+	console.log(activeOne.length+"changeslength1")
+
+}else{console.log("no")}
+
+
+
+
+
+
+
+
+
+
 
 		// now marks, initiated to default values
 		g.selectAll("circle")
@@ -758,20 +842,19 @@ function showHands(){
 		    .append("title")
 		      .text(function(d) {
 		    		if(d.num==576){ //64
-
 		      	// console.log(d.time)
-		      	rtime.push(d.time)
-		      	thisid.push(d.num)
+				      	rtime.push(d.time)
+				      	thisid.push(d.num)
 
-		      	rx.push(d.rx);
-				minRX = d3.min(rx);
-				maxRX = d3.max(rx);
-		      	
-		      	ry.push(d.ry);
-				minRY = d3.min(ry);
-				maxRY = d3.max(ry);
-				y.domain([minRY, maxRY])
-				x.domain([minRX, maxRX])
+				      	rx.push(d.rx);
+						minRX = d3.min(rx);
+						maxRX = d3.max(rx);
+				      	
+				      	ry.push(d.ry);
+						minRY = d3.min(ry);
+						maxRY = d3.max(ry);
+						y.domain([minRY, maxRY])
+						x.domain([minRX, maxRX])
 					}
 		      });
 		// finally, we animate our marks in position
@@ -807,8 +890,8 @@ for(i=0; i<changes.length; i++){
 
 var wtf = justDelta;//[]; //CUMULATIVE
     _.map(wtf,function(num,i){ if(i > 0) wtf[i] += wtf[i-1]; });
-    console.log(wtf);
-    console.log(changes.length)
+    // console.log(wtf);
+    // console.log(changes.length)
 
 var interval = 160;
 var softSpeed = [];
@@ -817,7 +900,7 @@ for(i=0; i<wtf.length; i++){
 		softSpeed.push((wtf[i]-wtf[i-interval])/(changes[i].time-changes[i-interval].time))
 	}
 }
-console.log(softSpeed)
+// console.log(softSpeed)
 console.log(softSpeed.length+"softspeedlength")
 console.log(changes.length+"changeslength")
 
