@@ -233,7 +233,7 @@ $(document).ready(function() {
 
 		//hard coded
 queue()
-	.defer(d3.json, "assets/data1.json")
+	.defer(d3.json, "assets/data2.json")
 	.await(ready);
 
 
@@ -1341,6 +1341,7 @@ function cleanArray(actual) {
   var newArray = new Array();
   for (var i = 0; i < actual.length; i++) {
     if (actual[i]) {
+    	// console.log(actual.time.sort(d3.ascending))
       newArray.push(actual[i]);
     }
   }
@@ -1377,7 +1378,12 @@ function cleanArray(actual) {
 	}
 
 
+//arrays are dirty with undefined values
 hardUseComp = cleanArray(hardUseComp)
+hardUseComp.sort(function(x, y){
+   return d3.ascending(x.time, y.time);
+})
+// 
 	// var maxComps = d3.max(totalComps)
 	// console.log(maxComps)
 	var yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
@@ -1409,7 +1415,7 @@ hardUseComp = cleanArray(hardUseComp)
   		.attr("fill","none")
   		.attr("stroke","pink");
   	pathH
-  		.datum(cleanArray(hardUseComp))
+  		.datum(hardUseComp)
     	.attr("transform", function(d,i){
         return "translate(" + 0 + ", "+50+")";
     	})
