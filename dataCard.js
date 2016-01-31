@@ -201,6 +201,8 @@ var rnum
 var newThing = []; 
 
 var activeOne = [];
+var activeTwo = [];
+var activeThree = [];
 
 var xIs = [];
 var yIs = [];
@@ -258,7 +260,17 @@ function ready(error,data1) {
 		// console.log(data2);
 startTime = data[0].time;
 endTime = data[data.length-1].time;
-totalTime = endTime-startTime;
+
+startMin = new Date(startTime).getMinutes();
+endMin = new Date(endTime).getMinutes();
+startHour = new Date(startTime).getHours();
+endHour = new Date(startTime).getHours();
+if(endMin>startMin){
+	totalTime = (endMin-startMin);	
+}else{
+	totalTime = (60-startMin)+endMin;	
+}
+
 console.log(totalTime);
 // var minutes=(totalTime/(1000*60))%60;
 // var hours=(totalTime/(1000*60*60))%24;
@@ -780,7 +792,6 @@ if(one!="undefined"){
 	  	rx1.push(one[0][i].rx);
 	  	ry1.push(one[0][i].ry);
 	}
-	console.log(time1)
 	if(time1.length>0){ //check if array is full
 		for(i=0; i<one[0].length; i++){
 			if(i>0){
@@ -791,15 +802,9 @@ if(one!="undefined"){
 		    	})
 		    }
 		}
-		// console.log(activeOne)
 	}
-	// for(i=0; i<two.length; i++){
-	// }
-	// for(i=0; i<three.length; i++){
-	// }
 	var delta1 = [];
 	if(activeOne){
-		console.log(activeOne)
 		for(i=0; i<activeOne.length; i++){
 			delta1.push(activeOne[i].changeDist);
 		}
@@ -813,125 +818,281 @@ if(one!="undefined"){
 			softS1.push((cumu1[i]-cumu1[i-interval])/(activeOne[i].thisTime-activeOne[i-interval].thisTime))
 		}
 	}
-	// console.log(softSpeed)
 	console.log(softS1.length+"softspeedlength1")
-	console.log(activeOne.length+"changeslength1")
+	console.log(activeOne.length+"activelength1")
 
 }else{console.log("no")}
 
-
-
-
-
-
-
-
-
-
-
-		// now marks, initiated to default values
-		g.selectAll("circle")
-		// we are getting the values of the countries like this:
-		.data(function(d) {
-			return d.values;
-		}) 
-		.enter()
-		.append("circle")
-		.attr("class","miniCircs")
-		    // throwing in a title element
-		    .append("title")
-		      .text(function(d) {
-		    		if(d.num==576){ //64
-		      	// console.log(d.time)
-				      	rtime.push(d.time)
-				      	thisid.push(d.num)
-
-				      	rx.push(d.rx);
-						minRX = d3.min(rx);
-						maxRX = d3.max(rx);
-				      	
-				      	ry.push(d.ry);
-						minRY = d3.min(ry);
-						maxRY = d3.max(ry);
-						y.domain([minRY, maxRY])
-						x.domain([minRX, maxRX])
-					}
-		      });
-		// finally, we animate our marks in position
-		g.selectAll("circle.miniCircs").transition().delay(100).duration(1000)
-		    .attr("cx",function(d,i) {
-		    	// console.log()
-		    	if(i>0){
-		    		if(d.num==576){ //64
-				    	newThing.push({
-				    		"changeDist": Math.sqrt(Math.pow((rx[i]-rx[i-1]), 2) + Math.pow((ry[i]-ry[i-1]),2)),
-				    		"changeTime": rtime[i]-rtime[i-1],
-				    		"thisTime": rtime[i],
-				    		"specialID": d.num		    		
-				    	})
-			    	}
-			    }
-		    })
-
-for (i=0; i<newThing.length; i++){
-	changes.push({
-		"time": newThing[i].thisTime, //minutes //new Date(newThing[i].thisTime).getMinutes()
-		"delta":newThing[i].changeDist,
-		"speed":(newThing[i].changeDist)/(newThing[i].changeTime),
-		"specialID":newThing[i].specialID
-	})
-}
-var justDelta = [];
-var justSpeed = [];
-for(i=0; i<changes.length; i++){
-	justDelta.push(changes[i].delta)
-	justSpeed.push(changes[i].speed)
-}
-
-var wtf = justDelta;//[]; //CUMULATIVE
-    _.map(wtf,function(num,i){ if(i > 0) wtf[i] += wtf[i-1]; });
-    // console.log(wtf);
-    // console.log(changes.length)
-
-var interval = 160;
-var softSpeed = [];
-for(i=0; i<wtf.length; i++){
-	if(i>interval){
-		softSpeed.push((wtf[i]-wtf[i-interval])/(changes[i].time-changes[i-interval].time))
+var rx2 = [];
+var ry2 = [];
+var time2 = [];
+if(two!="undefined"){
+	for(i=0; i<two[0].length; i++){
+	  	time2.push(two[0][i].time)
+	  	rx2.push(two[0][i].rx);
+	  	ry2.push(two[0][i].ry);
 	}
-}
-// console.log(softSpeed)
-console.log(softSpeed.length+"softspeedlength")
-console.log(changes.length+"changeslength")
+	if(time2.length>0){ //check if array is full
+		for(i=0; i<two[0].length; i++){
+			if(i>0){
+		    	activeTwo.push({
+		    		"changeDist": Math.sqrt(Math.pow((rx2[i]-rx2[i-1]), 2) + Math.pow((ry2[i]-ry2[i-1]),2)),
+		    		"changeTime": time2[i]-time2[i-1],
+		    		"thisTime": time2[i]
+		    	})
+		    }
+		}
+	}
+	var delta2 = [];
+	if(activeTwo){
+		for(i=0; i<activeTwo.length; i++){
+			delta2.push(activeTwo[i].changeDist);
+		}
+	}
+	var cumu2 = delta2;
+	    _.map(cumu2,function(num,i){ if(i > 0) cumu2[i] += cumu2[i-1]; });
+	// var interval = 160;
+	var softS2 = [];
+	for(i=0; i<cumu2.length; i++){
+		if(i>interval){
+			softS2.push((cumu2[i]-cumu2[i-interval])/(activeTwo[i].thisTime-activeTwo[i-interval].thisTime))
+		}
+	}
+	console.log(softS2.length+"softspeedlength2")
+	console.log(activeTwo.length+"activelength2")
 
-var maxActive = d3.max(softSpeed)//d3.max(justSpeed);//d3.max(justDelta);
-var minActive = d3.min(softSpeed)//d3.min(justSpeed);//d3.min(justDelta);
-console.log(maxActive+"maxactive")
-var pathActive, lineActive;
+}else{console.log("notwo")}
+
+var rx3 = [];
+var ry3 = [];
+var time3 = [];
+if(three!="undefined"){
+	for(i=0; i<three[0].length; i++){
+	  	time3.push(three[0][i].time)
+	  	rx3.push(three[0][i].rx);
+	  	ry3.push(three[0][i].ry);
+	}
+	if(time3.length>0){ //check if array is full
+		for(i=0; i<three[0].length; i++){
+			if(i>0){
+		    	activeThree.push({
+		    		"changeDist": Math.sqrt(Math.pow((rx3[i]-rx3[i-1]), 2) + Math.pow((ry3[i]-ry3[i-1]),2)),
+		    		"changeTime": time3[i]-time3[i-1],
+		    		"thisTime": time3[i]
+		    	})
+		    }
+		}
+	}
+	var delta3 = [];
+	if(activeThree){
+		for(i=0; i<activeThree.length; i++){
+			delta3.push(activeThree[i].changeDist);
+		}
+	}
+	var cumu3 = delta3;
+	    _.map(cumu3,function(num,i){ if(i > 0) cumu3[i] += cumu3[i-1]; });
+	// var interval = 160;
+	var softS3 = [];
+	for(i=0; i<cumu3.length; i++){
+		if(i>interval){
+			softS3.push((cumu3[i]-cumu3[i-interval])/(activeThree[i].thisTime-activeThree[i-interval].thisTime))
+		}
+	}
+	console.log(softS3.length+"softspeedlength3")
+	console.log(activeThree.length+"activelength3")
+
+}else{console.log("nothree")}
+
+
+
+
+
+
+
+var maxActive1 = d3.max(softS1)//d3.max(justSpeed);//d3.max(justDelta);
+var maxActive2 = d3.max(softS2)//d3.max(justSpeed);//d3.max(justDelta);
+var maxActive3 = d3.max(softS3)//d3.max(justSpeed);//d3.max(justDelta);
+// console.log(maxActive1+"maxactive1"+maxActive2);
+var maxActiveOverall;
+
+if(maxActive2>maxActive1){
+	maxActiveOverall = maxActive2;
+} else{
+	maxActiveOverall = maxActive1;
+}
+if(maxActive3>maxActiveOverall){
+	maxActiveOverall = maxActive3;
+} else{
+	maxActiveOverall = maxActiveOverall;
+}
+console.log(maxActive3);
+//which is the most active
+
+var pathActive1, lineActive1, pathActive2, lineActive2, pathActive3, lineActive3;
+
 var yActivePath;
   yActivePath = d3.scale.linear()
-      .domain([minActive,maxActive]).range([h/4-15, 0]);
+      .domain([0,maxActiveOverall]).range([h/4-15, 0]);
 
   xActivePath = d3.scale.linear() //startTime, endTime
       .domain([startTime, endTime]).range([10, w-40]);
 
-  lineActive = d3.svg.line()
-      .x(function(d, i) { return xActivePath(changes[i].time); })
+  lineActive1 = d3.svg.line()
+      .x(function(d, i) { return xActivePath(activeOne[i].thisTime); })
       .y(function(d, i) { return yActivePath(d); })
       .interpolate("linear")
-      // .interpolate("bundle")
-      // .tension(.87);
-  pathActive = timeSVG.append("g")
+  pathActive1 = timeSVG.append("g")
     .append("path")
-    .attr("class","activepath")
+    .attr("class","activepath1")
     .attr("fill","none")
-    .attr("stroke","lightgreen")
-  	pathActive
-  		.datum(softSpeed)
+    .attr("stroke","lightblue")
+  	pathActive1
+  		.datum(softS1)
     	.attr("transform", function(d,i){
         return "translate(" + 0 + ", "+50+")";
     	})
-  		.attr("d", lineActive);
+  		.attr("d", lineActive1);
+  lineActive2 = d3.svg.line()
+      .x(function(d, i) { return xActivePath(activeTwo[i].thisTime); })
+      .y(function(d, i) { return yActivePath(d); })
+      .interpolate("linear")
+  pathActive2 = timeSVG.append("g")
+    .append("path")
+    .attr("class","activepath2")
+    .attr("fill","none")
+    .attr("stroke","lightgreen")
+  	pathActive2
+  		.datum(softS2)
+    	.attr("transform", function(d,i){
+        return "translate(" + 0 + ", "+50+")";
+    	})
+  		.attr("d", lineActive2);
+  lineActive3 = d3.svg.line()
+      .x(function(d, i) { return xActivePath(activeThree[i].thisTime); })
+      .y(function(d, i) { return yActivePath(d); })
+      .interpolate("linear")
+  pathActive3 = timeSVG.append("g")
+    .append("path")
+    .attr("class","activepath3")
+    .attr("fill","none")
+    .attr("stroke","teal")
+  	pathActive3
+  		.datum(softS3)
+    	.attr("transform", function(d,i){
+        return "translate(" + 0 + ", "+50+")";
+    	})
+  		.attr("d", lineActive3);
+
+
+
+
+
+
+
+
+// 		// now marks, initiated to default values
+// 		g.selectAll("circle")
+// 		// we are getting the values of the countries like this:
+// 		.data(function(d) {
+// 			return d.values;
+// 		}) 
+// 		.enter()
+// 		.append("circle")
+// 		.attr("class","miniCircs")
+// 		    // throwing in a title element
+// 		    .append("title")
+// 		      .text(function(d) {
+// 		    		if(d.num==576){ //64
+// 		      	// console.log(d.time)
+// 				      	rtime.push(d.time)
+// 				      	thisid.push(d.num)
+
+// 				      	rx.push(d.rx);
+// 						minRX = d3.min(rx);
+// 						maxRX = d3.max(rx);
+				      	
+// 				      	ry.push(d.ry);
+// 						minRY = d3.min(ry);
+// 						maxRY = d3.max(ry);
+// 						y.domain([minRY, maxRY])
+// 						x.domain([minRX, maxRX])
+// 					}
+// 		      });
+// 		// finally, we animate our marks in position
+// 		g.selectAll("circle.miniCircs").transition().delay(100).duration(1000)
+// 		    .attr("cx",function(d,i) {
+// 		    	// console.log()
+// 		    	if(i>0){
+// 		    		if(d.num==576){ //64
+// 				    	newThing.push({
+// 				    		"changeDist": Math.sqrt(Math.pow((rx[i]-rx[i-1]), 2) + Math.pow((ry[i]-ry[i-1]),2)),
+// 				    		"changeTime": rtime[i]-rtime[i-1],
+// 				    		"thisTime": rtime[i],
+// 				    		"specialID": d.num		    		
+// 				    	})
+// 			    	}
+// 			    }
+// 		    })
+
+// for (i=0; i<newThing.length; i++){
+// 	changes.push({
+// 		"time": newThing[i].thisTime, //minutes //new Date(newThing[i].thisTime).getMinutes()
+// 		"delta":newThing[i].changeDist,
+// 		"speed":(newThing[i].changeDist)/(newThing[i].changeTime),
+// 		"specialID":newThing[i].specialID
+// 	})
+// }
+// var justDelta = [];
+// var justSpeed = [];
+// for(i=0; i<changes.length; i++){
+// 	justDelta.push(changes[i].delta)
+// 	justSpeed.push(changes[i].speed)
+// }
+
+// var wtf = justDelta;//[]; //CUMULATIVE
+//     _.map(wtf,function(num,i){ if(i > 0) wtf[i] += wtf[i-1]; });
+//     // console.log(wtf);
+//     // console.log(changes.length)
+
+// var interval = 160;
+// var softSpeed = [];
+// for(i=0; i<wtf.length; i++){
+// 	if(i>interval){
+// 		softSpeed.push((wtf[i]-wtf[i-interval])/(changes[i].time-changes[i-interval].time))
+// 	}
+// }
+// // console.log(softSpeed)
+// console.log(softSpeed.length+"softspeedlength")
+// console.log(changes.length+"changeslength")
+
+// var maxActive = d3.max(softSpeed)//d3.max(justSpeed);//d3.max(justDelta);
+// var minActive = d3.min(softSpeed)//d3.min(justSpeed);//d3.min(justDelta);
+// console.log(maxActive+"maxactive")
+// var pathActive, lineActive;
+// var yActivePath;
+//   yActivePath = d3.scale.linear()
+//       .domain([minActive,maxActive]).range([h/4-15, 0]);
+
+//   xActivePath = d3.scale.linear() //startTime, endTime
+//       .domain([startTime, endTime]).range([10, w-40]);
+
+//   lineActive = d3.svg.line()
+//       .x(function(d, i) { return xActivePath(changes[i].time); })
+//       .y(function(d, i) { return yActivePath(d); })
+//       .interpolate("linear")
+//       // .interpolate("bundle")
+//       // .tension(.87);
+//   pathActive = timeSVG.append("g")
+//     .append("path")
+//     .attr("class","activepath")
+//     .attr("fill","none")
+//     .attr("stroke","lightgreen")
+//   	pathActive
+//   		.datum(softSpeed)
+//     	.attr("transform", function(d,i){
+//         return "translate(" + 0 + ", "+50+")";
+//     	})
+//   		.attr("d", lineActive);
 
 
 
@@ -1137,44 +1298,97 @@ function showIDE(){
 		// .attr("opacity",.3);
 
 
-startMin = new Date(startTime).getMinutes();
-endMin = new Date(endTime).getMinutes()
-totalTime = endMin-startMin;
+
+if(endMin>startMin){
+	totalTime = (endMin-startMin);	
+}else{
+	totalTime = (60-startMin)+endMin;	
+}
 console.log("startMin"+startMin+"endMin"+endMin+"totalTime"+totalTime)
-// var newTime = new Date(totalTime).getMinutes();
+// for(j=0; j<totalTime; j++){
+// 	if(startMin+j<60){
+// 		var thisj = startMin+j;		
+// 		hardUseComp[j] = ({ 
+// 			"total":hardUseTotals(thisj), 
+// 			"time": j 
+// 		});
+// 	}
+// 	else{
+// 		var thisj = totalTime-j;		
+// 		hardUseComp[j] = ({ 
+// 			"total":hardUseTotals(thisj), 
+// 			"time": j 
+// 		});
+// 	}
+// }
 
 
 
 
-
-
-for(j=startMin; j<endMin; j++){
-	totalComps[j] = ardUseTotals(j);
-
-	hardUseComp[j] = ({ 
-		"total":hardUseTotals(j), 
-		"time":j 
-	});
-
-	softUseComp[j] = softUseTotals(j);
+	for(j=startTime; j<endTime; j++){
+		var thisDate = new Date(j).getMinutes();
+		var thisHour = new Date(j).getHours();
+		var thisD = thisHour+thisDate;
+			hardUseComp[thisD] = ({ 
+				"total":hardUseTotals(thisDate), 
+				"time": j,
+				"min":thisDate,
+				"hour":thisHour
+			});
+	}
+// Will remove all falsy values: undefined, null, 0, false, NaN and "" (empty string)
+function cleanArray(actual) {
+  var newArray = new Array();
+  for (var i = 0; i < actual.length; i++) {
+    if (actual[i]) {
+      newArray.push(actual[i]);
+    }
+  }
+  return newArray;
 }
 
+// console.log(hardUseComp)
+
+// for(j=startMin; j<endMin; j++){
+// 	totalComps[j] = ardUseTotals(j);
+// 	hardUseComp[j] = ({ 
+// 		"total":hardUseTotals(j), 
+// 		"time": //j 
+// 	});
+// 	// softUseComp[j] = softUseTotals(j);
+// }
 
 
 
+	uniqueHards = unique(hardNames);
+	uniqueSofts = unique(softNames);
+	        console.log("hardware in use"+uniqueHards);
+	        console.log("software in use"+uniqueSofts);
+			console.log("components in use"+uniqueNames)
+	diffSoftHard = _.difference(uniqueSofts, uniqueHards);
+	console.log("this is the difference between hard and soft"+diffSoftHard)
+	var both = uniqueHards.concat(diffSoftHard);
+	var both2 = diffSoftHard.concat(uniqueHards);
+	var bothLength;
+	if(uniqueHards.length>=diffSoftHard.length){
+		bothLength = uniqueHards.length;
+	} else{
+		bothLength = diffSoftHard.length;
+	}
 
-var maxComps = d3.max(totalComps)
-console.log(maxComps)
-var yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
 
-  xPath = d3.scale.linear()
-      .domain([startMin,endMin]).range([10, w-40]);
-  yPath = d3.scale.linear()
-      .domain([0,maxComps])
-      // .range([h/4-64, 0]);
-      .range([h/4-15, 0]);
+hardUseComp = cleanArray(hardUseComp)
+	// var maxComps = d3.max(totalComps)
+	// console.log(maxComps)
+	var yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
 
-  lineT = d3.svg.line()
+	xPath = d3.scale.linear()
+	      .domain([startTime,endTime]).range([10, w-40]);
+	yPath = d3.scale.linear()
+	      .domain([0,12]) //max hardware components
+	      .range([h/4-15, 0]);
+
+	lineT = d3.svg.line()
       .x(function(d, i) { 
       	if(d==undefined){ return 0; }
       		else{
@@ -1195,7 +1409,7 @@ var yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
   		.attr("fill","none")
   		.attr("stroke","pink");
   	pathH
-  		.datum(hardUseComp)
+  		.datum(cleanArray(hardUseComp))
     	.attr("transform", function(d,i){
         return "translate(" + 0 + ", "+50+")";
     	})
@@ -1239,39 +1453,7 @@ var yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
         // var software = ideData.filter(function(d) {
         //     return d.mod == "B";
         // });
-	uniqueHards = unique(hardNames);
-	uniqueSofts = unique(softNames);
 
-	        console.log("hardware in use"+uniqueHards);
-	        console.log("software in use"+uniqueSofts);
-			console.log("components in use"+uniqueNames)
-	diffSoftHard = _.difference(uniqueSofts, uniqueHards);
-	console.log("this is the difference between hard and soft"+diffSoftHard)
-
-	// var uniquesXS = d3.scale.ordinal()
-	// 	uniquesXS
-	// 	.domain(diffSoftHard)
-	// 	.rangePoints([10, forcewidth-40]);
-	// var uniquesXH = d3.scale.ordinal()
-	// 	uniquesXH
-	// 	.domain(uniqueHards)
-	// 	.rangePoints([10, forcewidth-40]);
-	var both = uniqueHards.concat(diffSoftHard);
-	var both2 = diffSoftHard.concat(uniqueHards);
-
-
-	// var yUniqueH = d3.scale.ordinal()
-	// 	.domain(both)
-	//     .rangePoints([topMarg, forceheight-topMarg/2]);
-	// var yUniqueS = d3.scale.ordinal()
-	// 	.domain(both2)
-	//     .rangePoints([topMarg, forceheight-topMarg/2]);
-	var bothLength;
-	if(uniqueHards.length>=diffSoftHard.length){
-		bothLength = uniqueHards.length;
-	} else{
-		bothLength = diffSoftHard.length;
-	}
 	var yUniqueH = d3.scale.linear()
 		.domain([0,bothLength])
 	    .range([topMarg, forceheight-topMarg/2]);
