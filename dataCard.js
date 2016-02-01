@@ -19,6 +19,18 @@ var startMin, endMin, totalTime;
 
 
 
+
+/////////
+var obsReflect = [];
+var obsDoc = [];
+var obsPlan = [];
+////////
+
+
+
+
+
+
 var topMarg = 10;
 var textH = 30;
 var iconW = 20;
@@ -237,8 +249,13 @@ function getData(thisSession, token){
 	if(thisSession>0){
 		$.getJSON("http://pelars.sssup.it:8080/pelars/data/"+thisSession+"?token="+token,function(json){
 				console.log("ready")
-				console.log(json)
+				// console.log(json)
 				ready(json)
+			})
+		$.getJSON("http://pelars.sssup.it:8080/pelars/phase/"+thisSession+"?token="+token,function(phasesJSON){
+				console.log("phase")
+				// console.log(phasesJSON)
+				phaseData(phasesJSON)
 			})
 	}
 }
@@ -262,12 +279,27 @@ function pelars_authenticate(){
 	});
 	return res;
 }
-// function ready(error,data1) {
+var phaseData;
+function phaseData(phasesJSON) {
+	// console.log(phasesJSON)
+	phaseData = phasesJSON;
+	for(i=0; i<phaseData.length; i++){
+		if(phaseData[i].phase=="obs_plan"){
+			obsPlan.push(phaseData[i])
+		}
+		if(phaseData[i].phase=="obs_document"){
+			obsDoc.push(phaseData[i])
+		}
+		if(phaseData[i].phase=="obs_reflect"){
+			obsReflect.push(phaseData[i])
+		}		
+	}
+}
+
+
+
 function ready(data1) {
-
 		data = (data1);
-
-
 		//how to split the data up so it shows each hand as a separate line?
 		// for(i=0; i<data.length; i++){
 		// 	if(data[i].type=="hand"){
