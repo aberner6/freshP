@@ -227,7 +227,7 @@ var token;
 function getSession(){
 	var token = pelars_authenticate();
 	$.getJSON("http://pelars.sssup.it:8080/pelars/session?token="+token,function(json1){
-			thisSession = parseInt(615);//537//615//json1[json1.length-1].session;
+			thisSession = parseInt(537);//537//615//json1[json1.length-1].session;
 			console.log("session"+thisSession);
 			getData(thisSession, token);
 	})
@@ -1384,6 +1384,12 @@ console.log("startMin"+startMin+"endMin"+endMin+"totalTime"+totalTime)
 				"min":thisDate,
 				"hour":thisHour
 			});
+			softUseComp[thisD] = ({ 
+				"total":softUseTotals(thisDate), 
+				"time": j,
+				"min":thisDate,
+				"hour":thisHour
+			});
 	}
 // Will remove all falsy values: undefined, null, 0, false, NaN and "" (empty string)
 function cleanArray(actual) {
@@ -1432,18 +1438,25 @@ hardUseComp = cleanArray(hardUseComp)
 hardUseComp.sort(function(x, y){
    return d3.ascending(x.time, y.time);
 })
+softUseComp = cleanArray(softUseComp)
+softUseComp.sort(function(x, y){
+   return d3.ascending(x.time, y.time);
+})
 // 
 	// var maxComps = d3.max(totalComps)
 	// console.log(maxComps)
-	var yPath, minTotal, maxTotal, pathH, index, lineT, svgPath;
+	var yHPath, ySPath, minTotal, maxTotal, pathH, index, lineS, lineH, svgPath;
 
 	xPath = d3.scale.linear()
 	      .domain([startTime,endTime]).range([10, w-40]);
-	yPath = d3.scale.linear()
+	yHPath = d3.scale.linear()
 	      .domain([0,12]) //max hardware components
 	      .range([h/4-15, 0]);
+	ySPath = d3.scale.linear()
+	      .domain([0,9]) //max software components
+	      .range([h/4-15, 0]);
 
-	lineT = d3.svg.line()
+	lineH = d3.svg.line()
       .x(function(d, i) { 
       	if(d==undefined){ return 0; }
       		else{
@@ -1453,22 +1466,54 @@ hardUseComp.sort(function(x, y){
       .y(function(d, i) { 
       	if(d==undefined){return 0;}
       		else{
-      			return yPath(d.total); 
+      			return yHPath(d.total); 
+      		}
+      })
+      .interpolate("linear");
+
+	lineS = d3.svg.line()
+      .x(function(d, i) { 
+      	if(d==undefined){ return 0; }
+      		else{
+		       	return xPath(d.time);      			
+      		}
+      })
+      .y(function(d, i) { 
+      	if(d==undefined){return 0;}
+      		else{
+      			return ySPath(d.total); 
       		}
       })
       .interpolate("linear");
 
   pathH = timeSVG.append("g")
     .append("path")
-    .attr("class","timepath")
-  		.attr("fill","none")
-  		.attr("stroke","pink");
+    .attr("class","timepathH")
+  		.attr("fill","lightblue")
+  		.attr("opacity",.3)
+  		.attr("stroke","lightblue");
   	pathH
   		.datum(hardUseComp)
     	.attr("transform", function(d,i){
         return "translate(" + 0 + ", "+50+")";
     	})
-  		.attr("d", lineT);
+  		.attr("d", lineH);
+
+var pathS;
+  pathS = timeSVG.append("g")
+    .append("path")
+    .attr("class","timepathS")
+  		.attr("fill","pink")
+  		.attr("opacity",.3)
+  		.attr("stroke","pink");
+  	pathS
+  		.datum(softUseComp)
+    	.attr("transform", function(d,i){
+        return "translate(" + 0 + ", "+50+")";
+    	})
+  		.attr("d", lineS);
+
+
 
         function ardUseTotals(index) {
             var total = 0;
