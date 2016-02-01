@@ -215,29 +215,33 @@ var fy=d3.scale.linear().range([cheight-cmargin,cmargin]);
 
 var rows = 2;
 var endTime;
+var thisSession;
 
 $(document).ready(function() {
 			//hard coded
 // queue()
-// 	.defer(d3.json, "assets/data1.json")
-// 	.await(ready);
+// 	.defer(getSession)
+getSession();
+var token;
 
-	// var token = "0ly1gt9Zj4G0P7iQZ6lXK1YLzf9hp3LUoUFtxdgLZXzmypKk4xia6jSwsmj84tP5kBcqH18E_gY8uDQLfN39HL6Pd-yrAoAc1OTetEhvM4Yv-B7luIE91A6Af3K1lD91";
+function getSession(){
 	var token = pelars_authenticate();
-
-	$.getJSON("http://pelars.sssup.it:8080/pelars/data/session"+token,function(json){
-			console.log("json1");
-			console.log(json)
-		})
-
-
-	$.getJSON("http://pelars.sssup.it:8080/pelars/data/537?token="+token,function(json){
-			console.log("ready")
-			console.log(json)
-			getData(json)
-		})
-
-
+	$.getJSON("http://pelars.sssup.it:8080/pelars/session?token="+token,function(json1){
+			thisSession = parseInt(615);//537//615//json1[json1.length-1].session;
+			console.log("session"+thisSession);
+			getData(thisSession, token);
+	})
+}
+function getData(thisSession, token){
+	console.log(thisSession);
+	if(thisSession>0){
+		$.getJSON("http://pelars.sssup.it:8080/pelars/data/"+thisSession+"?token="+token,function(json){
+				console.log("ready")
+				console.log(json)
+				ready(json)
+			})
+	}
+}
 function pelars_authenticate(){
 	var email = "d.paiva@ciid.dk";
 	var pswd = "pelars123!";
@@ -259,8 +263,8 @@ function pelars_authenticate(){
 	return res;
 }
 // function ready(error,data1) {
-// function ready(data1) {
-function getData(data1){
+function ready(data1) {
+
 		data = (data1);
 
 
@@ -478,44 +482,94 @@ var iconW = (forcewidth/1.5)/buttonTot
 		.domain([0, buttonTot+1])
 		.range([textL, forcewidth-iconW])
 
+
+
+
+
+
 buttonSVG.append("text")
 	.attr("class","button1")
 	.attr("x", textL)
-	.attr("y", topMarg+iconW/4)
+	.attr("y", topMarg*2)
+	.attr("font-size",14)
 	.text(button1.length)
 	.attr("fill","black")
 var iconBut = buttonSVG.selectAll(".button1")	
-	.data(d3.range(button1.length+1))
+	.data(d3.range(2))
 	iconBut.enter()
 	.append("image")
 	.attr("class","button1")
 	.attr("xlink:href", "assets/icons/idea.png")
-	.attr("x", function(d,i){
-		return xSpace(i);
-	})
-	.attr("y", topMarg-iconW/2)
-	.attr("width",iconW)
-	.attr("height",iconW);
+	.attr("x", textL)
+	.attr("y", topMarg*2+(button1.length+5))
+	.attr("width",button1.length+10)
+	.attr("height",button1.length+10);
 
 buttonSVG.append("text")
 	.attr("class","button2")
-	.attr("x", textL)
-	.attr("y", topMarg+iconW*1.7)
+	.attr("x", (forcewidth*3/4))
+	.attr("y", topMarg*2)
+	.attr("font-size", 14)
 	.text(button2.length)
 	.attr("fill","black");
 
 var iconBut = buttonSVG.selectAll(".button2")	
-	.data(d3.range(button2.length+1))
+	.data(d3.range(2))
 	iconBut.enter()
 	.append("image")
 	.attr("class","button2")
 	.attr("xlink:href", "assets/icons/thunder.png")
-	.attr("x", function(d,i){
-		return xSpace(i);
-	})
-	.attr("y", topMarg+iconW)
-	.attr("width",iconW)
-	.attr("height",iconW);
+	.attr("x", (forcewidth*3/4))
+	.attr("y", (topMarg*2)+5 ) //+button2.length+5
+	.attr("width",button2.length+10)
+	.attr("height",button2.length+10);
+
+
+
+
+
+
+
+// buttonSVG.append("text")
+// 	.attr("class","button1")
+// 	.attr("x", textL)
+// 	.attr("y", topMarg+(button1.length+10)/4)
+// 	.attr("font-size",button1.length+10)
+// 	.text(button1.length)
+// 	.attr("fill","black")
+// var iconBut = buttonSVG.selectAll(".button1")	
+// 	.data(d3.range(2))
+// 	iconBut.enter()
+// 	.append("image")
+// 	.attr("class","button1")
+// 	.attr("xlink:href", "assets/icons/idea.png")
+// 	.attr("x", function(d,i){
+// 		return xSpace(i);
+// 	})
+// 	.attr("y", (button1.length+10)/2)
+// 	.attr("width",button1.length+10)
+// 	.attr("height",button1.length+10);
+
+// buttonSVG.append("text")
+// 	.attr("class","button2")
+// 	.attr("x", textL)
+// 	.attr("y", topMarg*2+(button2.length+10)*1.7)
+// 	.attr("font-size", button2.length+10)
+// 	.text(button2.length)
+// 	.attr("fill","black");
+
+// var iconBut = buttonSVG.selectAll(".button2")	
+// 	.data(d3.range(2))
+// 	iconBut.enter()
+// 	.append("image")
+// 	.attr("class","button2")
+// 	.attr("xlink:href", "assets/icons/thunder.png")
+// 	.attr("x", function(d,i){
+// 		return xSpace(i)+(button2.length+10);
+// 	})
+// 	.attr("y", topMarg*2+button2.length+10)
+// 	.attr("width",button2.length+10)
+// 	.attr("height",button2.length+10);
 }
 
 function goIDE(incomingD, summary){
