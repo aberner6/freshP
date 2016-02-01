@@ -215,32 +215,52 @@ var fy=d3.scale.linear().range([cheight-cmargin,cmargin]);
 
 var rows = 2;
 var endTime;
+
 $(document).ready(function() {
-	console.log("ready")
-// var token = "xOlSArdMD3N_IEFy6pezxvlqLYHKYInWPwQoKDMo6A_TTfIRp0MlVFarwoHS7LQtkBcqH18E_gY8uDQLfN39HCd7uMyYakdwTKifWZOYKPwv-B7luIE91A6Af3K1lD91";
-	// var  token = "y_ETVWjdDYA7qLr3MHdUUEhTxthgb8e_bY02PaIJ9wIudaGhQdLM_-p67aSQRiMSkBcqH18E_gY8uDQLfN39HPVR8Ws7d3fnPQf_BhNIce4v-B7luIE91A6Af3K1lD91"
-	//pelars_authenticate();
-	// $.getJSON("http://pelars.sssup.it:8080/pelars/data/537/session?token="+token ,function(json){
-	// 		console.log("ready")
-	// 		console.log(json)
-	// 		ready(json)
-	// 	})
-// console.log(json);
-// if(token){
-	// $.getJSON( "http://pelars.sssup.it:8080/pelars/data/615/session?token="+token,function(json) { 
-		// document.getElementById("id").innerHTML = JSON.stringify(json); 
+			//hard coded
+// queue()
+// 	.defer(d3.json, "assets/data1.json")
+// 	.await(ready);
+
+	// var token = "0ly1gt9Zj4G0P7iQZ6lXK1YLzf9hp3LUoUFtxdgLZXzmypKk4xia6jSwsmj84tP5kBcqH18E_gY8uDQLfN39HL6Pd-yrAoAc1OTetEhvM4Yv-B7luIE91A6Af3K1lD91";
+	var token = pelars_authenticate();
+
+	$.getJSON("http://pelars.sssup.it:8080/pelars/data/session"+token,function(json){
+			console.log("json1");
+			console.log(json)
+		})
 
 
-		//hard coded
-queue()
-	.defer(d3.json, "assets/data2.json")
-	.await(ready);
+	$.getJSON("http://pelars.sssup.it:8080/pelars/data/537?token="+token,function(json){
+			console.log("ready")
+			console.log(json)
+			getData(json)
+		})
 
 
-function ready(error,data1) {
-
+function pelars_authenticate(){
+	var email = "d.paiva@ciid.dk";
+	var pswd = "pelars123!";
+	var jsres;
+	var res = "";
+	jQuery.ajax({
+		timeout : 1000,
+		type : "POST",
+		url : "http://pelars.sssup.it:8080/pelars/password?user=" + email + "&pwd=" + pswd,
+		async: false,
+		success : function(jqXHR, status, result){
+		jsres = jqXHR;
+		res = jsres["token"];
+		},
+		error : function(jqXHR, status) {
+			console.log("error"+jqXHR)
+			res = 0; }
+	});
+	return res;
+}
+// function ready(error,data1) {
 // function ready(data1) {
-// d3.json("assets/data.json", function(json) {
+function getData(data1){
 		data = (data1);
 
 
@@ -392,31 +412,6 @@ var rey = [];
 		}
 	};
 
-
-// var token = "tjoKrRSRFdq8Aw5I-_i7uvBjdCBbiNzHBMeaGl3k0UH4KE7zwzYSeogzqHg1-EQvIUH5Gdtx7Uc3IdMb30uR5AJYUS_yan4pHh1pFcQX2s7KGdnvSpCm9QJ91Ndsk4Ry";
-// var token;
-	// pelars_authenticate();
-
-function pelars_authenticate(){
-	var email = "d.paiva@ciid.dk";
-	var pswd = "pelars123!";
-	var jsres;
-	var res = "";
-	jQuery.ajax({
-		timeout : 1000,
-		type : "POST",
-		url : "http://pelars.sssup.it:8080/pelars/password?user=" + email + "&pwd=" + pswd,
-		async: false,
-		success : function(jqXHR, status, result){
-		jsres = JSON.parse(jqXHR);
-		res = jsres["token"];
-		},
-		error : function(jqXHR, status) {
-			res = 0; }
-	});
-	//document.getElementById("tag").innerHTML = res;
-	return res;
-}
 
 //probably have to fix this
 svg.on("click", function(){

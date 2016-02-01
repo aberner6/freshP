@@ -1,0 +1,34 @@
+<html>  
+<head>  
+<title>Login</title>  
+<script type="text/javascript" src="assets/jquery-1.11.3.min.js"></script>
+<script>
+	var token = pelars_authenticate();
+	$.getJSON("http://pelars.sssup.it:8080/pelars/data/537?token="+token,function(json){
+			console.log("ready")
+			console.log(json)
+		})
+
+
+function pelars_authenticate(){
+	var email = 'd.paiva@ciid.dk';
+	var pswd = 'pelars123!';
+	var jsres;
+	var res = "";
+	jQuery.ajax({
+		timeout : 1000,
+		type : "POST",
+		url : "http://pelars.sssup.it/pelars/password?user=" + email + "&pwd=" + pswd,
+		async: false,
+		success : function(jqXHR, status, result){
+		jsres = jqXHR;
+		res = jsres["token"];
+		},
+		error : function(jqXHR, status) {
+			res = 0; }
+	});
+	//document.getElementById("tag").innerHTML = res;
+	return res;
+}
+</script>
+</html>
