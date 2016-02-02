@@ -26,7 +26,7 @@ var obsReflect = [];
 var obsDoc = [];
 var obsPlan = [];
 ////////
-var phaseData;
+var phaseData = [];
 var planStart, planEnd;
 var obs = [];
 
@@ -271,7 +271,7 @@ var token;
 function getSession(){
 	var token = pelars_authenticate();
 	$.getJSON("http://pelars.sssup.it:8080/pelars/session?token="+token,function(json1){
-			thisSession = parseInt(615);//537//615//json1[json1.length-1].session;
+			thisSession = parseInt(537);//537//615//json1[json1.length-1].session;
 			console.log("session"+thisSession);
 			getData(thisSession, token);
 	})
@@ -292,7 +292,7 @@ console.log(startTime+"start")
 function getPhases(thisSession,token){
 	$.getJSON("http://pelars.sssup.it:8080/pelars/phase/"+768+"?token="+token,function(phasesJSON){
 		console.log("phase")
-		phaseData(phasesJSON)
+		showPhases(phasesJSON)
 	})
 }
 function pelars_authenticate(){
@@ -509,17 +509,17 @@ svg.on("click", function(){
 
 
 
-function phaseData(phasesJSON) {
+function showPhases(phasesJSON) {
 	// console.log(phasesJSON)
 	phaseData = phasesJSON;
 	var phaseNum = 0;
-	for(i=1; i<phaseData.length; i++){
+	for(i=1; i<4; i++){ //change this
 		if(phaseData[i].phase!=phaseData[i-1].phase){
 			phaseNum+=1;
 			obs[phaseNum]=({
 				"phase": phaseData[i].phase,
-				"start": startTime+i*60000,
-				"end": startTime+i*100000
+				"start": 10000+startTime+i*60000,
+				"end": 20000+startTime+i*300000
 			})
 		}	
 	}
@@ -534,7 +534,7 @@ obs = cleanArray(obs)
 	  	.append("rect")
 	  	.attr("class","phase")
 	  	.attr("transform",function(d,i) {
-	  		return "translate("+(i*50)+",0)";
+	  		return "translate("+(i*180)+",0)";
 	  	})
 		  .attr("x",function(d,i){
 		  	return timeX(d.start); 
@@ -549,6 +549,10 @@ obs = cleanArray(obs)
 		  .attr("stroke",function(d,i){
 		  	return handColor(i);
 		  });
+		  //OR
+		  // .attr("fill","none")
+		  // .attr("stroke-dasharray",5)
+		  // .attr("stroke-width",.5)
 }
 
 
@@ -1201,6 +1205,13 @@ function showFace(){
 	// 			}else { return "none"}
 	// 		})
 	//     .attr("r", radSize);
+
+
+
+
+
+
+///////OPTION 1
 	dotFace = timeSVG.append("g").attr("class","dots").selectAll(".dot")
 	    .data(faceData.values)
 	  	.enter().append("circle")
@@ -1225,9 +1236,72 @@ function showFace(){
 				// if(d.num>0){
 				// 	return faceColor(d.num)
 				// }
-				else { return "white"}
+				else { return "none"}
 		})
-		.attr("opacity", .4)
+		.attr("opacity", .3)
+/////OPTION 1
+// ////////////OPTION 2
+// 	rectFace = timeSVG.append("g").attr("class","facerect").selectAll(".facerect")
+// 	    .data(faceData.values)
+// 	  	.enter().append("rect")
+// 	    .attr("class", "facerect")
+// 	    .attr("x", function(d){
+// 	    	return timeX(d.time)
+// 	    })
+// 	    .attr("y", function(d,i){
+// 	    	return timeSVGH/2-d.num*faceRadius*2;
+// 	    })
+// 	    .attr("height", function(d,i){
+// 	    	return 2*(d.num*faceRadius*2);
+// 	    })
+// 	    .attr("width",1)
+// 	    .attr("fill", function(d,i){
+// 	    	if(d.num==1){
+// 	    		return "pink";
+// 	    	} 
+// 	    	if(d.num==2){
+// 	    		return "orange"
+// 	    	}
+// 	    	if(d.num==3){
+// 	    		return "red"
+// 	    	}
+// 				else { return "white"}
+// 		})
+// 		.attr("stroke","none")
+////////////OPTION 2
+
+////////////option 3
+	dotFace = timeSVG.append("g").attr("class","dots").selectAll(".dot")
+	    .data(faceData.values)
+	  	.enter().append("circle")
+	    .attr("class", "dot")
+	    .attr("cx", function(d){
+	    	return timeX(d.time)
+	    })
+	    .attr("cy", timeSVGH/2)
+	    .attr("r", 2)
+	    .attr("fill", function(d,i){
+	    	if(d.num==1){
+	    		return "pink";
+	    	} 
+	    	if(d.num==2){
+	    		return "orange"
+	    	}
+	    	if(d.num==3){
+	    		return "red"
+	    	}
+				// if(d.num>0){
+				// 	return faceColor(d.num)
+				// }
+				else { return "none"}
+		})
+		.attr("opacity", 1)
+
+
+
+
+///////////option 3
+
 		// 	function(d,i){
 	 //    	if(d.num==1){
 	 //    		return 1;
@@ -1304,9 +1378,9 @@ function showIDE(){
 	  	.attr("class","ide");
 		g.selectAll(".logs")
 		.data(function(d) {
-			if(d.oc!=2){
+			// if(d.oc!=2){
 				return d.values;				
-			}
+			// }
 		}) 
 		.enter()
 		.append("g")
@@ -1332,7 +1406,7 @@ function showIDE(){
 				// }
 				yOther.domain(uniqueNames);
 			}
-			return d.name;
+			// return d.name;
 		})
 		// .attr("x", function(d){
 		// 	return timeX(d.time)
@@ -1498,7 +1572,7 @@ var opacityPath = .5;
   pathH = timeSVG.append("g")
     .append("path")
     .attr("class","timepathH")
-  		.attr("fill","lightblue")
+  		.attr("fill","#15989C")
   		.attr("opacity",opacityPath)
   		.attr("stroke","lightblue");
   	pathH
@@ -1512,9 +1586,9 @@ var pathS;
   pathS = timeSVG.append("g")
     .append("path")
     .attr("class","timepathS")
-  		.attr("fill","pink")
+  		.attr("fill","#B19B80") //"#B19B80"
   		.attr("opacity",opacityPath)
-  		.attr("stroke","pink");
+  		// .attr("stroke","pink");
   	pathS
   		.datum(softUseComp)
     	// .attr("transform", function(d,i){
