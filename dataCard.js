@@ -17,7 +17,8 @@ var xPath;
 
 var startMin, endMin, totalTime;
 
-
+var faceRadius = 5;
+var maxRadius = faceRadius*4;
 
 
 /////////
@@ -58,6 +59,13 @@ var	hardUseComp = [];
 var	softUseComp = [];
 var colorText = "black";
 
+
+
+
+var	faceTotal = [];
+
+
+
 ////button stuff
 var particleOnly = [];
 var getthis = [];
@@ -92,6 +100,25 @@ var w = $("#container").width();//document.body.clientWidth;
 var goAhead;
 var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h)            
 	.attr("transform", "translate(" + 0 + "," + 0 + ")");
+
+
+
+
+
+
+
+
+
+
+// $('#submit').click(function () { 
+
+// });
+
+
+
+
+
+
 
 
 
@@ -188,6 +215,9 @@ var colorNet = d3.scale.ordinal()
 var handColor = d3.scale.ordinal()
     .domain([0,20])
     .range(d3.scale.category20c().range());
+var faceColor = d3.scale.ordinal()
+    .domain([0,5])
+    .range(d3.scale.category10().range());
 
 var yspace = radiusMin*2.5;
 var y_i = h/1.7,
@@ -790,6 +820,7 @@ var linkdist = w/10;
 	}
 	showIDE();
 	showHands();
+	showFace();
 }
 
 
@@ -1057,7 +1088,7 @@ var pathActive1, lineActive1, pathActive2, lineActive2, pathActive3, lineActive3
 
 var yActivePath;
   yActivePath = d3.scale.linear()
-      .domain([0,maxActiveOverall]).range([timeSVGH, timeSVGH/2]);
+      .domain([0,maxActiveOverall]).range([timeSVGH, (timeSVGH/2)+maxRadius]);
 
   xActivePath = d3.scale.linear() //startTime, endTime
       .domain([startTime, endTime]).range([10, w-40]);
@@ -1109,7 +1140,7 @@ var yActivePath;
   		.attr("d", lineActive3);
 }
 
-var path, line;
+var pathFace, lineFace;
 var thisData = [];
 
 function showFace(){
@@ -1117,47 +1148,107 @@ function showFace(){
 	var thisMany = [];
 	maxTotal = 4;
 
+
+
+	// for(j=startTime; j<endTime; j++){
+	// 	var thisDate = new Date(j).getMinutes();
+	// 	var thisHour = new Date(j).getHours();
+	// 	var thisD = thisHour+thisDate;
+	// 		faceTotal[thisD] = ({ 
+	// 			"total":faceTotals(thisDate), 
+	// 			"time": j,
+	// 			"min":thisDate,
+	// 			"hour":thisHour
+	// 		});
+	// }
+
+
+
+
 	  var yOffset = h/2;
 	  var mini = 4;
 	  var heightPanel = 100;
 	  var yPath = d3.scale.linear()
-		  .domain([-1, maxTotal])
-	      .range([yOffset, yOffset-heightPanel]);
+		  .domain([0, maxTotal])
+		 .range([timeSVGH, timeSVGH/2]);
 
-    backRect = svg.append("g").attr("class","backRect")
-    	.append("rect")
-    	.attr("class","backRect")
-    	.attr("x", cmargin)
-    	.attr("y", yOffset-heightPanel)
-    	.attr("width", w-cwidth+cmargin)//(timeX(timeMin)-timeX(timeMax)))
-    	.attr("height", heightPanel)
-    	.attr("fill","white")
-		.attr("stroke","lightgray")
-
-  	line = d3.svg.line()
+  	lineFace = d3.svg.line()
       .x(function(d, i) { return timeX(d.time); })
       .y(function(d, i) { return yPath(d.num); })
-      .interpolate("cardinal");
-	path = svg.append("g").attr("class","paths")
-    	.append("path")
-    	.attr("class","path")
-		.attr("d", line(faceData.values))
-		.attr("stroke-width",.5)
-		.attr("stroke","grey")
-		.attr("fill","none")
-	dot = svg.append("g").attr("class","dots").selectAll(".dot")
+      .interpolate("cardinal")
+      // .tension(.5);
+	// pathFace = timeSVG.append("g").attr("class","pathFace")
+ //    	.append("path")
+ //    	.attr("class","pathFace")
+	// 	.attr("d", lineFace(faceData.values))
+	// 	.attr("stroke-width",.5)
+	// 	.attr("stroke","grey")
+	// 	.attr("fill","none")
+
+	// console.log(face)
+
+	// dotFace = timeSVG.append("g").attr("class","dots").selectAll(".dot")
+	//     .data(faceData.values)
+	//   	.enter().append("circle")
+	//     .attr("class", "dot")
+	//     .attr("cx", lineFace.x())
+	//     .attr("cy", lineFace.y())
+	//     .attr("fill","none")
+	// 		.attr("stroke-width",.5)
+	// 		.attr("stroke",function(d,i){
+	// 			if(d.num>0){
+	// 				return "grey"
+	// 			}else { return "none"}
+	// 		})
+	//     .attr("r", radSize);
+	dotFace = timeSVG.append("g").attr("class","dots").selectAll(".dot")
 	    .data(faceData.values)
 	  	.enter().append("circle")
 	    .attr("class", "dot")
-	    .attr("cx", line.x())
-	    .attr("cy", line.y())
-	    .attr("fill","none")
-			.attr("stroke-width",.5)
-			.attr("stroke","grey")
-	    .attr("r", radSize);
-	// path
-		// .datum(faceData.values)
-		// .attr("d", line);
+	    .attr("cx", function(d){
+	    	return timeX(d.time)
+	    })
+	    .attr("cy", timeSVGH/2)
+	    .attr("r", function(d,i){
+	    	return d.num*faceRadius;
+	    })
+	    .attr("fill", function(d,i){
+	    	if(d.num==1){
+	    		return "pink";
+	    	} 
+	    	if(d.num==2){
+	    		return "orange"
+	    	}
+	    	if(d.num==3){
+	    		return "red"
+	    	}
+				// if(d.num>0){
+				// 	return faceColor(d.num)
+				// }
+				else { return "white"}
+		})
+		.attr("opacity", .4)
+		// 	function(d,i){
+	 //    	if(d.num==1){
+	 //    		return 1;
+	 //    	} 
+	 //    	if(d.num==2){
+	 //    		return 1;
+	 //    	}
+	 //    	if(d.num==3){
+	 //    		return 1;
+	 //    	}
+		// 		else { return .5}
+		// })
+
+var bins = {};
+faceData.values.forEach(function(t) {
+	// console.log(t.num)
+    var key = new Date(t.time).getMinutes();
+    bins[key] = bins[key] || 0;
+    bins[key] = t.num;
+});
+console.log(bins)
 }
 
 
@@ -1201,7 +1292,7 @@ function showIDE(){
         .tickFormat(timeFormat);
     xAxisCall.call(xAxis)
         .attr("class", "axis") //Assign "axis" class
-        .attr('transform', 'translate(0, ' + timeSVGH + ')');
+        .attr('transform', 'translate(0, ' + (timeSVGH-1) + ')');
 
 	var yOther = d3.scale.ordinal()
     	.rangePoints([topMarg, 115]);
@@ -1223,14 +1314,22 @@ function showIDE(){
 			if(d.name){
 				theseNames.push(d.name);
 				uniqueNames = unique(theseNames);
-				if(d.mod=="M" && d.oc==1){
+				if(d.mod=="M"){
 					hardwareOnly.push(d);
 					hardNames.push(d.name);
 				}
-				if(d.mod=="B"&& d.oc==1){
+				if(d.mod=="B"){
 					softwareOnly.push(d);
 					softNames.push(d.name);
 				}
+				// if(d.mod=="M" && d.oc==1){
+				// 	hardwareOnly.push(d);
+				// 	hardNames.push(d.name);
+				// }
+				// if(d.mod=="B"&& d.oc==1){
+				// 	softwareOnly.push(d);
+				// 	softNames.push(d.name);
+				// }
 				yOther.domain(uniqueNames);
 			}
 			return d.name;
@@ -1359,15 +1458,16 @@ softUseComp.sort(function(x, y){
 	xPath = d3.scale.linear()
 	      .domain([startTime,endTime]).range([10, w-40]);
 	yHPath = d3.scale.linear()
-	      .domain([0,12]) //max hardware components
+	      .domain([-12,12]) //max hardware components
 	      .range([timeSVGH/2, 0]);
 	ySPath = d3.scale.linear()
-	      .domain([0,9]) //max software components
+	      .domain([-9,9]) //max software components
 	      .range([timeSVGH/2, 0]);
 
 	lineH = d3.svg.line()
       .x(function(d, i) { 
       	if(d==undefined){ return 0; }
+      	// if(d<0){ return 0;}
       		else{
 		       	return xPath(d.time);      			
       		}
@@ -1394,12 +1494,12 @@ softUseComp.sort(function(x, y){
       		}
       })
       .interpolate("linear");
-
+var opacityPath = .5;
   pathH = timeSVG.append("g")
     .append("path")
     .attr("class","timepathH")
   		.attr("fill","lightblue")
-  		.attr("opacity",.3)
+  		.attr("opacity",opacityPath)
   		.attr("stroke","lightblue");
   	pathH
   		.datum(hardUseComp)
@@ -1413,7 +1513,7 @@ var pathS;
     .append("path")
     .attr("class","timepathS")
   		.attr("fill","pink")
-  		.attr("opacity",.3)
+  		.attr("opacity",opacityPath)
   		.attr("stroke","pink");
   	pathS
   		.datum(softUseComp)
@@ -1433,21 +1533,34 @@ var pathS;
             }
             return total;
         }
+        // function faceTotals(index) {
+        //     var total = 0;
+        //     for (i = 0; i < faceData.values.length-1; i++) {
+        //         if (faceData.values[i].minute == index) {
+        //             total++;
+        //         } else {}
+        //     }
+        //     return total;
+        // }
         function hardUseTotals(index) {
             var total = 0;
             for (i = 0; i < hardwareOnly.length-1; i++) {
-                if (hardwareOnly[i].minute == index) {
+                if (hardwareOnly[i].minute == index && hardwareOnly[i].oc==1) {
                     total++;
-                } else {}
+                } if (hardwareOnly[i].minute == index && hardwareOnly[i].oc==2) {
+                    total--;
+                } 
             }
             return total;
         }
         function softUseTotals(index) {
             var total = 0;
             for (i = 0; i < softwareOnly.length; i++) {
-                if (softwareOnly[i].minute == index) {
+                if (softwareOnly[i].minute == index && softwareOnly[i].oc==1) {
                     total++;
-                } else {}
+                } if (softwareOnly[i].minute == index && softwareOnly[i].oc==2) {
+                    total--;
+                } 
             }
             return total;
         }

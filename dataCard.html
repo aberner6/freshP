@@ -6,6 +6,9 @@
 <!-- <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script> -->
 <script type = "text/javascript" src="underscore-min.js"></script>
 <script type = "text/javascript" src="assets/d3.min.js"></script>
+<!-- <script type = "text/javascript" src="assets/simplify.js"></script> -->
+    <!-- // <script type="text/javascript" src="assets/jquery-ui-1.8.17.custom.min.js"></script> -->
+    <!-- // <script type="text/javascript" src="assets/dist/jspdf.debug.js"></script> -->
 
 <!-- <script type = "text/javascript" src = "http://pelars.sssup.it:8080/pelars/auth.js"></script> -->
 <script src="assets/mapper.js"></script>
@@ -31,15 +34,25 @@
       font-size:10pt;
     }
     #container {
-      text-align: center;
+/*      text-align: center;
       position: relative;
-      top: 1.2in;
-      left: 1.2in;
+      top: 10px;
+      left: 10px;
       width: 7in; 
       height: 5in;
+      background-color: #15989C;*/
 /*      width: 6.25in;
       height: 4.25in;*/
-      background-color: #15989C;
+
+
+          text-align: center;
+    position: relative;
+    top: 0px;
+    left: 0px;
+    width: 7in;
+    height: 5in;
+    /* background-color: #15989C; */
+    border: 3px solid #15989C;
     }
     #timeline{
       margin-top:.7in;
@@ -110,12 +123,15 @@ margin-top: 4.4in;
       width:30px;
     }
     .date{
-      float:left;
-      /*margin-right:10px;*/
-      /*margin-left: 70px;*/
+float: left;
+    margin-top: 10px;
+    text-align: left;
+    font-size: 10px;
+    height: 39.5px;
+/*      float:left;
       margin-top:13px;   
       text-align:left;  
-      font-size:10px; 
+      font-size:10px; */
     }
     .boxname{
     margin-top: 5px;
@@ -140,9 +156,22 @@ margin-top: 4.4in;
 </style>  
 </head>  
 <body>  
+
+<!-- <button id="submit">Export to  PDF</button> -->
+
+
+
+
+
+
+
+
 <div id="container"> 
 <div id = "logo">
-  <img src="assets/PELARSlogo_WhiteCentered.png">
+<img src="assets/PELARSlogo_WhiteCentered.png" data-pin-nopin="true" style="
+    background-color: #15989C;
+">
+  <!-- <img src="assets/PELARSlogo_WhiteCentered.png"> -->
   <!-- <img src="assets/brown.png"> -->
 
 <div class="date">
