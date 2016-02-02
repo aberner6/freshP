@@ -25,7 +25,9 @@ var obsReflect = [];
 var obsDoc = [];
 var obsPlan = [];
 ////////
-
+var phaseData;
+var planStart, planEnd;
+var obs = [];
 
 
 
@@ -122,11 +124,11 @@ var activeSVG = d3.select("#facehand")
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
 	.style("margin-top","1px");
-
+var timeSVGH = h/2-60;
 var timeSVG = d3.select("#timeline")
 	.append("svg")
 	.attr("width",w-40)
-	.attr("height",h/2-64)  
+	.attr("height",timeSVGH)  
 	.style("border","1px solid white") 
 	.style("margin-top","1px");
 // build the arrow.
@@ -184,7 +186,7 @@ var colorNet = d3.scale.ordinal()
     .domain(options)
     .range(d3.scale.category10().range());
 var handColor = d3.scale.ordinal()
-    // .domain()
+    .domain([0,20])
     .range(d3.scale.category20c().range());
 
 var yspace = radiusMin*2.5;
@@ -239,7 +241,7 @@ var token;
 function getSession(){
 	var token = pelars_authenticate();
 	$.getJSON("http://pelars.sssup.it:8080/pelars/session?token="+token,function(json1){
-			thisSession = parseInt(537);//537//615//json1[json1.length-1].session;
+			thisSession = parseInt(615);//537//615//json1[json1.length-1].session;
 			console.log("session"+thisSession);
 			getData(thisSession, token);
 	})
@@ -249,15 +251,19 @@ function getData(thisSession, token){
 	if(thisSession>0){
 		$.getJSON("http://pelars.sssup.it:8080/pelars/data/"+thisSession+"?token="+token,function(json){
 				console.log("ready")
-				// console.log(json)
+startTime = json[0].time;
+endTime = json[json.length-1].time;
+console.log(startTime+"start")
 				ready(json)
-			})
-		$.getJSON("http://pelars.sssup.it:8080/pelars/phase/"+thisSession+"?token="+token,function(phasesJSON){
-				console.log("phase")
-				// console.log(phasesJSON)
-				phaseData(phasesJSON)
+				getPhases(thisSession, token);
 			})
 	}
+}
+function getPhases(thisSession,token){
+	$.getJSON("http://pelars.sssup.it:8080/pelars/phase/"+768+"?token="+token,function(phasesJSON){
+		console.log("phase")
+		phaseData(phasesJSON)
+	})
 }
 function pelars_authenticate(){
 	var email = "d.paiva@ciid.dk";
@@ -279,23 +285,6 @@ function pelars_authenticate(){
 	});
 	return res;
 }
-var phaseData;
-function phaseData(phasesJSON) {
-	// console.log(phasesJSON)
-	phaseData = phasesJSON;
-	for(i=0; i<phaseData.length; i++){
-		if(phaseData[i].phase=="obs_plan"){
-			obsPlan.push(phaseData[i])
-		}
-		if(phaseData[i].phase=="obs_document"){
-			obsDoc.push(phaseData[i])
-		}
-		if(phaseData[i].phase=="obs_reflect"){
-			obsReflect.push(phaseData[i])
-		}		
-	}
-}
-
 
 
 function ready(data1) {
@@ -314,20 +303,20 @@ function ready(data1) {
 		// 	}
 		// }
 		// console.log(data2);
-startTime = data[0].time;
-endTime = data[data.length-1].time;
+
 
 startMin = new Date(startTime).getMinutes();
 endMin = new Date(endTime).getMinutes();
 startHour = new Date(startTime).getHours();
 endHour = new Date(startTime).getHours();
 if(endMin>startMin){
-	totalTime = (endMin-startMin);	
+	totalMin = (endMin-startMin);	
 }else{
-	totalTime = (60-startMin)+endMin;	
+	totalMin = (60-startMin)+endMin;	
 }
 
-console.log(totalTime);
+console.log(totalMin);
+var totalTime = endTime-startTime;
 // var minutes=(totalTime/(1000*60))%60;
 // var hours=(totalTime/(1000*60*60))%24;
 humanReadableTime = millisecondsToStr(totalTime);
@@ -482,6 +471,61 @@ svg.on("click", function(){
 		$(".faceText").show();
 	}
 })
+
+
+
+
+
+
+
+
+function phaseData(phasesJSON) {
+	// console.log(phasesJSON)
+	phaseData = phasesJSON;
+	var phaseNum = 0;
+	for(i=1; i<phaseData.length; i++){
+		if(phaseData[i].phase!=phaseData[i-1].phase){
+			phaseNum+=1;
+			obs[phaseNum]=({
+				"phase": phaseData[i].phase,
+				"start": startTime+i*60000,
+				"end": startTime+i*100000
+			})
+		}	
+	}
+obs = cleanArray(obs)
+	timeX.domain([startTime, endTime]).range([10, w-40]);
+
+	console.log(obs);
+	//draw a rectangle for each key
+	var rectPhase = timeSVG.selectAll(".phase")
+		.data(obs)
+		.enter()
+	  	.append("rect")
+	  	.attr("class","phase")
+	  	.attr("transform",function(d,i) {
+	  		return "translate("+(i*50)+",0)";
+	  	})
+		  .attr("x",function(d,i){
+		  	return timeX(d.start); 
+		  })
+		  .attr("y",0)
+		  .attr("width",function(d,i){
+		  	return timeX(d.end)-timeX(d.start);
+		  })
+		  .attr("height",timeSVGH)//-2*cmargin)
+		  .attr("fill","lightgray")
+		  .attr("opacity",.1)
+		  .attr("stroke",function(d,i){
+		  	return handColor(i);
+		  });
+}
+
+
+
+
+
+
 
 function goButton(incomingData){
 	buttonData.push(incomingData);
@@ -1013,7 +1057,7 @@ var pathActive1, lineActive1, pathActive2, lineActive2, pathActive3, lineActive3
 
 var yActivePath;
   yActivePath = d3.scale.linear()
-      .domain([0,maxActiveOverall]).range([h/4-15, 0]);
+      .domain([0,maxActiveOverall]).range([timeSVGH, timeSVGH/2]);
 
   xActivePath = d3.scale.linear() //startTime, endTime
       .domain([startTime, endTime]).range([10, w-40]);
@@ -1029,9 +1073,9 @@ var yActivePath;
     .attr("stroke","lightblue")
   	pathActive1
   		.datum(softS1)
-    	.attr("transform", function(d,i){
-        return "translate(" + 0 + ", "+50+")";
-    	})
+    	// .attr("transform", function(d,i){
+     //    return "translate(" + 0 + ", "+50+")";
+    	// })
   		.attr("d", lineActive1);
   lineActive2 = d3.svg.line()
       .x(function(d, i) { return xActivePath(activeTwo[i].thisTime); })
@@ -1044,9 +1088,9 @@ var yActivePath;
     .attr("stroke","lightgreen")
   	pathActive2
   		.datum(softS2)
-    	.attr("transform", function(d,i){
-        return "translate(" + 0 + ", "+50+")";
-    	})
+    	// .attr("transform", function(d,i){
+     //    return "translate(" + 0 + ", "+50+")"; //WAIT WHAT THE FUCK
+    	// })
   		.attr("d", lineActive2);
   lineActive3 = d3.svg.line()
       .x(function(d, i) { return xActivePath(activeThree[i].thisTime); })
@@ -1059,169 +1103,12 @@ var yActivePath;
     .attr("stroke","teal")
   	pathActive3
   		.datum(softS3)
-    	.attr("transform", function(d,i){
-        return "translate(" + 0 + ", "+50+")";
-    	})
+    	// .attr("transform", function(d,i){
+     //    return "translate(" + 0 + ", "+50+")";
+    	// })
   		.attr("d", lineActive3);
-
-
-
-
-
-
-
-
-// 		// now marks, initiated to default values
-// 		g.selectAll("circle")
-// 		// we are getting the values of the countries like this:
-// 		.data(function(d) {
-// 			return d.values;
-// 		}) 
-// 		.enter()
-// 		.append("circle")
-// 		.attr("class","miniCircs")
-// 		    // throwing in a title element
-// 		    .append("title")
-// 		      .text(function(d) {
-// 		    		if(d.num==576){ //64
-// 		      	// console.log(d.time)
-// 				      	rtime.push(d.time)
-// 				      	thisid.push(d.num)
-
-// 				      	rx.push(d.rx);
-// 						minRX = d3.min(rx);
-// 						maxRX = d3.max(rx);
-				      	
-// 				      	ry.push(d.ry);
-// 						minRY = d3.min(ry);
-// 						maxRY = d3.max(ry);
-// 						y.domain([minRY, maxRY])
-// 						x.domain([minRX, maxRX])
-// 					}
-// 		      });
-// 		// finally, we animate our marks in position
-// 		g.selectAll("circle.miniCircs").transition().delay(100).duration(1000)
-// 		    .attr("cx",function(d,i) {
-// 		    	// console.log()
-// 		    	if(i>0){
-// 		    		if(d.num==576){ //64
-// 				    	newThing.push({
-// 				    		"changeDist": Math.sqrt(Math.pow((rx[i]-rx[i-1]), 2) + Math.pow((ry[i]-ry[i-1]),2)),
-// 				    		"changeTime": rtime[i]-rtime[i-1],
-// 				    		"thisTime": rtime[i],
-// 				    		"specialID": d.num		    		
-// 				    	})
-// 			    	}
-// 			    }
-// 		    })
-
-// for (i=0; i<newThing.length; i++){
-// 	changes.push({
-// 		"time": newThing[i].thisTime, //minutes //new Date(newThing[i].thisTime).getMinutes()
-// 		"delta":newThing[i].changeDist,
-// 		"speed":(newThing[i].changeDist)/(newThing[i].changeTime),
-// 		"specialID":newThing[i].specialID
-// 	})
-// }
-// var justDelta = [];
-// var justSpeed = [];
-// for(i=0; i<changes.length; i++){
-// 	justDelta.push(changes[i].delta)
-// 	justSpeed.push(changes[i].speed)
-// }
-
-// var wtf = justDelta;//[]; //CUMULATIVE
-//     _.map(wtf,function(num,i){ if(i > 0) wtf[i] += wtf[i-1]; });
-//     // console.log(wtf);
-//     // console.log(changes.length)
-
-// var interval = 160;
-// var softSpeed = [];
-// for(i=0; i<wtf.length; i++){
-// 	if(i>interval){
-// 		softSpeed.push((wtf[i]-wtf[i-interval])/(changes[i].time-changes[i-interval].time))
-// 	}
-// }
-// // console.log(softSpeed)
-// console.log(softSpeed.length+"softspeedlength")
-// console.log(changes.length+"changeslength")
-
-// var maxActive = d3.max(softSpeed)//d3.max(justSpeed);//d3.max(justDelta);
-// var minActive = d3.min(softSpeed)//d3.min(justSpeed);//d3.min(justDelta);
-// console.log(maxActive+"maxactive")
-// var pathActive, lineActive;
-// var yActivePath;
-//   yActivePath = d3.scale.linear()
-//       .domain([minActive,maxActive]).range([h/4-15, 0]);
-
-//   xActivePath = d3.scale.linear() //startTime, endTime
-//       .domain([startTime, endTime]).range([10, w-40]);
-
-//   lineActive = d3.svg.line()
-//       .x(function(d, i) { return xActivePath(changes[i].time); })
-//       .y(function(d, i) { return yActivePath(d); })
-//       .interpolate("linear")
-//       // .interpolate("bundle")
-//       // .tension(.87);
-//   pathActive = timeSVG.append("g")
-//     .append("path")
-//     .attr("class","activepath")
-//     .attr("fill","none")
-//     .attr("stroke","lightgreen")
-//   	pathActive
-//   		.datum(softSpeed)
-//     	.attr("transform", function(d,i){
-//         return "translate(" + 0 + ", "+50+")";
-//     	})
-//   		.attr("d", lineActive);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		// g.append("circle")
-		// .attr("class","bigCircs")
-		// .attr("cx", function(d,i){
-	 //  		if(d.key==summaryHands[i].key){
-	 //  			return x(summaryHands[i].values.meanX);
-	 //  		}
-	 //  	})
-		// .attr("cy", function(d,i){
-	 //  		if(d.key==summaryHands[i].key){
-	 //  			return y(summaryHands[i].values.meanY);
-	 //  		}
-	 //  	})
-	 //  	.attr("r", function(d,i){
-	 //  		if(d.key==summaryHands[i].key){
-	 //  			return 200*((summaryHands[i].values.deviationX+summaryHands[i].values.deviationY)/2);
-	 //  		}
-	 //  	})
-		// .attr("fill",function(d){
-		// 	return handColor(d.key);//"pink";
-		// })
-		// .attr("opacity",.6)
-//try to find average spot
 }
+
 var path, line;
 var thisData = [];
 
@@ -1314,7 +1201,7 @@ function showIDE(){
         .tickFormat(timeFormat);
     xAxisCall.call(xAxis)
         .attr("class", "axis") //Assign "axis" class
-        .attr('transform', 'translate(0, ' + 140 + ')');
+        .attr('transform', 'translate(0, ' + timeSVGH + ')');
 
 	var yOther = d3.scale.ordinal()
     	.rangePoints([topMarg, 115]);
@@ -1336,11 +1223,11 @@ function showIDE(){
 			if(d.name){
 				theseNames.push(d.name);
 				uniqueNames = unique(theseNames);
-				if(d.mod=="M"){
+				if(d.mod=="M" && d.oc==1){
 					hardwareOnly.push(d);
 					hardNames.push(d.name);
 				}
-				if(d.mod=="B"){
+				if(d.mod=="B"&& d.oc==1){
 					softwareOnly.push(d);
 					softNames.push(d.name);
 				}
@@ -1381,9 +1268,9 @@ function showIDE(){
 
 
 if(endMin>startMin){
-	totalTime = (endMin-startMin);	
+	totalMin = (endMin-startMin);	
 }else{
-	totalTime = (60-startMin)+endMin;	
+	totalMin = (60-startMin)+endMin;	
 }
 console.log("startMin"+startMin+"endMin"+endMin+"totalTime"+totalTime)
 // for(j=0; j<totalTime; j++){
@@ -1423,17 +1310,7 @@ console.log("startMin"+startMin+"endMin"+endMin+"totalTime"+totalTime)
 				"hour":thisHour
 			});
 	}
-// Will remove all falsy values: undefined, null, 0, false, NaN and "" (empty string)
-function cleanArray(actual) {
-  var newArray = new Array();
-  for (var i = 0; i < actual.length; i++) {
-    if (actual[i]) {
-    	// console.log(actual.time.sort(d3.ascending))
-      newArray.push(actual[i]);
-    }
-  }
-  return newArray;
-}
+
 
 // console.log(hardUseComp)
 
@@ -1483,10 +1360,10 @@ softUseComp.sort(function(x, y){
 	      .domain([startTime,endTime]).range([10, w-40]);
 	yHPath = d3.scale.linear()
 	      .domain([0,12]) //max hardware components
-	      .range([h/4-15, 0]);
+	      .range([timeSVGH/2, 0]);
 	ySPath = d3.scale.linear()
 	      .domain([0,9]) //max software components
-	      .range([h/4-15, 0]);
+	      .range([timeSVGH/2, 0]);
 
 	lineH = d3.svg.line()
       .x(function(d, i) { 
@@ -1526,9 +1403,9 @@ softUseComp.sort(function(x, y){
   		.attr("stroke","lightblue");
   	pathH
   		.datum(hardUseComp)
-    	.attr("transform", function(d,i){
-        return "translate(" + 0 + ", "+50+")";
-    	})
+    	// .attr("transform", function(d,i){
+     //    return "translate(" + 0 + ", "+0+")";
+    	// })
   		.attr("d", lineH);
 
 var pathS;
@@ -1540,9 +1417,9 @@ var pathS;
   		.attr("stroke","pink");
   	pathS
   		.datum(softUseComp)
-    	.attr("transform", function(d,i){
-        return "translate(" + 0 + ", "+50+")";
-    	})
+    	// .attr("transform", function(d,i){
+     //    return "translate(" + 0 + ", "+0+")";
+    	// })
   		.attr("d", lineS);
 
 
@@ -1723,7 +1600,17 @@ function linkTotalTo(name) {
             return uniques;
         }
 
-
+// Will remove all falsy values: undefined, null, 0, false, NaN and "" (empty string)
+function cleanArray(actual) {
+  var newArray = new Array();
+  for (var i = 0; i < actual.length; i++) {
+    if (actual[i]) {
+    	// console.log(actual.time.sort(d3.ascending))
+      newArray.push(actual[i]);
+    }
+  }
+  return newArray;
+}
 
 var moveToFront = function() { 
     this.parentNode.appendChild(this); 
