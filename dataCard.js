@@ -10,7 +10,7 @@ var theseNames = [];
 var faceUseComp = [];
 
 var hardCumu = [];
-
+var yOther = d3.scale.ordinal()
 
 var theseTotals = [];
 var one = [];
@@ -128,7 +128,7 @@ var goAhead;
 
 var forcewidth = w/4-9;
 var forceheight = h/4;
-var netSVG = d3.select("#ardinfo")
+var netSVG = d3.select("#facehand")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
@@ -149,7 +149,7 @@ var buttonSVG = d3.select("#buttonuse")
 	.style("border","1px solid white") 
 	.style("margin-top","1px");
 
-var activeSVG = d3.select("#facehand")
+var activeSVG = d3.select("#ardinfo")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
@@ -206,6 +206,7 @@ var only1 = [];
 
 var timeMin, timeMax;
 var timeX = d3.scale.linear();
+var timeX2 = d3.scale.linear();
 var maxtime = [];
 var whatTime = [];	
 
@@ -1124,8 +1125,8 @@ console.log(maxActive3);
 var pathActive1, lineActive1, pathActive2, lineActive2, pathActive3, lineActive3;
 
 var yActivePath;
-  yActivePath = d3.scale.linear()
-      .domain([0,maxActiveOverall]).range([timeSVGH, (timeSVGH/2)+maxRadius]);
+  yActivePath = d3.scale.linear() 
+      .domain([0,maxActiveOverall]).range([timeSVGH-maxRadius, 0]); //timeSVGH/2
 
   xActivePath = d3.scale.linear() //startTime, endTime
       .domain([startTime, endTime]).range([10, w-40]);
@@ -1242,37 +1243,39 @@ function showFace(){
 
 var faceColor = "pink";
 ///////OPTION 1
-	// dotFace = timeSVG.append("g").attr("class","dots").selectAll(".dot")
-	//     .data(faceData.values)
-	//   	.enter().append("circle")
-	//     .attr("class", "dot")
-	//     .attr("cx", function(d){
-	//     	return timeX(d.time)
-	//     })
-	//     .attr("cy", timeSVGH/2)
-	//     .attr("r", function(d,i){
-	//     	return d.num*faceRadius;
-	//     })
-	//     .attr("fill", faceColor)
-	// 	.attr("opacity", .1)
-/////OPTION 1
-// ////////////OPTION 2
-	rectFace = timeSVG.append("g").attr("class","facerect").selectAll(".facerect")
+	dotFace = timeSVG.append("g").attr("class","dots").selectAll(".dot")
 	    .data(faceData.values)
-	  	.enter().append("rect")
-	    .attr("class", "facerect")
-	    .attr("x", function(d){
+	  	.enter().append("circle")
+	    .attr("class", "dot")
+	    .attr("cx", function(d){
 	    	return timeX(d.time)
 	    })
-	    .attr("y", function(d,i){
-	    	return timeSVGH/2-d.num*faceRadius*2;
+	    .attr("cy", timeSVGH-5)
+	    .attr("r", function(d,i){
+	    	return d.num*faceRadius;
 	    })
-	    .attr("height", function(d,i){
-	    	return 2*(d.num*faceRadius*2);
-	    })
-	    .attr("width",2)
 	    .attr("fill", faceColor)
-		.attr("stroke","none")
+		.attr("opacity", .1)
+		.attr("stroke-opacity",1)
+		.attr("stroke",faceColor)
+/////OPTION 1
+// ////////////OPTION 2
+	// rectFace = timeSVG.append("g").attr("class","facerect").selectAll(".facerect")
+	//     .data(faceData.values)
+	//   	.enter().append("rect")
+	//     .attr("class", "facerect")
+	//     .attr("x", function(d){
+	//     	return timeX(d.time)
+	//     })
+	//     .attr("y", function(d,i){
+	//     	return timeSVGH/2-d.num*faceRadius*2;
+	//     })
+	//     .attr("height", function(d,i){
+	//     	return 2*(d.num*faceRadius*2);
+	//     })
+	//     .attr("width",2)
+	//     .attr("fill", faceColor)
+	// 	.attr("stroke","none")
 ////////////OPTION 2
 
 var bins = {};
@@ -1350,10 +1353,12 @@ function showIDE(){
         .attr("class", "axis") //Assign "axis" class
         .attr('transform', 'translate(0, ' + (timeSVGH-1) + ')');
 
-	var yOther = d3.scale.ordinal()
-    	.rangePoints([topMarg, 115]);
+	yOther
+	    .rangePoints([topMarg, forceheight-topMarg/2]);
 
-	var g = timeSVG.selectAll(".ide")
+	timeX2.domain([startTime, endTime]).range([forcewidth/4, forcewidth]);
+
+	var g = activeSVG.selectAll(".ide")
 		.data(ide_nest2)
 		.enter()
 	  	.append("g")
@@ -1365,7 +1370,7 @@ function showIDE(){
 			// }
 		}) 
 		.enter()
-		.append("g")
+		.append("rect")
 		.attr("class",function(d){
 			if(d.name){
 				theseNames.push(d.name);
@@ -1378,47 +1383,73 @@ function showIDE(){
 					softwareOnly.push(d);
 					softNames.push(d.name);
 				}
-				// if(d.mod=="M" && d.oc==1){
-				// 	hardwareOnly.push(d);
-				// 	hardNames.push(d.name);
-				// }
-				// if(d.mod=="B"&& d.oc==1){
-				// 	softwareOnly.push(d);
-				// 	softNames.push(d.name);
-				// }
 				yOther.domain(uniqueNames);
 			}
-			// return d.name;
+			return d.name;
 		})
-		// .attr("x", function(d){
-		// 	return timeX(d.time)
-		// })
-  //       .attr("y", function(d, i) {
-  //           return yOther(d.name);
-  //       })
-		// .attr("width",function(d,i){
-		// 	if(d.end){
-		// 		return timeX(d.end)-timeX(d.time);
-		// 	}else{
-		// 		return timeX(endTime)-timeX(d.time);				
-		// 	}
-		// })
-		// .attr("height", 5)
-		// .attr("fill", function(d){
+		.attr("x", function(d){
+			return timeX2(d.time)
+		})
+        .attr("y", function(d, i) {
+            return yOther(d.name);
+        })
+		.attr("width",function(d,i){
+			if(d.oc==1){
+				if(d.end){
+					return timeX2(d.end)-timeX2(d.time);
+				}else{
+					return timeX2(endTime)-timeX2(d.time);				
+				}
+			} else{
+				return 0;
+			}
+		})
+		.attr("height", 5)
+		.attr("fill", function(d){
+			if(yOther(d.name)!=undefined){
+				return colorScale(d.mod);
+			} else{
+				return "none";
+			}
+		})
+		.attr("stroke", function(d){
+			if(yOther(d.name)!=undefined){
+				return "white"
+			} else{
+				return "none";
+			}
+		})
+		.attr("opacity",.3);
+
+
+	activeSVG.selectAll(".timeText")
+		.data(uniqueNames)
+		.enter()
+		.append("text")
+		.attr("class","timeText")
+		.attr("x", function(d){
+			return 3
+		})
+        .attr("y", function(d, i) {
+            return yOther(d);
+        })
+		.attr("fill", "black")
+		// 	function(d){
 		// 	if(yOther(d.name)!=undefined){
 		// 		return colorScale(d.mod);
 		// 	} else{
 		// 		return "none";
 		// 	}
 		// })
-		// .attr("stroke", function(d){
-		// 	if(yOther(d.name)!=undefined){
-		// 		return "white"
-		// 	} else{
-		// 		return "none";
-		// 	}
-		// })
-		// .attr("opacity",.3);
+		.text(function(d){
+			return d;
+		})
+		.attr("font-size",8)
+		.attr("text-anchor","start")
+
+
+
+
 
 
 
@@ -1453,9 +1484,13 @@ softwareOnly.sort(function(x, y){
 		for(i=0; i<hardwareOnly.length; i++){
 			hardCumu.push(hardwareOnly[i].oc);
 		}
-	var cumuH = hardCumu;
-	    _.map(cumuH,function(num,i){ if(i > 0) cumuH[i] += cumuH[i-1]; });
+	// var cumuH = hardCumu;
+	//     _.map(cumuH,function(num,i){ if(i > 0) cumuH[i] += cumuH[i-1]; });
 
+
+	// var cumuH = hardCumu;
+	    _.map(hardwareOnly,function(num,i){ if(i > 0) hardwareOnly[i].oc += hardwareOnly[i-1].oc; });
+	    _.map(softwareOnly,function(num,i){ if(i > 0) softwareOnly[i].oc += softwareOnly[i-1].oc; });
 
 	for(j=startTime; j<endTime; j++){
 		var thisDate = new Date(j).getMinutes();
@@ -1528,11 +1563,73 @@ softUseComp.sort(function(x, y){
 	      .domain([startTime,endTime]).range([10, w-40]);
 
 	yHPath = d3.scale.linear()
-	      .domain([-12,12]) //max hardware components
-	      .range([timeSVGH/2, 0]);
+	      .domain([0,21]) //max hardware components
+	      .range([timeSVGH-maxRadius, 0]);
 	ySPath = d3.scale.linear()
-	      .domain([-9,9]) //max software components
-	      .range([timeSVGH/2, 0]);
+	      .domain([0,21]) //max software components
+	      .range([timeSVGH-maxRadius, 0]);
+
+
+
+
+
+
+
+
+	// var rectH = timeSVG.selectAll(".rectpathH")
+ //  		.data(hardwareOnly).enter().append("rect")
+ //    .attr("class","rectpathH")
+ //  		.attr("opacity",.5)
+ //  		.attr("fill","#15989C")
+ //      .attr("x", function(d, i) { 
+ //      	if(d==undefined){ return 0; }
+ //      		else{
+	// 	       	return xPath(d.time);      			
+ //      		}
+ //      })
+ //      .attr("y",function(d, i) { 
+ //      	if(d==undefined){return 0;}
+	//       		else{
+	//       			return yHPath(d.oc);  //actually totals now
+	//       		}
+ //      })
+ //      .attr("width",10)
+ //      .attr("height",function(d, i) { 
+ //      	if(d==undefined){return 0;}
+ //      		else{
+ //      			return timeSVGH/2-yHPath(d.oc);  //actually totals now
+ //      		}
+ //      })
+
+	// var rectH2 = timeSVG.selectAll(".rectpathH2")
+ //  		.data(hardUseComp).enter().append("rect")
+ //    .attr("class","rectpathH2")
+ //  		.attr("opacity",opacityPath)
+ //  		.attr("fill","#15989C")
+ //      .attr("x", function(d, i) { 
+ //      	if(d==undefined){ return 0; }
+ //      		else{
+	// 	       	return xPath(d.time);      			
+ //      		}
+ //      })
+ //      .attr("y",function(d, i) { 
+ //      	if(d==undefined){return 0;}
+ //      	if(d<0){ return 0; }
+	//       		else{
+	//       			return yHPath(d.total);  //actually totals now
+	//       		}
+ //      })
+ //      .attr("width",10)
+ //      .attr("height",function(d, i) { 
+ //      	if(d==undefined){return 0;}
+ //      	if(d<0){ return 0; }
+ //      		else{
+ //      			return timeSVGH/2-yHPath(d.total);  //actually totals now
+ //      		}
+ //      })
+
+
+
 
 	lineH = d3.svg.line()
       .x(function(d, i) { 
@@ -1546,7 +1643,7 @@ softUseComp.sort(function(x, y){
       	if(d==undefined){return 0;}
       	if(d.total<0){ return 0}
       		else{
-      			return yHPath(d.total); 
+      			return yHPath(d.oc);  //actually totals now
       		}
       })
       .interpolate("linear");
@@ -1562,7 +1659,7 @@ softUseComp.sort(function(x, y){
       	if(d==undefined){return 0;}
       	if(d.total<0){ return 0}
       		else{
-      			return ySPath(d.total); 
+      			return ySPath(d.oc); 
       		}
       })
       .interpolate("linear");
@@ -1570,28 +1667,22 @@ var opacityPath = .5;
   pathH = timeSVG.append("g")
     .append("path")
     .attr("class","timepathH")
-  		.attr("fill","#15989C")
-  		.attr("opacity",opacityPath)
-  		.attr("stroke","lightblue");
+  		.attr("fill","none")
+  		// .attr("opacity",opacityPath)
+  		.attr("stroke","#15989C");
   	pathH
-  		.datum(hardUseComp)
-    	// .attr("transform", function(d,i){
-     //    return "translate(" + 0 + ", "+0+")";
-    	// })
+  		.datum(hardwareOnly)
   		.attr("d", lineH);
 
 var pathS;
   pathS = timeSVG.append("g")
     .append("path")
     .attr("class","timepathS")
-  		.attr("fill","#B19B80") //"#B19B80"
-  		.attr("opacity",opacityPath)
-  		// .attr("stroke","pink");
+  		.attr("fill","none") //"#B19B80"
+  		// .attr("opacity",opacityPath)
+  		.attr("stroke","#B19B80");
   	pathS
-  		.datum(softUseComp)
-    	// .attr("transform", function(d,i){
-     //    return "translate(" + 0 + ", "+0+")";
-    	// })
+  		.datum(softwareOnly)
   		.attr("d", lineS);
 
 
