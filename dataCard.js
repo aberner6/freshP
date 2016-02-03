@@ -98,8 +98,8 @@ var w = $("#container").width();//document.body.clientWidth;
 
 
 var goAhead;
-var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h)            
-	.attr("transform", "translate(" + 0 + "," + 0 + ")");
+// var svg = d3.select("#container").append("svg").attr("width",w).attr("height",h)            
+// 	.attr("transform", "translate(" + 0 + "," + 0 + ")");
 
 
 
@@ -469,38 +469,43 @@ var rey = [];
 
 
 //probably have to fix this
-svg.on("click", function(){
-	toggling = !toggling;
-	console.log(toggling)
-	if(!toggling){
-		d3.selectAll(".hand")
-			.transition()
-			.attr("transform",function(d,i) {
-		  		return "translate("+cmargin+",0)";
-		  	});
-		// d3.selectAll(".face")
-		// 	.transition()
-		// 	.attr("transform",function(d,i) {
-		//   		return "translate("+cmargin+",0)";
-		//   	});
-		$(".rectText").hide();
-		$(".faceText").hide();
-	}
-	if(toggling){
-		d3.selectAll(".hand")
-			.transition()
-			.attr("transform",function(d,i) {
-		  		return "translate("+cwidth*i+",0)";
-		  	});
-		// d3.selectAll(".face")
-		// 	.transition()
-		// 	.attr("transform",function(d,i) {
-	 //  		return "translate("+(cwidth*i)+","+(cheight*rows)+")";
-		//   	});
-		$(".rectText").show();
-		$(".faceText").show();
-	}
-})
+// svg.on("click", function(){
+// 	toggling = !toggling;
+// 	console.log(toggling)
+// 	if(!toggling){
+// 		d3.selectAll(".hand")
+// 			.transition()
+// 			.attr("transform",function(d,i) {
+// 		  		return "translate("+cmargin+",0)";
+// 		  	});
+// 		// d3.selectAll(".face")
+// 		// 	.transition()
+// 		// 	.attr("transform",function(d,i) {
+// 		//   		return "translate("+cmargin+",0)";
+// 		//   	});
+// 		$(".rectText").hide();
+// 		$(".faceText").hide();
+// 	}
+// 	if(toggling){
+// 		d3.selectAll(".hand")
+// 			.transition()
+// 			.attr("transform",function(d,i) {
+// 		  		return "translate("+cwidth*i+",0)";
+// 		  	});
+// 		// d3.selectAll(".face")
+// 		// 	.transition()
+// 		// 	.attr("transform",function(d,i) {
+// 	 //  		return "translate("+(cwidth*i)+","+(cheight*rows)+")";
+// 		//   	});
+// 		$(".rectText").show();
+// 		$(".faceText").show();
+// 	}
+// })
+
+
+
+
+
 
 
 
@@ -746,6 +751,7 @@ var linkdist = w/10;
 	    .charge(-100)
 	    .on("tick", tick)
 	    .start();  
+makeChords(force.nodes(), force.links());
 
 
 	var rMap;
@@ -918,7 +924,7 @@ function compress(){
 function showHands(){
 	var numPanels = handData.values.length;
 
-	var g = svg.selectAll(".hand")
+	var g = timeSVG.selectAll(".hand")
 		.data(handData.values.sort(d3.ascending))
 		.enter()
 	  	.append("g")
@@ -1764,6 +1770,186 @@ function linkTotalTo(name) {
         console.log("total links made to and from")
         console.log(totalLinks)
 }
+
+
+
+
+
+
+
+
+
+function makeChords(data1, data2){
+	console.log(data2);
+   var mpr = chordMpr(data2);
+
+// action_id: "L1"
+// data_id: 74923
+// date: "11/18/2015 15:30:20"
+// mod: "L"
+// name: "COLIF"
+// oc: "1"
+// opt: "3 COL 16 IF 0 0"
+// session: 537
+// source: Object
+// index: 0
+// name: "COL"
+// px: 467.16906299322505
+// py: 342.2459058406161
+// weight: 6
+// x: 467.166596959635
+// y: 342.2727725576841
+// __proto__: Object
+// special_id: "L3 COL 16 IF 0 0"
+// target: Object
+// index: 1
+// name: "IF"
+// px: 450.1427695009287
+// py: 243.54770739468535
+// weight: 56
+// x: 450.14339860613967
+// y: 243.51789598176026
+// __proto__: Object
+// time: 1447857020370
+// type: "ide"
+for(i=0; i<data2.length; i++){
+	newData.push({
+		"has":data2[i].source.name,
+		"prefers":data2[i].target.name,
+		"count":data2[i].source.weight
+	})
+}
+console.log(newData);
+var mpr = chordMpr(newData);
+    mpr
+      .addValuesToMap('has')
+      .setFilter(function (row, a, b) {
+      	// console.log(row.has)
+         return (row.has === a.name && row.prefers === b.name)
+       })
+       .setAccessor(function (recs, a, b) {
+         if (!recs[0]) return 0;
+         return +recs[0].count;
+        });
+
+       // console.log(mpr.getMatrix())
+     drawChords(mpr.getMatrix(), mpr.getMap());
+}
+      //*******************************************************************
+      //  DRAW THE CHORD DIAGRAM
+      //*******************************************************************
+      function drawChords (matrix, mmap) {
+        var r1 = forceheight / 4, r0 = forceheight/6;
+ // w = 980, h = 800,
+        var fill = d3.scale.ordinal()
+            .range(['#c7b570','#c6cdc7','#335c64','#768935','#507282','#5c4a56','#aa7455','#574109','#837722','#73342d','#0a5564','#9c8f57','#7895a4','#4a5456','#b0a690','#0a3542',]);
+
+        var chord = d3.layout.chord()
+            .padding(.02)
+            .sortSubgroups(d3.descending)
+
+        var arc = d3.svg.arc()
+            .innerRadius(r0)
+            .outerRadius(r0 + 20);
+
+        // var svg = d3.select("body").append("svg:svg")
+        //     .attr("width", w)
+        //     .attr("height", h)
+          // activeSVG.append("svg:g")
+          //   .attr("id", "circle")
+          //   .attr("transform", "translate(" + forcewidth / 2 + "," + forceheight / 2 + ")");
+
+          //   activeSVG.append("circle")
+          //       .attr("r", r0 + 20);
+
+        var rdr = chordRdr(matrix, mmap);
+        chord.matrix(matrix);
+        console.log(chord.chords())
+        var g = activeSVG.selectAll("g.group")
+            .data(chord.groups())
+          .enter().append("svg:g")
+            .attr("class", "group")
+            .attr("transform", "translate(" + forcewidth / 2 + "," + forceheight / 2 + ")");
+
+        g.append("svg:path")
+            .style("stroke", "black")
+            //needs to be about the type of element
+            .style("fill","none")
+            // .style("fill", function(d) { return rdr(d).gdata == "state" ? "black": "grey"; })
+            .attr("d", arc)
+                        // .attr("transform", "translate(" + forcewidth / 2 + "," + forceheight / 2 + ")");
+
+        g.append("svg:text")
+            .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
+            .attr("dy", ".35em")
+            .style("font-family", "helvetica, arial, sans-serif")
+            .style("font-size", "10px")
+            .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
+            .attr("transform", function(d) {
+              return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
+                  + "translate(" + (r0 + 26) + ")"
+                  + (d.angle > Math.PI ? "rotate(180)" : "");
+            })
+            .text(function(d) { return rdr(d).gname; });
+
+          var chordPaths = activeSVG.selectAll("path.chord")
+                .data(chord.chords())
+              .enter().append("svg:path")
+                .attr("class", "chord")
+                // .style("stroke", "black")
+                // .style("fill", function(d) { return rdr(d).tname == "Starbucks" ? "#00592d": "#ff6200"; })
+                .attr("d", d3.svg.chord().radius(r0))
+            .attr("transform", "translate(" + forcewidth / 2 + "," + forceheight / 2 + ")");
+
+                // .on("mouseover", function (d) {
+                //   d3.select("#tooltip")
+                //     .style("visibility", "visible")
+                //     .html(chordTip(rdr(d)))
+                //     .style("top", function () { return (d3.event.pageY - 170)+"px"})
+                //     .style("left", function () { return (d3.event.pageX - 100)+"px";})
+                // })
+                // .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
+
+          // function chordTip (d) {
+          //   var p = d3.format(".1%"), q = d3.format(",f")
+          //   return "Chord Info:<br/>"
+          //     +  d.sname + " → " + d.tname
+          //     + ": " + q(d.svalue) + "<br/>"
+          //     + p(d.svalue/d.stotal) + " of " + d.sname + "'s Total (" + q(d.stotal) + ")<br/>"
+          //     + p(d.svalue/(d.mtotal/2)) + " of Matrix Total (" + q(d.mtotal/2) + ")<br/>"
+          //     + "<br/>"
+          //     + d.tname + " → " + d.sname
+          //     + ": " + q(d.tvalue) + "<br/>"
+          //     + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s Total (" + q(d.ttotal) + ")<br/>"
+          //     + p(d.tvalue/(d.mtotal/2)) + " of Matrix Total (" + q(d.mtotal/2) + ")";
+          // }
+
+          // function groupTip (d) {
+          //   var p = d3.format(".1%"), q = d3.format(",f")
+          //   return "Group Info:<br/>"
+          //       + d.gname + " : " + q(d.gvalue) + "<br/>"
+          //       + p(d.gvalue/(d.mtotal/2)) + " of Matrix Total (" + q(d.mtotal/2) + ")"
+          // }
+
+          // function mouseover(d, i) {
+          //   d3.select("#tooltip")
+          //     .style("visibility", "visible")
+          //     .html(groupTip(rdr(d)))
+          //     .style("top", function () { return (d3.event.pageY - 80)+"px"})
+          //     .style("left", function () { return (d3.event.pageX - 130)+"px";})
+
+          //   chordPaths.classed("fade", function(p) {
+          //     return p.source.index != i
+          //         && p.target.index != i;
+          //   });
+          // }
+      }
+
+
+
+
+
+
 
 
         function unique(obj) {
