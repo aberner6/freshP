@@ -9,6 +9,9 @@ var theseNames = [];
 
 var faceUseComp = [];
 
+var hardCumu = [];
+
+
 var theseTotals = [];
 var one = [];
 var two = [];
@@ -713,11 +716,18 @@ function goIDE(incomingD, summary){
 		}
 		if(ideData[i].action_id.length>2){
 			ideData[i].mod = ideData[i].action_id.substr(0, 2);
-			ideData[i].oc = ideData[i].action_id.substr(2, 2);
+			ideData[i].oc = parseInt(ideData[i].action_id.substr(2, 2));
 		}else{ //doesn't matter about the CC without open close
 			ideData[i].mod = ideData[i].action_id.substr(0, 1);
-			ideData[i].oc = ideData[i].action_id.substr(1, 1);
+			ideData[i].oc = parseInt(ideData[i].action_id.substr(1, 1));
 		}
+
+
+
+		if(ideData[i].oc==2){ ideData[i].oc=-1 }
+
+
+
 		ideData[i].special_id = ideData[i].mod+ideData[i].opt;
 		ideData[i].hour = (new Date(ideData[i].time)).getHours();
 		ideData[i].minute = (new Date(ideData[i].time)).getMinutes();
@@ -836,7 +846,7 @@ makeEdge(links,force.nodes(), force.links());
 	}
 	for(i=0; i<ide_nest2.length; i++){
 		for(j=0; j<ide_nest2[i].values.length-1; j++){
-			if(ide_nest2[i].values[j].oc==1 && ide_nest2[i].values[j+1].oc==2){
+			if(ide_nest2[i].values[j].oc==1 && ide_nest2[i].values[j+1].oc==-1){
 				var secondguy = ide_nest2[i].values[j+1].time;
 				ide_nest2[i].values[j].end = secondguy;
 			} else{ 
@@ -993,6 +1003,7 @@ if(one!="undefined"){
 	}
 	var cumu1 = delta1;
 	    _.map(cumu1,function(num,i){ if(i > 0) cumu1[i] += cumu1[i-1]; });
+
 	var interval = 160;
 	var softS1 = [];
 	for(i=0; i<cumu1.length; i++){
@@ -1122,32 +1133,29 @@ var yActivePath;
   lineActive1 = d3.svg.line()
       .x(function(d, i) { return xActivePath(activeOne[i].thisTime); })
       .y(function(d, i) { return yActivePath(d); })
-      .interpolate("linear")
+      .interpolate("bundle")
   pathActive1 = timeSVG.append("g")
     .append("path")
     .attr("class","activepath1")
     .attr("fill","none")
-    .attr("stroke","lightblue")
+    .attr("stroke","darkgrey")
+    .attr("stroke-dasharray",1)
   	pathActive1
   		.datum(softS1)
-    	// .attr("transform", function(d,i){
-     //    return "translate(" + 0 + ", "+50+")";
-    	// })
   		.attr("d", lineActive1);
+
   lineActive2 = d3.svg.line()
       .x(function(d, i) { return xActivePath(activeTwo[i].thisTime); })
       .y(function(d, i) { return yActivePath(d); })
-      .interpolate("linear")
+      .interpolate("bundle")
+      // .tension(5)
   pathActive2 = timeSVG.append("g")
     .append("path")
     .attr("class","activepath2")
     .attr("fill","none")
-    .attr("stroke","lightgreen")
+    .attr("stroke","darkgrey")
   	pathActive2
   		.datum(softS2)
-    	// .attr("transform", function(d,i){
-     //    return "translate(" + 0 + ", "+50+")"; //WAIT WHAT THE FUCK
-    	// })
   		.attr("d", lineActive2);
   lineActive3 = d3.svg.line()
       .x(function(d, i) { return xActivePath(activeThree[i].thisTime); })
@@ -1234,48 +1242,37 @@ function showFace(){
 
 var faceColor = "pink";
 ///////OPTION 1
-	dotFace = timeSVG.append("g").attr("class","dots").selectAll(".dot")
-	    .data(faceData.values)
-	  	.enter().append("circle")
-	    .attr("class", "dot")
-	    .attr("cx", function(d){
-	    	return timeX(d.time)
-	    })
-	    .attr("cy", timeSVGH/2)
-	    .attr("r", function(d,i){
-	    	return d.num*faceRadius;
-	    })
-	    .attr("fill", faceColor)
-		.attr("opacity", .1)
+	// dotFace = timeSVG.append("g").attr("class","dots").selectAll(".dot")
+	//     .data(faceData.values)
+	//   	.enter().append("circle")
+	//     .attr("class", "dot")
+	//     .attr("cx", function(d){
+	//     	return timeX(d.time)
+	//     })
+	//     .attr("cy", timeSVGH/2)
+	//     .attr("r", function(d,i){
+	//     	return d.num*faceRadius;
+	//     })
+	//     .attr("fill", faceColor)
+	// 	.attr("opacity", .1)
 /////OPTION 1
 // ////////////OPTION 2
-// 	rectFace = timeSVG.append("g").attr("class","facerect").selectAll(".facerect")
-// 	    .data(faceData.values)
-// 	  	.enter().append("rect")
-// 	    .attr("class", "facerect")
-// 	    .attr("x", function(d){
-// 	    	return timeX(d.time)
-// 	    })
-// 	    .attr("y", function(d,i){
-// 	    	return timeSVGH/2-d.num*faceRadius*2;
-// 	    })
-// 	    .attr("height", function(d,i){
-// 	    	return 2*(d.num*faceRadius*2);
-// 	    })
-// 	    .attr("width",1)
-// 	    .attr("fill", function(d,i){
-// 	    	if(d.num==1){
-// 	    		return "pink";
-// 	    	} 
-// 	    	if(d.num==2){
-// 	    		return "orange"
-// 	    	}
-// 	    	if(d.num==3){
-// 	    		return "red"
-// 	    	}
-// 				else { return "white"}
-// 		})
-// 		.attr("stroke","none")
+	rectFace = timeSVG.append("g").attr("class","facerect").selectAll(".facerect")
+	    .data(faceData.values)
+	  	.enter().append("rect")
+	    .attr("class", "facerect")
+	    .attr("x", function(d){
+	    	return timeX(d.time)
+	    })
+	    .attr("y", function(d,i){
+	    	return timeSVGH/2-d.num*faceRadius*2;
+	    })
+	    .attr("height", function(d,i){
+	    	return 2*(d.num*faceRadius*2);
+	    })
+	    .attr("width",2)
+	    .attr("fill", faceColor)
+		.attr("stroke","none")
 ////////////OPTION 2
 
 var bins = {};
@@ -1447,20 +1444,33 @@ console.log("startMin"+startMin+"endMin"+endMin+"totalTime"+totalTime)
 // 		});
 // 	}
 // }
-
-
+hardwareOnly.sort(function(x, y){
+   return d3.ascending(x.time, y.time);
+})
+softwareOnly.sort(function(x, y){
+   return d3.ascending(x.time, y.time);
+})
+		for(i=0; i<hardwareOnly.length; i++){
+			hardCumu.push(hardwareOnly[i].oc);
+		}
+	var cumuH = hardCumu;
+	    _.map(cumuH,function(num,i){ if(i > 0) cumuH[i] += cumuH[i-1]; });
 
 
 	for(j=startTime; j<endTime; j++){
 		var thisDate = new Date(j).getMinutes();
+
 		var thisHour = new Date(j).getHours();
+		
 		var thisD = thisHour+thisDate;
+		
 			hardUseComp[thisD] = ({ 
 				"total":hardUseTotals(thisDate), 
 				"time": j,
 				"min":thisDate,
 				"hour":thisHour
 			});
+
 			softUseComp[thisD] = ({ 
 				"total":softUseTotals(thisDate), 
 				"time": j,
@@ -1516,6 +1526,7 @@ softUseComp.sort(function(x, y){
 
 	xPath = d3.scale.linear()
 	      .domain([startTime,endTime]).range([10, w-40]);
+
 	yHPath = d3.scale.linear()
 	      .domain([-12,12]) //max hardware components
 	      .range([timeSVGH/2, 0]);
@@ -1533,6 +1544,7 @@ softUseComp.sort(function(x, y){
       })
       .y(function(d, i) { 
       	if(d==undefined){return 0;}
+      	if(d.total<0){ return 0}
       		else{
       			return yHPath(d.total); 
       		}
@@ -1548,6 +1560,7 @@ softUseComp.sort(function(x, y){
       })
       .y(function(d, i) { 
       	if(d==undefined){return 0;}
+      	if(d.total<0){ return 0}
       		else{
       			return ySPath(d.total); 
       		}
@@ -1601,17 +1614,33 @@ var pathS;
         //     }
         //     return total;
         // }
+
+
+
         function hardUseTotals(index) {
             var total = 0;
-            for (i = 0; i < hardwareOnly.length-1; i++) {
+            for (i = 0; i < hardwareOnly.length; i++) {
                 if (hardwareOnly[i].minute == index && hardwareOnly[i].oc==1) {
                     total++;
-                } if (hardwareOnly[i].minute == index && hardwareOnly[i].oc==2) {
+                } 
+                if (hardwareOnly[i].minute == index && hardwareOnly[i].oc==2) {
                     total--;
                 } 
             }
             return total;
         }
+        // function hardUseTotals(index) {
+        //     var total = 0;
+        //     // console.log(index)
+        //     for (i = 0; i < hardwareOnly.length-1; i++) {
+        //         if (i == index && hardwareOnly[i].oc==1) {
+        //             total+=1;
+        //         } if (i == index && hardwareOnly[i].oc==2) {
+        //             total-=1;
+        //         } 
+        //     }
+        //     return total;
+        // }
         function softUseTotals(index) {
             var total = 0;
             for (i = 0; i < softwareOnly.length; i++) {
