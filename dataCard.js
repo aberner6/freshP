@@ -7,6 +7,7 @@ var interactionTypes = ["inputs","outputs","programming","games"];
 var uniqueNames;
 var theseNames = [];
 
+var faceUseComp = [];
 
 var theseTotals = [];
 var one = [];
@@ -173,9 +174,21 @@ netSVG.append("svg:defs").selectAll("marker")
     .attr("fill",colorText)
   .append("svg:path")
     .attr("d", "M0,-5L10,0L0,5");         
-	// .attr("transform", "translate(" + 0 + "," + 10 + ")");
-// var svg2 = d3.select("#container").append("svg").attr("width",w).attr("height",h)
-// .attr("transform", "translate(" + 0 + "," + 0 + ")");
+
+buttonSVG.append("svg:defs").selectAll("marker")
+    .data(["end"])      // Different link/path types can be defined here
+  .enter().append("svg:marker")    // This section adds in the arrows
+    .attr("id", String)
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 15)
+    .attr("refY", -1.5)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    // .attr("stroke-width",1)
+    .attr("orient", "auto")
+    .attr("fill",colorText)
+  .append("svg:path")
+    .attr("d", "M0,-5L10,0L0,5");  
 
 var nest_again;
 var ideData;
@@ -271,7 +284,7 @@ var token;
 function getSession(){
 	var token = pelars_authenticate();
 	$.getJSON("http://pelars.sssup.it:8080/pelars/session?token="+token,function(json1){
-			thisSession = parseInt(537);//537//615//json1[json1.length-1].session;
+			thisSession = parseInt(615);//537//615//json1[json1.length-1].session;
 			console.log("session"+thisSession);
 			getData(thisSession, token);
 	})
@@ -602,42 +615,42 @@ var iconW = (forcewidth/1.5)/buttonTot
 
 
 
-buttonSVG.append("text")
-	.attr("class","button1")
-	.attr("x", textL)
-	.attr("y", topMarg*2)
-	.attr("font-size",14)
-	.text(button1.length)
-	.attr("fill","black")
-var iconBut = buttonSVG.selectAll(".button1")	
-	.data(d3.range(2))
-	iconBut.enter()
-	.append("image")
-	.attr("class","button1")
-	.attr("xlink:href", "assets/icons/idea.png")
-	.attr("x", textL)
-	.attr("y", topMarg*2+(button1.length+5))
-	.attr("width",button1.length+10)
-	.attr("height",button1.length+10);
+// buttonSVG.append("text")
+// 	.attr("class","button1")
+// 	.attr("x", textL)
+// 	.attr("y", topMarg*2)
+// 	.attr("font-size",14)
+// 	.text(button1.length)
+// 	.attr("fill","black")
+// var iconBut = buttonSVG.selectAll(".button1")	
+// 	.data(d3.range(2))
+// 	iconBut.enter()
+// 	.append("image")
+// 	.attr("class","button1")
+// 	.attr("xlink:href", "assets/icons/idea.png")
+// 	.attr("x", textL)
+// 	.attr("y", topMarg*2+(button1.length+5))
+// 	.attr("width",button1.length+10)
+// 	.attr("height",button1.length+10);
 
-buttonSVG.append("text")
-	.attr("class","button2")
-	.attr("x", (forcewidth*3/4))
-	.attr("y", topMarg*2)
-	.attr("font-size", 14)
-	.text(button2.length)
-	.attr("fill","black");
+// buttonSVG.append("text")
+// 	.attr("class","button2")
+// 	.attr("x", (forcewidth*3/4))
+// 	.attr("y", topMarg*2)
+// 	.attr("font-size", 14)
+// 	.text(button2.length)
+// 	.attr("fill","black");
 
-var iconBut = buttonSVG.selectAll(".button2")	
-	.data(d3.range(2))
-	iconBut.enter()
-	.append("image")
-	.attr("class","button2")
-	.attr("xlink:href", "assets/icons/thunder.png")
-	.attr("x", (forcewidth*3/4))
-	.attr("y", (topMarg*2)+5 ) //+button2.length+5
-	.attr("width",button2.length+10)
-	.attr("height",button2.length+10);
+// var iconBut = buttonSVG.selectAll(".button2")	
+// 	.data(d3.range(2))
+// 	iconBut.enter()
+// 	.append("image")
+// 	.attr("class","button2")
+// 	.attr("xlink:href", "assets/icons/thunder.png")
+// 	.attr("x", (forcewidth*3/4))
+// 	.attr("y", (topMarg*2)+5 ) //+button2.length+5
+// 	.attr("width",button2.length+10)
+// 	.attr("height",button2.length+10);
 
 
 
@@ -738,8 +751,8 @@ function goIDE(incomingD, summary){
 	var force;
 	// Compute the distinct nodes from the links.
 	links.forEach(function(link) {
-	  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
-	  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+	  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, mod:link.mod});
+	  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, mod:link.mod});
 	});
 
 var linkdist = w/10;
@@ -752,7 +765,10 @@ var linkdist = w/10;
 	    .on("tick", tick)
 	    .start();  
 makeChords(force.nodes(), force.links());
-
+// console.log(links);
+// console.log(force.nodes())
+// console.log(force.links())
+makeEdge(links,force.nodes(), force.links());
 
 	var rMap;
 	var maxWeight;
@@ -1216,7 +1232,7 @@ function showFace(){
 
 
 
-
+var faceColor = "pink";
 ///////OPTION 1
 	dotFace = timeSVG.append("g").attr("class","dots").selectAll(".dot")
 	    .data(faceData.values)
@@ -1229,22 +1245,8 @@ function showFace(){
 	    .attr("r", function(d,i){
 	    	return d.num*faceRadius;
 	    })
-	    .attr("fill", function(d,i){
-	    	if(d.num==1){
-	    		return "pink";
-	    	} 
-	    	if(d.num==2){
-	    		return "orange"
-	    	}
-	    	if(d.num==3){
-	    		return "red"
-	    	}
-				// if(d.num>0){
-				// 	return faceColor(d.num)
-				// }
-				else { return "none"}
-		})
-		.attr("opacity", .3)
+	    .attr("fill", faceColor)
+		.attr("opacity", .1)
 /////OPTION 1
 // ////////////OPTION 2
 // 	rectFace = timeSVG.append("g").attr("class","facerect").selectAll(".facerect")
@@ -1276,51 +1278,6 @@ function showFace(){
 // 		.attr("stroke","none")
 ////////////OPTION 2
 
-////////////option 3
-	dotFace = timeSVG.append("g").attr("class","dots").selectAll(".dot")
-	    .data(faceData.values)
-	  	.enter().append("circle")
-	    .attr("class", "dot")
-	    .attr("cx", function(d){
-	    	return timeX(d.time)
-	    })
-	    .attr("cy", timeSVGH/2)
-	    .attr("r", 2)
-	    .attr("fill", function(d,i){
-	    	if(d.num==1){
-	    		return "pink";
-	    	} 
-	    	if(d.num==2){
-	    		return "orange"
-	    	}
-	    	if(d.num==3){
-	    		return "red"
-	    	}
-				// if(d.num>0){
-				// 	return faceColor(d.num)
-				// }
-				else { return "none"}
-		})
-		.attr("opacity", 1)
-
-
-
-
-///////////option 3
-
-		// 	function(d,i){
-	 //    	if(d.num==1){
-	 //    		return 1;
-	 //    	} 
-	 //    	if(d.num==2){
-	 //    		return 1;
-	 //    	}
-	 //    	if(d.num==3){
-	 //    		return 1;
-	 //    	}
-		// 		else { return .5}
-		// })
-
 var bins = {};
 faceData.values.forEach(function(t) {
 	// console.log(t.num)
@@ -1329,6 +1286,28 @@ faceData.values.forEach(function(t) {
     bins[key] = t.num;
 });
 console.log(bins)
+	// for(j=startTime; j<endTime; j++){
+	// 	var thisDate = new Date(j).getMinutes();
+	// 	var thisHour = new Date(j).getHours();
+	// 	var thisD = thisHour+thisDate;
+	// 		faceUseComp[thisD] = ({ 
+	// 			"total":faceUseTotals(thisDate), 
+	// 			"time": j,
+	// 			"min":thisDate,
+	// 			"hour":thisHour
+	// 		});
+	// }
+	// console.log(faceUseComp)
+ //        function faceUseTotals(index) {
+ //            var total = 0;
+	// 		for(i=0; i<faceData.values; i++){
+ //    			var key = new Date(faceData[i].values.time).getMinutes();
+ //                if (key == index) {
+ //                    total++;
+ //                } else {}
+ //            }
+ //            return total;
+ //        }
 }
 
 
@@ -1772,46 +1751,185 @@ function linkTotalTo(name) {
 }
 
 
+var linkData;
+function makeEdge(linkData, linkNodes, linkLinks){
+	var linkData = linkData;
+	var linkNodes = linkNodes;
+	var linkLinks = linkLinks;
+
+	// console.log(linkNodes);
+	for(i=0; i<linkData.length; i++){
+		linkData[i].parent = linkData[i].mod;
+	}	
+// console.log(linkNodes);
+// console.log(linkLinks)
+var diameter = forcewidth;
+var radius = diameter / 2;
+var margin = 40;
+
+// drawGraph();
+// Draws an arc diagram for the provided undirected graph
+// function drawGraph(graph) {
+    // create svg image
+    // var circleSVG  = d3.select("body").select("#buttonSVG")
+    //     .append("svg")
+    //     .attr("width", diameter)
+    //     .attr("height", diameter);
+
+    // create plot area within svg image
+    var plot = buttonSVG.append("g")
+        .attr("id", "plot")
+        .attr("transform", "translate(" + radius + ", " + (radius-19) + ")");
+
+    // draw border around plot area
+    plot.append("circle")
+        .attr("class", "outline")
+        .attr("fill","none")
+        .attr("stroke","#888888")
+        .attr("r", radius - margin);
+
+    // // calculate node positions
+    // circleLayout(graph.nodes);
+    circleLayout(linkNodes);
+
+    // // draw edges first
+    // drawLinks(graph.links);
+    drawCurves(linkLinks);
+
+    // draw nodes last
+    drawNodes(linkNodes);
+// }
+// Calculates node locations
+function circleLayout(nodes) {
+    // sort nodes by group
+    nodes.sort(function(a, b) {
+        return a.group - b.group;
+    });
+
+    // use to scale node index to theta value
+    var scale = d3.scale.linear()
+        .domain([0, nodes.length])
+        .range([0, 2 * Math.PI]);
+
+    // calculate theta for each node
+    nodes.forEach(function(d, i) {
+        // calculate polar coordinates
+        var theta  = scale(i);
+        var radial = radius - margin;
+
+        // convert to cartesian coordinates
+        d.x = radial * Math.sin(theta);
+        d.y = radial * Math.cos(theta);
+    });
+}
 
 
+// Generates a tooltip for a SVG circle element based on its ID
+function addTooltip(circle) {
+    var x = parseFloat(circle.attr("cx"));
+    var y = parseFloat(circle.attr("cy"));
+    var r = parseFloat(circle.attr("r"));
+    var text = circle.attr("id");
+
+    var tooltip = d3.select("#plot")
+        .append("text")
+        .text(text)
+        .attr("x", x)
+        .attr("y", y)
+        .attr("dy", -r * 2)
+        .attr("id", "tooltip");
+
+    var offset = tooltip.node().getBBox().width / 2;
+
+    if ((x - offset) < -radius) {
+        tooltip.attr("text-anchor", "start");
+        tooltip.attr("dx", -r);
+    }
+    else if ((x + offset) > (radius)) {
+        tooltip.attr("text-anchor", "end");
+        tooltip.attr("dx", r);
+    }
+    else {
+        tooltip.attr("text-anchor", "middle");
+        tooltip.attr("dx", 0);
+    }
+}
+function drawNodes(nodes) {
+    // used to assign nodes color by group
+    var color = d3.scale.category20();
+var radius = 5;
+    d3.select("#plot").selectAll(".node")
+        .data(nodes)
+        .enter()
+        .append("circle")
+        .attr("class", "node")
+        .attr("id", function(d, i) { return d.name; })
+        .attr("cx", function(d, i) { return d.x; })
+        .attr("cy", function(d, i) { return d.y; })
+        .attr("r", radius)
+        .style("fill",  function(d, i) { 
+        	addTooltip(d3.select(this))
+        	if(d.mod =="M"){
+        		return "teal";
+        	}
+        	if(d.mod=="B"){
+        		return "brown";
+        	}
+        	if(d.mod=="L"){
+        		return "grey"
+        	}
+        })
+}
+// Draws straight edges between nodes
+function drawLinks(links) {
+    d3.select("#plot").selectAll(".link")
+        .data(links)
+        .enter()
+        .append("line")
+        .attr("class", "link")
+        .attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; })
+        .style("stroke",  function(d, i) { 
+        	if(d.mod =="M"){
+        		return "teal";
+        	}
+        	if(d.mod=="B"){
+        		return "brown";
+        	}
+        	if(d.mod=="L"){
+        		return "grey"
+        	}
+        })
+        .attr("fill","none")
+	    .attr("marker-end", "url(#end)");
+}
+
+// Draws curved edges between nodes
+	function drawCurves(links) {
+	    // remember this from tree example?
+	    var curve = d3.svg.diagonal()
+	        .projection(function(d) { return [d.x, d.y]; });
+
+	    d3.select("#plot").selectAll(".link")
+	        .data(links)
+	        .enter()
+	        .append("path")
+	        .attr("class", "link")
+	        .attr("stroke","blue")
+	        .attr("fill","none")
+	        .attr("d", curve);
+	}
+}
 
 
 
 
 
 function makeChords(data1, data2){
-	console.log(data2);
+	// console.log(data2);
    var mpr = chordMpr(data2);
-
-// action_id: "L1"
-// data_id: 74923
-// date: "11/18/2015 15:30:20"
-// mod: "L"
-// name: "COLIF"
-// oc: "1"
-// opt: "3 COL 16 IF 0 0"
-// session: 537
-// source: Object
-// index: 0
-// name: "COL"
-// px: 467.16906299322505
-// py: 342.2459058406161
-// weight: 6
-// x: 467.166596959635
-// y: 342.2727725576841
-// __proto__: Object
-// special_id: "L3 COL 16 IF 0 0"
-// target: Object
-// index: 1
-// name: "IF"
-// px: 450.1427695009287
-// py: 243.54770739468535
-// weight: 56
-// x: 450.14339860613967
-// y: 243.51789598176026
-// __proto__: Object
-// time: 1447857020370
-// type: "ide"
 for(i=0; i<data2.length; i++){
 	newData.push({
 		"has":data2[i].source.name,
@@ -1819,7 +1937,7 @@ for(i=0; i<data2.length; i++){
 		"count":data2[i].source.weight
 	})
 }
-console.log(newData);
+// console.log(newData);
 var mpr = chordMpr(newData);
     mpr
       .addValuesToMap('has')
@@ -1833,7 +1951,7 @@ var mpr = chordMpr(newData);
         });
 
        // console.log(mpr.getMatrix())
-     drawChords(mpr.getMatrix(), mpr.getMap());
+     // drawChords(mpr.getMatrix(), mpr.getMap());
 }
       //*******************************************************************
       //  DRAW THE CHORD DIAGRAM
@@ -1900,49 +2018,6 @@ var mpr = chordMpr(newData);
                 // .style("fill", function(d) { return rdr(d).tname == "Starbucks" ? "#00592d": "#ff6200"; })
                 .attr("d", d3.svg.chord().radius(r0))
             .attr("transform", "translate(" + forcewidth / 2 + "," + forceheight / 2 + ")");
-
-                // .on("mouseover", function (d) {
-                //   d3.select("#tooltip")
-                //     .style("visibility", "visible")
-                //     .html(chordTip(rdr(d)))
-                //     .style("top", function () { return (d3.event.pageY - 170)+"px"})
-                //     .style("left", function () { return (d3.event.pageX - 100)+"px";})
-                // })
-                // .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
-
-          // function chordTip (d) {
-          //   var p = d3.format(".1%"), q = d3.format(",f")
-          //   return "Chord Info:<br/>"
-          //     +  d.sname + " → " + d.tname
-          //     + ": " + q(d.svalue) + "<br/>"
-          //     + p(d.svalue/d.stotal) + " of " + d.sname + "'s Total (" + q(d.stotal) + ")<br/>"
-          //     + p(d.svalue/(d.mtotal/2)) + " of Matrix Total (" + q(d.mtotal/2) + ")<br/>"
-          //     + "<br/>"
-          //     + d.tname + " → " + d.sname
-          //     + ": " + q(d.tvalue) + "<br/>"
-          //     + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s Total (" + q(d.ttotal) + ")<br/>"
-          //     + p(d.tvalue/(d.mtotal/2)) + " of Matrix Total (" + q(d.mtotal/2) + ")";
-          // }
-
-          // function groupTip (d) {
-          //   var p = d3.format(".1%"), q = d3.format(",f")
-          //   return "Group Info:<br/>"
-          //       + d.gname + " : " + q(d.gvalue) + "<br/>"
-          //       + p(d.gvalue/(d.mtotal/2)) + " of Matrix Total (" + q(d.mtotal/2) + ")"
-          // }
-
-          // function mouseover(d, i) {
-          //   d3.select("#tooltip")
-          //     .style("visibility", "visible")
-          //     .html(groupTip(rdr(d)))
-          //     .style("top", function () { return (d3.event.pageY - 80)+"px"})
-          //     .style("left", function () { return (d3.event.pageX - 130)+"px";})
-
-          //   chordPaths.classed("fade", function(p) {
-          //     return p.source.index != i
-          //         && p.target.index != i;
-          //   });
-          // }
       }
 
 
