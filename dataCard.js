@@ -11,7 +11,8 @@ var faceUseComp = [];
 var faceNum = [];
 var hardCumu = [];
 var yOther = d3.scale.ordinal()
-
+var linkData;
+var force;
 var theseTotals = [];
 var one = [];
 var two = [];
@@ -35,13 +36,17 @@ var phaseData = [];
 var planStart, planEnd;
 var obs = [];
 
-
-
+var listComponents = ["BTN","POT","TMP","ACR","COL","ROT","LDR","LED","PEZ", "RGB","IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger","Note", "Random", "PONG", "SimonSays"];
+// inputs.push("BTN","POT","TMP","ACR","COL","ROT","LDR")
+// outputs.push("LED","PEZ", "RGB")
+// programming.push("IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger")
+// games.push("Note", "Random", "PONG", "SimonSays")
+var hardware = ["BTN","POT","TMP","ACR","COL","ROT","LDR","LED","PEZ", "RGB"]
 
 
 var topMarg = 10;
 var textH = 30;
-var iconW = 20;
+var iconW = 15;
 var iconLMarg = 27;
 var textL = 10;
 ///////summary
@@ -218,7 +223,7 @@ var inputs = [];
 var outputs = [];
 var programming = [];
 var games = [];
-options=("BTN","POT","TMP","ACR","COL","ROT","LDR","LED","PEZ", "RGB","IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger","Note", "Random", "PONG", "SimonSays");
+var options=("BTN","POT","TMP","ACR","COL","ROT","LDR","LED","PEZ", "RGB","IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger","Note", "Random", "PONG", "SimonSays");
 inputs.push("BTN","POT","TMP","ACR","COL","ROT","LDR")
 outputs.push("LED","PEZ", "RGB")
 programming.push("IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger")
@@ -776,8 +781,30 @@ function goIDE(incomingD, summary){
 			return d.special_id; 
 		})		
 		.entries(ideData);
+	for(i=0; i<ide_nest2.length; i++){
+		for(j=0; j<ide_nest2[i].values.length-1; j++){
+			if(ide_nest2[i].values[j].oc==1 && ide_nest2[i].values[j+1].oc==-1){
+				var secondguy = ide_nest2[i].values[j+1].time;
+				ide_nest2[i].values[j].end = secondguy;
+			} else{ 
+				// idenest2[i].values[j].end = +Date.now(); 
+			}
+		}
+	}
+	showIDE();
+	showFace();
+	showHands();
+	// goButton();
+// var itemsOrdered = [];
+// var theOrder = ["Grapes", "Oranges", "Peaches", "Apples", "Watermelons", "Bananas"];
 
+// for (var i = 0; i < theOrder.length; i++) {
+//     if (items.indexOf(theOrder[i]) > -1) {
+//         itemsOrdered.push(theOrder[i]);
+//     }
+// }
 
+// console.log(itemsOrdered);
 		//trying to figure out links here
         links = ideData.filter(function(d) {
             return d.mod == "L";
@@ -787,10 +814,23 @@ function goIDE(incomingD, summary){
 			links[i].source = newguy[i][1];
 			links[i].target = newguy[i][3];
 		}
-
+			for(i=0; i<links.length; i++){
+				for(j=0; j<listComponents.length; j++){
+				    if (links[i].source.indexOf(listComponents[j]) > -1) {
+						links[i].source = listComponents[j];
+					}
+				    if (links[i].target.indexOf(listComponents[j]) > -1) {
+						links[i].target = listComponents[j];
+					}
+				}
+			}
+		console.log(links)
 
 	var circle, path, text;
 	var force;
+
+
+
 	// Compute the distinct nodes from the links.
 	links.forEach(function(link) {
 	  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, mod:link.mod});
@@ -811,6 +851,7 @@ makeChords(force.nodes(), force.links());
 // console.log(force.nodes())
 // console.log(force.links())
 makeEdge(links,force.nodes(), force.links());
+
 
 	var rMap;
 	var maxWeight;
@@ -843,7 +884,7 @@ makeEdge(links,force.nodes(), force.links());
 	    .attr("stroke",colorText)
 	    .attr("fill","none")
 	    .attr("opacity",.05)
-	    .attr("marker-end", "url(#end)");
+	    // .attr("marker-end", "url(#end)");
 
 	text = netSVG.selectAll("labels")
 	    .data(force.nodes())
@@ -876,20 +917,7 @@ makeEdge(links,force.nodes(), force.links());
 	    //     .attr("cy", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); });    
 	  return "translate(" + d.x+ "," + d.y + ")";
 	}
-	for(i=0; i<ide_nest2.length; i++){
-		for(j=0; j<ide_nest2[i].values.length-1; j++){
-			if(ide_nest2[i].values[j].oc==1 && ide_nest2[i].values[j+1].oc==-1){
-				var secondguy = ide_nest2[i].values[j+1].time;
-				ide_nest2[i].values[j].end = secondguy;
-			} else{ 
-				// idenest2[i].values[j].end = +Date.now(); 
-			}
-		}
-	}
-	showIDE();
-	showFace();
-	showHands();
-	// goButton();
+
 }
 
 
@@ -1433,10 +1461,15 @@ function showIDE(){
 				// theseNames.push(d.name);
 				// uniqueNames = unique(theseNames);
 				if(d.mod=="M"){
+			d.timeEdit = Math.round(d.time/100)*100;
+// d.time
+					// (d.time)
 					hardwareOnly.push(d);
 					hardNames.push(d.name);
 				}
 				if(d.mod=="B"){
+			d.timeEdit = Math.round(d.time/100)*100;
+
 					softwareOnly.push(d);
 					softNames.push(d.name);
 				}
@@ -1551,14 +1584,19 @@ console.log("startMin"+startMin+"endMin"+endMin+"totalTime"+totalTime)
 hardwareOnly.sort(function(x, y){
    return d3.ascending(x.time, y.time);
 })
+console.log(hardwareOnly.length)
 uniqueHWOnly = 
-_.uniq(hardwareOnly, function(hware) { return hware.time; })
+_.uniq(hardwareOnly, function(hware) { return hware.timeEdit; })
+console.log(hardwareOnly.length+"done")
+// console.log(_.uniq(hardwareOnly, function(hware) { return hware.timeEdit; }))
+
+
 
 softwareOnly.sort(function(x, y){
    return d3.ascending(x.time, y.time);
 })
 uniqueSWOnly = 
-_.uniq(softwareOnly, function(sware) { return sware.time; })
+_.uniq(softwareOnly, function(sware) { return sware.timeEdit; })
 console.log(uniqueSWOnly.length+"in sw unique")
 console.log(uniqueHWOnly.length+"in hw unique")
 
@@ -1587,8 +1625,6 @@ console.log(uniqueHWOnly.length+"in hw unique")
 			});
 	}
 
-
-
 	// uniqueHards = unique(hardNames);
 	// uniqueSofts = unique(softNames);
 	        console.log("hardware in use"+uniqueHards);
@@ -1605,7 +1641,15 @@ console.log(uniqueHWOnly.length+"in hw unique")
 		bothLength = diffSoftHard.length;
 	}
 
+// var maxHeight;
+// 	if(uniqueHards.length>=uniqueSofts.length){
+// 		maxHeight = uniqueHards.length;
+// 	} else{
+// 		maxHeight = uniqueSofts.length;
+// 	}
+// 	console.log(maxHeight)
 
+// var maxHeight = 
 //arrays are dirty with undefined values
 hardUseComp = cleanArray(hardUseComp)
 // hardUseComp.sort(function(x, y){
@@ -1620,14 +1664,36 @@ softUseComp = cleanArray(softUseComp)
 	// console.log(maxComps)
 	var yHPath, ySPath, minTotal, maxTotal, pathH, index, lineS, lineH, svgPath;
 
+
+
+
+
+
+var howManyHard = [];
+var howManySoft = [];
+for (i=0; i<hardUseComp.length; i++){
+	howManyHard.push(hardUseComp[i].total);
+}
+for (i=0; i<softUseComp.length; i++){
+	howManySoft.push(softUseComp[i].total);
+}
+var maxHeightH = d3.max(howManyHard);
+var maxHeightS = d3.max(howManySoft);
+if(maxHeightH>maxHeightS){
+	maxHeight = maxHeightH;
+} else{
+	maxHeight = maxHeightS;
+}
+console.log(maxHeight+"real max height")
 	xPath = d3.scale.linear()
 	      .domain([startTime,endTime]).range([10, w-40]);
 
+console.log(bothLength+"bothlength");
 	yHPath = d3.scale.linear()
-	      .domain([0,21]) //max hardware components
+	      .domain([0,maxHeight+1]) //max hardware components
 	      .range([timeSVGH/2-maxRadius, 0]);
 	ySPath = d3.scale.linear()
-	      .domain([0,21]) //max software components
+	      .domain([0,maxHeight+1]) //max software components
 	      .range([timeSVGH/2-maxRadius, 0]);
 
 
@@ -1999,9 +2065,8 @@ function linkTotalTo(name) {
 }
 
 
-var linkData;
 function makeEdge(linkData, linkNodes, linkLinks){
-	var linkData = linkData;
+	linkData = linkData;
 	var linkNodes = linkNodes;
 	var linkLinks = linkLinks;
 
@@ -2033,16 +2098,20 @@ var margin = 60;
     plot.append("circle")
         .attr("class", "outline")
         .attr("fill","none")
-        .attr("stroke","#888888")
+        .attr("stroke","black")
+        .attr("stroke-width",.5)
         .attr("r", radius - margin);
 
     // // calculate node positions
     // circleLayout(graph.nodes);
     circleLayout(linkNodes);
-
+    console.log("linkNodes")
+console.log(linkNodes);
     // // draw edges first
     // drawLinks(graph.links);
     drawCurves(linkLinks);
+    console.log("linkLinks")
+    console.log(linkLinks)
 
     // draw nodes last
     drawNodes(linkNodes);
@@ -2051,6 +2120,8 @@ var margin = 60;
 function circleLayout(nodes) {
     // sort nodes by group
     nodes.sort(function(a, b) {
+    	// console.log(a.group);
+    	// console.log(b.group);
         return a.group - b.group;
     });
 
@@ -2117,14 +2188,17 @@ var radius = 5;
         .attr("r", radius)
         .style("fill",  function(d, i) { 
         	addTooltip(d3.select(this))
-        	if(d.mod =="M"){
-        		return "teal";
+        	for(j=0; j<uniqueHards.length; j++){
+        		if(d.name.toLowerCase().indexOf(uniqueHards[j].toLowerCase())>-1){
+	        		return hardwareColor;
+        		}
         	}
-        	if(d.mod=="B"){
-        		return "brown";
-        	}
-        	if(d.mod=="L"){
-        		return "grey"
+        	for(k=0; k<uniqueSofts.length; k++){
+        		console.log(d.name)
+        		console.log(uniqueSofts[k])
+        		if(d.name.toLowerCase().indexOf(uniqueSofts[k].toLowerCase())>-1){
+	        		return softwareColor;
+        		}
         	}
         })
 }
@@ -2139,17 +2213,19 @@ function drawLinks(links) {
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; })
-        .style("stroke",  function(d, i) { 
-        	if(d.mod =="M"){
-        		return "teal";
-        	}
-        	if(d.mod=="B"){
-        		return "brown";
-        	}
-        	if(d.mod=="L"){
-        		return "grey"
-        	}
-        })
+        // .style("stroke",  function(d, i) { 
+        // 	for(j=0; j<uniqueHards.length; j++){
+        // 		if(d.name.indexOf(uniqueHards[j])>-1){
+	       //  		return hardwareColor;
+        // 		}
+        // 	}
+        // 	for(k=0; k<uniqueSofts.length; k++){
+        // 		if(d.name.indexOf(uniqueSofts[k])>-1){
+	       //  		return softwareColor;
+        // 		}
+        // 	}
+        // })
+        // })
         .attr("fill","none")
 	    .attr("marker-end", "url(#end)");
 }
@@ -2165,8 +2241,22 @@ function drawLinks(links) {
 	        .enter()
 	        .append("path")
 	        .attr("class", "link")
-	        .attr("stroke","blue")
+	        .attr("stroke",function(d, i) { 
+        	for(j=0; j<uniqueHards.length; j++){
+        		if(d.name.toLowerCase().indexOf(uniqueHards[j].toLowerCase())>-1){
+	        		return hardwareColor;
+        		}
+        	}
+        	for(k=0; k<uniqueSofts.length; k++){
+        		if(d.name.toLowerCase().indexOf(uniqueSofts[k].toLowerCase())>-1){
+	        		return softwareColor;
+        		}
+        	}
+        })
 	        .attr("fill","none")
+	        .attr("stroke-dasharray", function(d,i){
+	        	if(d.)
+	        })
 	        .attr("d", curve);
 	}
 }
