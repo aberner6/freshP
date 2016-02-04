@@ -788,9 +788,29 @@ obs = cleanArray(obs)
 	  	.append("text")
 	  	.attr("class","phaseText")
 		  .attr("x",function(d,i){
-		  	return timeX(d.start)+(timeX(d.end)-timeX(d.start))/2; 
+		  	// if(i>0){
+var currentX = timeX(d.start)+(timeX(d.end)-timeX(d.start))/2;
+// var oneBefore = (timeX(obs[i-1].start)+(timeX(obs[i-1].end)-timeX(obs[i-1].start))/2);
+	return currentX;	
+		  // }
 		  })
-		  .attr("y",15)
+		  // .attr("dx","")
+		  .attr("y",function(d,i){
+if(i>0){
+var currentX = timeX(d.start)+(timeX(d.end)-timeX(d.start))/2;
+var oneBefore = (timeX(obs[i-1].start)+timeX(obs[i-1].end)-timeX(obs[i-1].start))/2;
+var whichIndex=1; 
+	if((currentX-oneBefore)>70){
+		return 15;
+	} else{
+		whichIndex++;
+		return 15*whichIndex;
+	}
+}
+if(i==0){
+	return 15;
+}
+})
 		  .text(function(d){
 		  	if(d.phase=="obs_reflect"){
 		  		return "Reflection"
