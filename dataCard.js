@@ -1331,7 +1331,8 @@ maxFaces = d3.max(faceNum);
 	    .attr("height", 2*(maxFaces*faceRadius))
 	    .attr("width",timeX(endTime)-timeX(startTime))
 	    .attr("fill", "none")
-		.attr("stroke","lightgray")
+		.attr("stroke","grey")
+		.attr("stroke-dasharray",1)
 
 
 // var bins = {};
