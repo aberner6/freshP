@@ -607,16 +607,23 @@ console.log(phaseArray+"phasearray")
 // };
 
 var width = forcewidth,
-    height = forceheight,
-    radius = Math.min(width, height) / 2.4;
+    height = forceheight;
+var diameter = forcewidth;
+var margin = 60;
+var radius = (diameter / 2)-margin+3;
+    // radius = Math.min(width, height) / 2.4;
 
 var color = ["#3F51B5","#607D8B","#7986CB"];
 
 var pie = d3.layout.pie()
     .sort(null);
 
-var outerRadius = radius-10;
-var innerRadius = radius-30;
+
+
+
+
+var outerRadius = radius;//-10;
+var innerRadius = radius-20;//-30;
 var arc = d3.svg.arc()
     .innerRadius(innerRadius)
     .outerRadius(outerRadius);
@@ -631,7 +638,7 @@ var netSVG = d3.select("#facehand")
 	.append("g")
 	.style("border","1px solid white") 
 	.style("margin-top","1px")
-    .attr("transform", "translate(" + width/2 + "," + height/2 + ")");
+    .attr("transform", "translate(" + width/2 + "," + (height/2)+11 + ")");
 
 var pathPie = netSVG.selectAll("pathPie")
     .data(pie(phaseArray))
@@ -662,10 +669,10 @@ sliceLabel.enter().append("svg:text")
             // pythagorean theorem for hypotenuse
             h = Math.sqrt(x*x + y*y);
     	if ((y/h * labelr)>outerRadius/2) {
-    		return "0em"
+    		return ".45em"
     	}
 		else{
-			return (".35em")
+			return ("-.45em")
 		}
     })
     .attr("text-anchor", "middle")
@@ -2269,7 +2276,6 @@ function makeEdge(linkData, linkNodes, linkLinks){
 var diameter = forcewidth;
 var radius = diameter / 2;
 var margin = 60;
-
 // drawGraph();
 // Draws an arc diagram for the provided undirected graph
 // function drawGraph(graph) {
@@ -2282,7 +2288,7 @@ var margin = 60;
     // create plot area within svg image
     var plot = buttonSVG.append("g")
         .attr("id", "plot")
-        .attr("transform", "translate(" + radius + ", " + (radius-29) + ")");
+        .attr("transform", "translate(" + radius + ", " + (radius-19) + ")");
 
     // draw border around plot area
     plot.append("circle")
@@ -2290,7 +2296,7 @@ var margin = 60;
         .attr("fill","none")
         .attr("stroke","black")
         .attr("stroke-width",.5)
-        .attr("r", radius - margin);
+        .attr("r", radius - margin+2);
 
     // // calculate node positions
     // circleLayout(graph.nodes);
