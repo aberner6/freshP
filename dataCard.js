@@ -302,6 +302,8 @@ function getData(thisSession, token){
 				console.log("ready")
 startTime = json[0].time;
 endTime = json[json.length-1].time;
+	timeX.domain([startTime, endTime]).range([10, w-40]);
+
 console.log(startTime+"start")
 				ready(json)
 				getPhases(thisSession, token);
@@ -412,7 +414,6 @@ for(i=0; i<data.length; i++){
 		particleOnly.push(data[i]);
 	}
 }
-goButton(particleOnly);
 
 		nested_data = d3.nest()
 			.key(function(d) { return d.type; })
@@ -484,6 +485,7 @@ var rey = [];
 				// else{ console.log("nope")}
 			}	
 		}
+goButton(particleOnly);
 	};
 
 
@@ -549,7 +551,6 @@ function showPhases(phasesJSON) {
 		}	
 	}
 obs = cleanArray(obs)
-	timeX.domain([startTime, endTime]).range([10, w-40]);
 
 	console.log(obs);
 	//draw a rectangle for each key
@@ -616,13 +617,36 @@ if(button2.length>button1.length){
 	buttonTot = button2.length;
 }else{ buttonTot = button1.length; }
 console.log(buttonTot)
-var iconW = (forcewidth/1.5)/buttonTot
+// var iconW = (forcewidth/1.5)/buttonTot
 	var xSpace = d3.scale.linear()
 		.domain([0, buttonTot+1])
 		.range([textL, forcewidth-iconW])
 
-
-
+var iconBut = timeSVG.selectAll(".button1")	
+	.data(button1)
+	iconBut.enter()
+	.append("image")
+	.attr("class","button1")
+	.attr("xlink:href", "assets/icons/idea.png")
+	.attr("x", function(d){
+		return timeX(d.time);
+	})
+	.attr("y", timeSVGH/2+iconW/2)
+	.attr("width",iconW)
+	.attr("height",iconW);
+console.log(button2);
+var iconBut2 = timeSVG.selectAll(".button2")	
+	.data(button2)
+	iconBut2.enter()
+	.append("image")
+	.attr("class","button2")
+	.attr("xlink:href", "assets/icons/thunder.png")
+	.attr("x", function(d){
+		return timeX(d.time);
+	})
+	.attr("y", timeSVGH/2+iconW/2)
+	.attr("width",iconW)
+	.attr("height",iconW);
 
 
 
@@ -865,6 +889,7 @@ makeEdge(links,force.nodes(), force.links());
 	showIDE();
 	showFace();
 	showHands();
+	// goButton();
 }
 
 
@@ -1298,7 +1323,7 @@ var faceColor = "pink";
 maxFaces = d3.max(faceNum);
 /////OPTION 1
 	backFace = timeSVG.append("g").attr("class","backrect").selectAll(".backrect")
-	    .data(d3.range(2))
+	    .data(d3.range(1))
 	  	.enter().append("rect")
 	    .attr("class", "backrect")
 	    .attr("x", timeX(startTime))
