@@ -608,17 +608,19 @@ console.log(phaseArray+"phasearray")
 
 var width = forcewidth,
     height = forceheight,
-    radius = Math.min(width, height) / 2;
+    radius = Math.min(width, height) / 2.3;
 
 var color = ["aqua","lightblue","blue"];
 
 var pie = d3.layout.pie()
     .sort(null);
+
 var outerRadius = radius-10;
+var innerRadius = radius-40;
 var arc = d3.svg.arc()
-    .innerRadius(radius - 20)
+    .innerRadius(innerRadius)
     .outerRadius(outerRadius);
-   var labelr = radius/2 + 30; // radius for label anchor
+   var labelr = radius/1.7 + 30; // radius for label anchor
 
 
 
