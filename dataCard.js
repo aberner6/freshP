@@ -300,6 +300,7 @@ function getSession(){
 			getData(thisSession, token);
 	})
 }
+var firstData;
 function getData(thisSession, token){
 	console.log(thisSession);
 	if(thisSession>0){
@@ -310,7 +311,8 @@ function getData(thisSession, token){
 // 	timeX.domain([startTime, endTime]).range([10, w-40]);
 
 // console.log(startTime+"start")
-				ready(json)
+firstData = json;
+ 				// ready(json)
 				getPhases(thisSession, token);
 			})
 	}
@@ -318,12 +320,19 @@ function getData(thisSession, token){
 function getPhases(thisSession,token){
 	$.getJSON("http://pelars.sssup.it:8080/pelars/phase/"+thisSession+"?token="+token,function(phasesJSON){
 		console.log("phase")
-startTime = phasesJSON[0].time;
-endTime = phasesJSON[phasesJSON.length-1].time;
+startTime = phasesJSON[0].start;
+if(phasesJSON[phasesJSON.length-1].end>phasesJSON[phasesJSON.length-2].end){
+	endTime = phasesJSON[phasesJSON.length-1].end;
+} else{
+		endTime = phasesJSON[phasesJSON.length-2].end;
+}
+console.log(startTime+"START"+endTime+"end")
+
 	timeX.domain([startTime, endTime]).range([10, w-40]);
 
 console.log(startTime+"start")
 		showPhases(phasesJSON)
+		ready(firstData)
 	})
 }
 function pelars_authenticate(){
@@ -572,9 +581,9 @@ obs = cleanArray(obs)
 		.enter()
 	  	.append("rect")
 	  	.attr("class","phase")
-	  	.attr("transform",function(d,i) {
-	  		return "translate("+(i*180)+",0)";
-	  	})
+	  	// .attr("transform",function(d,i) {
+	  	// 	return "translate("+(i*180)+",0)";
+	  	// })
 		  .attr("x",function(d,i){
 		  	return timeX(d.start); 
 		  })
@@ -591,7 +600,7 @@ obs = cleanArray(obs)
 		  	}
 		  })
 		  .attr("opacity",.1)
-		  .attr("stroke","none")
+		  .attr("stroke","grey")
 		  //OR
 		  // .attr("fill","none")
 		  // .attr("stroke-dasharray",5)
@@ -799,8 +808,8 @@ function goIDE(incomingD, summary){
 			}
 		}
 	}
-	showIDE();
 	showFace();
+	showIDE();
 	showHands();
 	// goButton();
 // var itemsOrdered = [];
@@ -891,7 +900,7 @@ makeEdge(links,force.nodes(), force.links());
 	    .attr("class","link")
 	    .attr("stroke",colorText)
 	    .attr("fill","none")
-	    .attr("opacity",.05)
+	    .attr("opacity",.5)
 	    // .attr("marker-end", "url(#end)");
 
 	text = netSVG.selectAll("labels")
@@ -985,7 +994,7 @@ function goFace(incomingData, summary){
 	}
 	timeMin = d3.min(miniTime);
 	timeMax = d3.max(whatTime);
-	timeX.domain([timeMin, timeMax]).range([cmargin, w-cwidth+cmargin]);
+	// timeX.domain([timeMin, timeMax]).range([cmargin, w-cwidth+cmargin]);
 }
 
 function goHands(incomingData, summary){	
@@ -1434,7 +1443,7 @@ function showIDE(){
         .range([10, w-40]);
     var timeFormat = d3.time.format("%H:%M");
 
-	timeX.domain([startTime, endTime]).range([iconLMarg, w-40]);
+	// timeX.domain([startTime, endTime]).range([iconLMarg, w-40]);
 
     xAxis
         .scale(xAxisScale)
@@ -1697,12 +1706,13 @@ console.log(maxHeight+"real max height")
 	      .domain([startTime,endTime]).range([10, w-40]);
 
 console.log(bothLength+"bothlength");
+// var maxFaces = 5;
 	yHPath = d3.scale.linear()
 	      .domain([0,maxHeight+1]) //max hardware components
-	      .range([timeSVGH/2-maxRadius, 0]);
+	      .range([timeSVGH/2-(maxFaces*faceRadius), 0]);
 	ySPath = d3.scale.linear()
 	      .domain([0,maxHeight+1]) //max software components
-	      .range([timeSVGH/2-maxRadius, 0]);
+	      .range([timeSVGH/2-(maxFaces*faceRadius), 0]);
 
 
 
