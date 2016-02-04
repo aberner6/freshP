@@ -46,6 +46,7 @@ var textL = 10;
 ///////summary
 var uniqueHards;
 var uniqueSofts;
+var bothHS;
 var uniqueManips;
 var hardNames = [];
 var softNames = [];
@@ -1402,8 +1403,8 @@ function showIDE(){
 		.append("rect")
 		.attr("class",function(d){
 			if(d.name){
-				theseNames.push(d.name);
-				uniqueNames = unique(theseNames);
+				// theseNames.push(d.name);
+				// uniqueNames = unique(theseNames);
 				if(d.mod=="M"){
 					hardwareOnly.push(d);
 					hardNames.push(d.name);
@@ -1412,47 +1413,60 @@ function showIDE(){
 					softwareOnly.push(d);
 					softNames.push(d.name);
 				}
-				yOther.domain(uniqueNames);
+				uniqueHards = unique(hardNames);
+				uniqueSofts = unique(softNames);
+				bothHS = uniqueHards.concat(uniqueSofts);
+				yOther.domain(bothHS);
 			}
 			return d.name;
 		})
 		.attr("x", function(d){
-			return timeX2(d.time)
+			if(d.mod=="M" || d.mod=="B"){
+				return timeX2(d.time)
+			}
 		})
         .attr("y", function(d, i) {
-            return yOther(d.name);
+			if(d.mod=="M" || d.mod=="B"){
+	            return yOther(d.name);
+    		}
         })
 		.attr("width",function(d,i){
-			if(d.oc==1){
-				if(d.end){
-					return timeX2(d.end)-timeX2(d.time);
-				}else{
-					return timeX2(endTime)-timeX2(d.time);				
+			if(d.mod=="M" || d.mod=="B"){
+				if(d.oc==1){
+					if(d.end){
+						return timeX2(d.end)-timeX2(d.time);
+					}else{
+						return timeX2(endTime)-timeX2(d.time);				
+					}
+				} else{
+					return 0;
 				}
-			} else{
-				return 0;
 			}
 		})
 		.attr("height", 5)
 		.attr("fill", function(d){
-			if(yOther(d.name)!=undefined){
-				return colorScale(d.mod);
-			} else{
-				return "none";
+			if(d.mod=="M" || d.mod=="B"){
+				if(yOther(d.name)!=undefined){
+					return colorScale(d.mod);
+				} else{
+					return "none";
+				}
 			}
 		})
 		.attr("stroke", function(d){
-			if(yOther(d.name)!=undefined){
-				return "white"
-			} else{
-				return "none";
+			if(d.mod=="M" || d.mod=="B"){
+				if(yOther(d.name)!=undefined){
+					return "white"
+				} else{
+					return "none";
+				}
 			}
 		})
 		.attr("opacity",.3);
 
 
 	activeSVG.selectAll(".timeText")
-		.data(uniqueNames)
+		.data(bothHS)
 		.enter()
 		.append("text")
 		.attr("class","timeText")
@@ -1530,8 +1544,8 @@ console.log(uniqueHWOnly.length+"in hw unique")
 
 
 
-	uniqueHards = unique(hardNames);
-	uniqueSofts = unique(softNames);
+	// uniqueHards = unique(hardNames);
+	// uniqueSofts = unique(softNames);
 	        console.log("hardware in use"+uniqueHards);
 	        console.log("software in use"+uniqueSofts);
 			console.log("components in use"+uniqueNames)
