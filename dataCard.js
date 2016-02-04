@@ -1636,7 +1636,37 @@ maxFaces = d3.max(faceNum);
 		.attr("stroke","grey")
 		.attr("stroke-dasharray",1)
 
+/////OPTION 1
+var	handPic = timeSVG.append("g").attr("class","backlabels")
+		.append("image")
+	    .attr("x", timeX(startTime))
+	    .attr("y", timeSVGH/2+(3*maxFaces*faceRadius)-10)
+	    .attr("width",iconW)
+	    .attr("height",iconW)
+               .attr("xlink:href","assets/hand.png")
 
+var	labelsHand = timeSVG.append("g").attr("class","backlabels")
+		.append("text")
+	    .attr("x", timeX(startTime)+iconW+2)
+	    .attr("y", timeSVGH/2+(3*maxFaces*faceRadius)-5)
+	    .text("Hand Activity")
+	    .attr("font-size",8)
+
+/////OPTION 1
+var	facePic = timeSVG.append("g").attr("class","backlabels")
+		.append("image")
+	    .attr("x", timeX(startTime))
+	    .attr("y", timeSVGH/2-(maxFaces*faceRadius)-15)
+	    .attr("width",iconW)
+	    .attr("height",iconW)
+               .attr("xlink:href", "assets/face2.png")
+
+var	labelsFace = timeSVG.append("g").attr("class","backlabels")
+		.append("text")
+	    .attr("x", timeX(startTime)+iconW+2)
+	    .attr("y", timeSVGH/2-(maxFaces*faceRadius)-5)
+	    .text("Faces @ Table")
+	    .attr("font-size",8)
 // var bins = {};
 // faceData.values.forEach(function(t) {
 // 	// console.log(t.num)
