@@ -761,9 +761,6 @@ obs = cleanArray(obs)
 		.enter()
 	  	.append("rect")
 	  	.attr("class","phase")
-	  	// .attr("transform",function(d,i) {
-	  	// 	return "translate("+(i*180)+",0)";
-	  	// })
 		  .attr("x",function(d,i){
 		  	return timeX(d.start); 
 		  })
@@ -785,6 +782,28 @@ obs = cleanArray(obs)
 		  // .attr("fill","none")
 		  // .attr("stroke-dasharray",5)
 		  // .attr("stroke-width",.5)
+	var textPhase = timeSVG.selectAll(".phaseText")
+		.data(obs)
+		.enter()
+	  	.append("text")
+	  	.attr("class","phaseText")
+		  .attr("x",function(d,i){
+		  	return timeX(d.start)+(timeX(d.end)-timeX(d.start))/2; 
+		  })
+		  .attr("y",15)
+		  .text(function(d){
+		  	if(d.phase=="obs_reflect"){
+		  		return "Reflection"
+		  	}
+		  	if(d.phase=="obs_document"){
+		  		return "Documentation"
+		  	}
+		  	if(d.phase=="obs_plan"){
+		  		return "Planning"
+		  	}
+		  })
+
+
 }
 
 
