@@ -295,7 +295,7 @@ var token;
 function getSession(){
 	var token = pelars_authenticate();
 	$.getJSON("http://pelars.sssup.it:8080/pelars/session?token="+token,function(json1){
-			thisSession = parseInt(615);//537//615//json1[json1.length-1].session;
+			thisSession = parseInt(832);//537//615//json1[json1.length-1].session;
 			console.log("session"+thisSession);
 			getData(thisSession, token);
 	})
@@ -305,19 +305,24 @@ function getData(thisSession, token){
 	if(thisSession>0){
 		$.getJSON("http://pelars.sssup.it:8080/pelars/data/"+thisSession+"?token="+token,function(json){
 				console.log("ready")
-startTime = json[0].time;
-endTime = json[json.length-1].time;
-	timeX.domain([startTime, endTime]).range([10, w-40]);
+// startTime = json[0].time;
+// endTime = json[json.length-1].time;
+// 	timeX.domain([startTime, endTime]).range([10, w-40]);
 
-console.log(startTime+"start")
+// console.log(startTime+"start")
 				ready(json)
 				getPhases(thisSession, token);
 			})
 	}
 }
 function getPhases(thisSession,token){
-	$.getJSON("http://pelars.sssup.it:8080/pelars/phase/"+768+"?token="+token,function(phasesJSON){
+	$.getJSON("http://pelars.sssup.it:8080/pelars/phase/"+thisSession+"?token="+token,function(phasesJSON){
 		console.log("phase")
+startTime = phasesJSON[0].time;
+endTime = phasesJSON[phasesJSON.length-1].time;
+	timeX.domain([startTime, endTime]).range([10, w-40]);
+
+console.log(startTime+"start")
 		showPhases(phasesJSON)
 	})
 }
@@ -541,18 +546,21 @@ goButton(particleOnly);
 
 
 function showPhases(phasesJSON) {
-	// console.log(phasesJSON)
+	console.log(phasesJSON)
 	phaseData = phasesJSON;
 	var phaseNum = 0;
-	for(i=1; i<4; i++){ //change this
+	for(i=1; i<phaseData.length; i++){ //change this
 		if(phaseData[i].phase!=phaseData[i-1].phase){
-			phaseNum+=1;
-			obs[phaseNum]=({
-				"num":phaseNum,
-				"phase": phaseData[i].phase,
-				"start": startTime+phaseNum*20000,
-				"end": startTime+phaseNum*20000+(endTime-startTime)/3.5
-			})
+			if(phaseData[i].phase=="obs_rate" || phaseData[i].phase=="setup"){}
+				else{
+					phaseNum+=1;
+					obs[phaseNum]=({
+						"num":phaseNum,
+						"phase": phaseData[i].phase,
+						"start": phaseData[i].start,
+						"end": phaseData[i].end
+					})
+			}
 		}	
 	}
 obs = cleanArray(obs)
@@ -2255,7 +2263,7 @@ function drawLinks(links) {
         })
 	        .attr("fill","none")
 	        .attr("stroke-dasharray", function(d,i){
-	        	if(d.)
+	        	// if(d.)
 	        })
 	        .attr("d", curve);
 	}
