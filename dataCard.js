@@ -302,15 +302,15 @@ function getSession(){
 }
 var firstData;
 
-
+var startFirst, endFirst;
 // IF START TIME OF ONE IS LESS THAN START TIME OF OTHER, MAKE IT THAT
 function getData(thisSession, token){
 	console.log(thisSession);
 	if(thisSession>0){
 		$.getJSON("http://pelars.sssup.it:8080/pelars/data/"+thisSession+"?token="+token,function(json){
 				console.log("ready")
-// startTime = json[0].time;
-// endTime = json[json.length-1].time;
+startFirst = json[0].time;
+endFirst = json[json.length-1].time;
 // 	timeX.domain([startTime, endTime]).range([10, w-40]);
 
 // console.log(startTime+"start")
@@ -323,12 +323,22 @@ firstData = json;
 function getPhases(thisSession,token){
 	$.getJSON("http://pelars.sssup.it:8080/pelars/phase/"+thisSession+"?token="+token,function(phasesJSON){
 		console.log("phase")
-startTime = phasesJSON[0].start;
-if(phasesJSON[phasesJSON.length-1].end>phasesJSON[phasesJSON.length-2].end){
-	endTime = phasesJSON[phasesJSON.length-1].end;
-} else{
-		endTime = phasesJSON[phasesJSON.length-2].end;
-}
+		if(phasesJSON[0].start<startFirst){
+			startTime = phasesJSON[0].start;			
+		} else{
+			startTime = startFirst;			
+		}
+		if(phasesJSON[phasesJSON.length-1].end>phasesJSON[phasesJSON.length-2].end){
+			endPhase = phasesJSON[phasesJSON.length-1].end;
+		} 		
+		else{
+			endPhase = phasesJSON[phasesJSON.length-2].end;
+		}
+		if(endPhase>endFirst){
+			endTime = endPhase;
+		} else{
+			endTime = endFirst;
+		}
 console.log(startTime+"START"+endTime+"end")
 
 	timeX.domain([startTime, endTime]).range([10, w-40]);
