@@ -608,7 +608,7 @@ console.log(phaseArray+"phasearray")
 
 var width = forcewidth,
     height = forceheight,
-    radius = Math.min(width, height) / 2.3;
+    radius = Math.min(width, height) / 2.4;
 
 var color = ["aqua","lightblue","blue"];
 
@@ -655,7 +655,19 @@ sliceLabel.enter().append("svg:text")
         return "translate(" + (x/h * labelr) +  ',' +
            (y/h * labelr) +  ")"; 
     })
-    .attr("dy", ".35em")
+    .attr("dy",  function(d){
+        var c = arc.centroid(d),
+            x = c[0],
+            y = c[1],
+            // pythagorean theorem for hypotenuse
+            h = Math.sqrt(x*x + y*y);
+    	if ((y/h * labelr)>outerRadius/2) {
+    		return "0em"
+    	}
+		else{
+			return (".35em")
+		}
+    })
     .attr("text-anchor", "middle")
     .text(function(d, i) { 
     	if(i==0){
@@ -668,6 +680,8 @@ sliceLabel.enter().append("svg:text")
     		return "Reflect"
     	}
     })
+    .attr("fill", function(d, i) { return color[i]; })
+
 var sliceLabel2 = label_group.selectAll(".arcLabel2")
     .data(pie(phaseArray))
 sliceLabel2.enter().append("svg:text")
@@ -681,7 +695,19 @@ sliceLabel2.enter().append("svg:text")
         return "translate(" + (x/h * labelr) +  ',' +
            (y/h * labelr) +  ")"; 
     })
-    .attr("dy", "1.3em")
+    .attr("dy", function(d){
+        var c = arc.centroid(d),
+            x = c[0],
+            y = c[1],
+            // pythagorean theorem for hypotenuse
+            h = Math.sqrt(x*x + y*y);
+    	if ((y/h * labelr)>outerRadius/2) {
+    		return "-1.3em"
+    	}
+		else{
+			return ("1.3em")
+		}
+    })
     .attr("text-anchor", "middle")
     .text(function(d, i) { 
     	// console.log(d);
