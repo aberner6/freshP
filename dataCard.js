@@ -620,7 +620,7 @@ var innerRadius = radius-30;
 var arc = d3.svg.arc()
     .innerRadius(innerRadius)
     .outerRadius(outerRadius);
-   var labelr = radius/1.7 + 30; // radius for label anchor
+   var labelr = radius/1.7 + 23; // radius for label anchor
 
 
 
