@@ -682,48 +682,48 @@ sliceLabel.enter().append("svg:text")
     })
     .attr("fill", function(d, i) { return color[i]; })
 
-var sliceLabel2 = label_group.selectAll(".arcLabel2")
-    .data(pie(phaseArray))
-sliceLabel2.enter().append("svg:text")
-    .attr("class", "arcLabel2")
-    .attr("transform", function(d) {
-        var c = arc.centroid(d),
-            x = c[0],
-            y = c[1],
-            // pythagorean theorem for hypotenuse
-            h = Math.sqrt(x*x + y*y);
-        return "translate(" + (x/h * labelr) +  ',' +
-           (y/h * labelr) +  ")"; 
-    })
-    .attr("dy", function(d){
-        var c = arc.centroid(d),
-            x = c[0],
-            y = c[1],
-            // pythagorean theorem for hypotenuse
-            h = Math.sqrt(x*x + y*y);
-    	if ((y/h * labelr)>outerRadius/2) {
-    		return "-1.3em"
-    	}
-		else{
-			return ("1.3em")
-		}
-    })
-    .attr("text-anchor", "middle")
-    .text(function(d, i) { 
-    	// console.log(d);
-    	if(i==0){
-    		var thisDate = new Date(d.data)
-    		return thisDate.getMinutes()+"mins";
-    	}
-    	if(i==1){
-    		var thisDate = new Date(d.data)
-    		return thisDate.getMinutes()+"mins";
-    	}
-    	if(i==2){
-    		var thisDate = new Date(d.data)
-    		return thisDate.getMinutes()+"mins";    	
-    	}
-    })
+// var sliceLabel2 = label_group.selectAll(".arcLabel2")
+//     .data(pie(phaseArray))
+// sliceLabel2.enter().append("svg:text")
+//     .attr("class", "arcLabel2")
+//     .attr("transform", function(d) {
+//         var c = arc.centroid(d),
+//             x = c[0],
+//             y = c[1],
+//             // pythagorean theorem for hypotenuse
+//             h = Math.sqrt(x*x + y*y);
+//         return "translate(" + (x/h * labelr) +  ',' +
+//            (y/h * labelr) +  ")"; 
+//     })
+//     .attr("dy", function(d){
+//         var c = arc.centroid(d),
+//             x = c[0],
+//             y = c[1],
+//             // pythagorean theorem for hypotenuse
+//             h = Math.sqrt(x*x + y*y);
+//     	if ((y/h * labelr)>outerRadius/2) {
+//     		return "-1.3em"
+//     	}
+// 		else{
+// 			return ("1.3em")
+// 		}
+//     })
+//     .attr("text-anchor", "middle")
+//     .text(function(d, i) { 
+//     	// console.log(d);
+//     	if(i==0){
+//     		var thisDate = new Date(d.data)
+//     		return thisDate.getMinutes()+"mins";
+//     	}
+//     	if(i==1){
+//     		var thisDate = new Date(d.data)
+//     		return thisDate.getMinutes()+"mins";
+//     	}
+//     	if(i==2){
+//     		var thisDate = new Date(d.data)
+//     		return thisDate.getMinutes()+"mins";    	
+//     	}
+//     })
 
 
 
