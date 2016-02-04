@@ -24,7 +24,8 @@ var startMin, endMin, totalTime;
 var faceRadius = 5;
 var maxRadius = faceRadius*4;
 
-
+var hardwareColor = "#15989C";
+var softwareColor = "#B19B80";
 /////////
 var obsReflect = [];
 var obsDoc = [];
@@ -1384,7 +1385,7 @@ function showIDE(){
         .attr('transform', 'translate(0, ' + (timeSVGH-1) + ')');
 
 	yOther
-	    .rangePoints([topMarg, forceheight-topMarg/2]);
+	    .rangePoints([topMarg, forceheight-topMarg/2-iconW/2]);
 
 	timeX2.domain([startTime, endTime]).range([forcewidth/4, forcewidth]);
 
@@ -1445,24 +1446,30 @@ function showIDE(){
 		})
 		.attr("height", 5)
 		.attr("fill", function(d){
-			if(d.mod=="M" || d.mod=="B"){
-				if(yOther(d.name)!=undefined){
-					return colorScale(d.mod);
+			if(yOther(d.name)!=undefined){
+			if(d.mod=="M"){
+				return hardwareColor;
+			} if (d.mod=="B"){
+				return softwareColor;
+					// return colorScale(d.mod);
 				} else{
 					return "none";
 				}
-			}
-		})
-		.attr("stroke", function(d){
-			if(d.mod=="M" || d.mod=="B"){
-				if(yOther(d.name)!=undefined){
-					return "white"
-				} else{
+			} else{
 					return "none";
 				}
-			}
 		})
-		.attr("opacity",.3);
+		.attr("stroke", "none")
+		// 	function(d){
+		// 	if(d.mod=="M" || d.mod=="B"){
+		// 		if(yOther(d.name)!=undefined){
+		// 			return "white"
+		// 		} else{
+		// 			return "none";
+		// 		}
+		// 	}
+		// })
+		.attr("opacity",.4);
 
         var iconsHS;
            iconsHS = activeSVG.selectAll(".iconsHS")
@@ -1473,7 +1480,7 @@ function showIDE(){
                    return "assets/icons/"+d.toLowerCase() + ".png";
                })
                .attr("y", function(d,i) {
-            		return yOther(d)-12;
+            		return yOther(d)-7;
                })
                .attr("width", iconW)
                .attr("height", iconW)
@@ -1486,7 +1493,7 @@ function showIDE(){
 		.attr("class","timeText")
 		.attr("x", iconLMarg)
         .attr("y", function(d, i) {
-            return yOther(d);
+            return yOther(d)+5;
         })
 		.attr("fill", "black")
 		// 	function(d){
@@ -1755,13 +1762,16 @@ softUseComp = cleanArray(softUseComp)
       		}
       })
       .interpolate("linear");
+
+
+
 var opacityPath = .5;
   pathH = timeSVG.append("g")
     .append("path")
     .attr("class","timepathH")
-  		.attr("fill","#15989C")
+  		.attr("fill",hardwareColor)
   		.attr("opacity",opacityPath)
-  		.attr("stroke","#15989C");
+  		.attr("stroke",hardwareColor);
   	pathH
   		.datum(hardUseComp)
   		.attr("d", lineH);
@@ -1770,9 +1780,9 @@ var pathS;
   pathS = timeSVG.append("g")
     .append("path")
     .attr("class","timepathS")
-  		.attr("fill","#B19B80")
+  		.attr("fill",softwareColor)
   		.attr("opacity",opacityPath)
-  		.attr("stroke","#B19B80");
+  		.attr("stroke",softwareColor);
   	pathS
   		.datum(softUseComp)
   		.attr("d", lineS);
