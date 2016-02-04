@@ -596,7 +596,7 @@ for(i=0; i<obsDoc.length; i++){
 	totalDoc = obsDoc[obsDoc.length-1].end-obsDoc[0].start 
 }
 var phaseArray = [];
-phaseArray.push(totalPlan, totalReflect, totalDoc)
+phaseArray.push(totalPlan, totalDoc, totalReflect)
 console.log(phaseArray+"phasearray")
 
 
@@ -614,10 +614,11 @@ var color = ["aqua","lightblue","blue"];
 
 var pie = d3.layout.pie()
     .sort(null);
-
+var outerRadius = radius-10;
 var arc = d3.svg.arc()
     .innerRadius(radius - 20)
-    .outerRadius(radius - 10);
+    .outerRadius(outerRadius);
+   var labelr = radius/2 + 30; // radius for label anchor
 
 
 
@@ -655,9 +656,35 @@ var sliceLabel = label_group.selectAll("text")
     .data(pie(phaseArray))
 sliceLabel.enter().append("svg:text")
     .attr("class", "arcLabel")
-    .attr("transform", function(d) {return "translate(" + arc.centroid(d) + ")"; })
+      // .attr("transform", function(d) { //set the label's origin to the center of the arc
+      //   //we have to make sure to set these before calling arc.centroid
+      //   d.outerRadius = radius + 50; // Set Outer Coordinate
+      //   d.innerRadius = radius + 45; // Set Inner Coordinate
+      //   return "translate(" + arc.centroid(d) + ")";
+      // })   
+    .attr("transform", function(d) {
+        var c = arc.centroid(d),
+            x = c[0],
+            y = c[1],
+            // pythagorean theorem for hypotenuse
+            h = Math.sqrt(x*x + y*y);
+        return "translate(" + (x/h * labelr) +  ',' +
+           (y/h * labelr) +  ")"; 
+    })
+    .attr("dy", ".35em")
     .attr("text-anchor", "middle")
-    .text(function(d, i) { return "Phase "+i });
+
+    .text(function(d, i) { 
+    	if(i==0){
+    		return "Plan";
+    	}
+    	if(i==1){
+    		return "Document";
+    	}
+    	if(i==2){
+    		return "Reflect";
+    	}
+    });
 
 
 
