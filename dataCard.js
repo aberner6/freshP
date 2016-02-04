@@ -127,8 +127,8 @@ var goAhead;
 
 
 
-var forcewidth = w/4-9;
-var forceheight = h/4;
+var forcewidth = w/3-15;
+var forceheight = h/3.5;
 var netSVG = d3.select("#facehand")
 	.append("svg")
 	.attr("width",forcewidth)
@@ -1371,7 +1371,7 @@ function showIDE(){
         .range([10, w-40]);
     var timeFormat = d3.time.format("%H:%M");
 
-	timeX.domain([startTime, endTime]).range([10, w-40]);
+	timeX.domain([startTime, endTime]).range([iconLMarg, w-40]);
 
     xAxis
         .scale(xAxisScale)
@@ -1464,15 +1464,27 @@ function showIDE(){
 		})
 		.attr("opacity",.3);
 
+        var iconsHS;
+           iconsHS = activeSVG.selectAll(".iconsHS")
+               .data(bothHS)
+           iconsHS.enter().append("image")
+               .attr("class", "iconsHS")
+               .attr("xlink:href", function(d, i) {
+                   return "assets/icons/"+d.toLowerCase() + ".png";
+               })
+               .attr("y", function(d,i) {
+            		return yOther(d)-12;
+               })
+               .attr("width", iconW)
+               .attr("height", iconW)
+               .attr("x", 2)
 
 	activeSVG.selectAll(".timeText")
 		.data(bothHS)
 		.enter()
 		.append("text")
 		.attr("class","timeText")
-		.attr("x", function(d){
-			return 3
-		})
+		.attr("x", iconLMarg)
         .attr("y", function(d, i) {
             return yOther(d);
         })
@@ -1965,7 +1977,7 @@ function makeEdge(linkData, linkNodes, linkLinks){
 // console.log(linkLinks)
 var diameter = forcewidth;
 var radius = diameter / 2;
-var margin = 40;
+var margin = 60;
 
 // drawGraph();
 // Draws an arc diagram for the provided undirected graph
@@ -1979,7 +1991,7 @@ var margin = 40;
     // create plot area within svg image
     var plot = buttonSVG.append("g")
         .attr("id", "plot")
-        .attr("transform", "translate(" + radius + ", " + (radius-19) + ")");
+        .attr("transform", "translate(" + radius + ", " + (radius-29) + ")");
 
     // draw border around plot area
     plot.append("circle")
