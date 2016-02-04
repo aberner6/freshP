@@ -616,7 +616,7 @@ var pie = d3.layout.pie()
     .sort(null);
 
 var outerRadius = radius-10;
-var innerRadius = radius-40;
+var innerRadius = radius-30;
 var arc = d3.svg.arc()
     .innerRadius(innerRadius)
     .outerRadius(outerRadius);
@@ -641,29 +641,11 @@ var pathPie = netSVG.selectAll("pathPie")
 
 var label_group = netSVG.append("svg:g")
     .attr("class", "lblGroup")
-    // .attr("transform", "translate(" + (w / 2) + "," + (h / 2) + ")");
-
-// GROUP FOR CENTER TEXT
-// var center_group = netSVG.append("svg:g")
-//     .attr("class", "ctrGroup")
-// .append("svg:text")
-//     .attr("dy", ".35em").attr("class", "chartLabel")
-//     .attr("text-anchor", "middle")
-//     .text(function(d){
-//     	return d;
-//     });
-    // .attr("transform", "translate(" + (w / 2) + "," + (h / 2) + ")");
 // DRAW SLICE LABELS
 var sliceLabel = label_group.selectAll("text")
     .data(pie(phaseArray))
 sliceLabel.enter().append("svg:text")
     .attr("class", "arcLabel")
-      // .attr("transform", function(d) { //set the label's origin to the center of the arc
-      //   //we have to make sure to set these before calling arc.centroid
-      //   d.outerRadius = radius + 50; // Set Outer Coordinate
-      //   d.innerRadius = radius + 45; // Set Inner Coordinate
-      //   return "translate(" + arc.centroid(d) + ")";
-      // })   
     .attr("transform", function(d) {
         var c = arc.centroid(d),
             x = c[0],
@@ -675,19 +657,47 @@ sliceLabel.enter().append("svg:text")
     })
     .attr("dy", ".35em")
     .attr("text-anchor", "middle")
-
     .text(function(d, i) { 
     	if(i==0){
-    		return "Plan";
+    		return "Plan"
     	}
     	if(i==1){
-    		return "Document";
+    		return "Document"
     	}
     	if(i==2){
-    		return "Reflect";
+    		return "Reflect"
     	}
-    });
-
+    })
+var sliceLabel2 = label_group.selectAll(".arcLabel2")
+    .data(pie(phaseArray))
+sliceLabel2.enter().append("svg:text")
+    .attr("class", "arcLabel2")
+    .attr("transform", function(d) {
+        var c = arc.centroid(d),
+            x = c[0],
+            y = c[1],
+            // pythagorean theorem for hypotenuse
+            h = Math.sqrt(x*x + y*y);
+        return "translate(" + (x/h * labelr) +  ',' +
+           (y/h * labelr) +  ")"; 
+    })
+    .attr("dy", "1.3em")
+    .attr("text-anchor", "middle")
+    .text(function(d, i) { 
+    	// console.log(d);
+    	if(i==0){
+    		var thisDate = new Date(d.data)
+    		return thisDate.getMinutes()+"mins";
+    	}
+    	if(i==1){
+    		var thisDate = new Date(d.data)
+    		return thisDate.getMinutes()+"mins";
+    	}
+    	if(i==2){
+    		var thisDate = new Date(d.data)
+    		return thisDate.getMinutes()+"mins";    	
+    	}
+    })
 
 
 
@@ -745,14 +755,23 @@ function goButton(incomingData){
 	console.log(incomingData);
 	for(i=0; i<buttonData[0].length; i++){
 		getthis.push(buttonData[0][i].data);
-		button1.push({
-			"button": getthis[i].match(/button1/g),
-			"time": buttonData[0][i].time
-		});	
-		button2.push({
-			"button": getthis[i].match(/button2/g),
-			"time": buttonData[0][i].time
-		});	
+		if(buttonData[0][i].data=="b2"){
+			button2.push({
+				"button": "button2",
+				"time": buttonData[0][i].time
+			});				
+		}
+		if(buttonData[0][i].data=="b1"){
+			button1.push({
+				"button": "button1",
+				"time": buttonData[0][i].time
+			});				
+		}
+		// button1.push({
+		// 	"button": getthis[i].match(/button1/g),
+		// 	"time": buttonData[0][i].time
+		// });	
+
 		// button2.push(getthis[i].match(/button2/g));	
 	}
 button1 = button1.filter(function(n){ return n.button != undefined }); 
@@ -793,7 +812,7 @@ var iconBut2 = timeSVG.selectAll(".button2")
 	.attr("x", function(d){
 		return timeX(d.time);
 	})
-	.attr("y", timeSVGH/2+iconW/2+15)
+	.attr("y", timeSVGH/2+iconW/2+21)
 	.attr("width",iconW)
 	.attr("height",iconW);
 
