@@ -2288,7 +2288,7 @@ var margin = 60;
     // create plot area within svg image
     var plot = buttonSVG.append("g")
         .attr("id", "plot")
-        .attr("transform", "translate(" + radius + ", " + (radius-19) + ")");
+        .attr("transform", "translate(" + radius + ", " + (radius-39) + ")");
 
     // draw border around plot area
     plot.append("circle")
