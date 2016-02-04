@@ -885,13 +885,28 @@ var iconBut = timeSVG.selectAll(".button1")
 	.attr("y", timeSVGH/2+iconW/2+15)
 	.attr("width",iconW)
 	.attr("height",iconW);
+var iconLine1 = timeSVG.selectAll(".button1L")	
+	.data(button1)
+	iconLine1.enter()
+	.append("line")
+	.attr("class","button1L")
+	.attr("x1", function(d){
+		return timeX(d.time)+7.25;
+	})
+	.attr("x2", function(d){
+		return timeX(d.time)+7.25;
+	})
+	.attr("y1", timeSVGH/2+iconW+25)
+	.attr("y2", timeSVGH)
+	.attr("stroke","grey")
+
 console.log(button2);
 var iconBut2 = timeSVG.selectAll(".button2")	
 	.data(button2)
 	iconBut2.enter()
 	.append("image")
 	.attr("class","button2")
-	.attr("xlink:href", "assets/icons/thunder.png")
+	.attr("xlink:href", "assets/icons/thunder.png") //just checking now put back to thunder
 	.attr("x", function(d){
 		return timeX(d.time);
 	})
@@ -899,7 +914,20 @@ var iconBut2 = timeSVG.selectAll(".button2")
 	.attr("width",iconW)
 	.attr("height",iconW);
 
-
+var iconLine2 = timeSVG.selectAll(".button2L")	
+	.data(button2)
+	iconLine2.enter()
+	.append("line")
+	.attr("class","button2L")
+	.attr("x1", function(d){
+		return timeX(d.time)+8;
+	})
+	.attr("x2", function(d){
+		return timeX(d.time)+8;
+	})
+	.attr("y1", timeSVGH/2+iconW+25)
+	.attr("y2", timeSVGH)
+	.attr("stroke","grey")
 
 // buttonSVG.append("text")
 // 	.attr("class","button1")
@@ -1677,11 +1705,12 @@ function showIDE(){
     xAxis
         .scale(xAxisScale)
         .orient("top")
-        .ticks(5)
+        .ticks(10)
         .tickPadding(1)
         .tickFormat(timeFormat);
     xAxisCall.call(xAxis)
         .attr("class", "axis") //Assign "axis" class
+            .attr("text-anchor", "end")
         .attr('transform', 'translate(0, ' + (timeSVGH-1) + ')');
 
 	yOther
