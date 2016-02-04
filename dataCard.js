@@ -802,6 +802,7 @@ obs = cleanArray(obs)
 		  		return "Planning"
 		  	}
 		  })
+		  .attr("text-anchor","middle")
 
 
 }
