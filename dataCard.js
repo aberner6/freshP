@@ -135,12 +135,12 @@ var goAhead;
 
 var forcewidth = w/3-15;
 var forceheight = h/3.5;
-var netSVG = d3.select("#facehand")
-	.append("svg")
-	.attr("width",forcewidth)
-	.attr("height",forceheight)  
-	.style("border","1px solid white") 
-	.style("margin-top","1px")
+// var netSVG = d3.select("#facehand")
+// 	.append("svg")
+// 	.attr("width",forcewidth)
+// 	.attr("height",forceheight)  
+// 	.style("border","1px solid white") 
+// 	.style("margin-top","1px")
 
 var ardSVG = d3.select("#network")
 	.append("svg")
@@ -170,20 +170,20 @@ var timeSVG = d3.select("#timeline")
 	.style("border","1px solid white") 
 	.style("margin-top","1px");
 // build the arrow.
-netSVG.append("svg:defs").selectAll("marker")
-    .data(["end"])      // Different link/path types can be defined here
-  .enter().append("svg:marker")    // This section adds in the arrows
-    .attr("id", String)
-    .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 15)
-    .attr("refY", -1.5)
-    .attr("markerWidth", 6)
-    .attr("markerHeight", 6)
-    // .attr("stroke-width",1)
-    .attr("orient", "auto")
-    .attr("fill",colorText)
-  .append("svg:path")
-    .attr("d", "M0,-5L10,0L0,5");         
+// netSVG.append("svg:defs").selectAll("marker")
+//     .data(["end"])      // Different link/path types can be defined here
+//   .enter().append("svg:marker")    // This section adds in the arrows
+//     .attr("id", String)
+//     .attr("viewBox", "0 -5 10 10")
+//     .attr("refX", 15)
+//     .attr("refY", -1.5)
+//     .attr("markerWidth", 6)
+//     .attr("markerHeight", 6)
+//     // .attr("stroke-width",1)
+//     .attr("orient", "auto")
+//     .attr("fill",colorText)
+//   .append("svg:path")
+//     .attr("d", "M0,-5L10,0L0,5");         
 
 buttonSVG.append("svg:defs").selectAll("marker")
     .data(["end"])      // Different link/path types can be defined here
@@ -598,6 +598,77 @@ for(i=0; i<obsDoc.length; i++){
 var phaseArray = [];
 phaseArray.push(totalPlan, totalReflect, totalDoc)
 console.log(phaseArray+"phasearray")
+
+
+
+
+// var dataset = {
+//   apples: [53245, 28479, 19697, 24037, 40245],
+// };
+
+var width = forcewidth,
+    height = forceheight,
+    radius = Math.min(width, height) / 2;
+
+var color = ["aqua","lightblue","blue"];
+
+var pie = d3.layout.pie()
+    .sort(null);
+
+var arc = d3.svg.arc()
+    .innerRadius(radius - 20)
+    .outerRadius(radius - 10);
+
+
+
+var netSVG = d3.select("#facehand")
+	.append("svg")
+	.attr("width",forcewidth)
+	.attr("height",forceheight)  
+	.append("g")
+	.style("border","1px solid white") 
+	.style("margin-top","1px")
+    .attr("transform", "translate(" + width/2 + "," + height/2 + ")");
+
+var pathPie = netSVG.selectAll("pathPie")
+    .data(pie(phaseArray))
+  .enter().append("path")
+    .attr("fill", function(d, i) { return color[i]; })
+    .attr("d", arc);
+
+var label_group = netSVG.append("svg:g")
+    .attr("class", "lblGroup")
+    // .attr("transform", "translate(" + (w / 2) + "," + (h / 2) + ")");
+
+// GROUP FOR CENTER TEXT
+// var center_group = netSVG.append("svg:g")
+//     .attr("class", "ctrGroup")
+// .append("svg:text")
+//     .attr("dy", ".35em").attr("class", "chartLabel")
+//     .attr("text-anchor", "middle")
+//     .text(function(d){
+//     	return d;
+//     });
+    // .attr("transform", "translate(" + (w / 2) + "," + (h / 2) + ")");
+// DRAW SLICE LABELS
+var sliceLabel = label_group.selectAll("text")
+    .data(pie(phaseArray))
+sliceLabel.enter().append("svg:text")
+    .attr("class", "arcLabel")
+    .attr("transform", function(d) {return "translate(" + arc.centroid(d) + ")"; })
+    .attr("text-anchor", "middle")
+    .text(function(d, i) { return "Phase "+i });
+
+
+
+
+
+
+
+
+
+
+
 
 obs = cleanArray(obs)
 
