@@ -610,7 +610,7 @@ var width = forcewidth,
     height = forceheight,
     radius = Math.min(width, height) / 2.4;
 
-var color = ["aqua","lightblue","blue"];
+var color = ["#3F51B5","#607D8B","#7986CB"];
 
 var pie = d3.layout.pie()
     .sort(null);
