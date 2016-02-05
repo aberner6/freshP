@@ -343,9 +343,10 @@ var	handPic = svgMain.append("g").attr("class","backlabels")
                .attr("xlink:href","assets/hand.png")
 var	labelsHand = svgMain.append("g").attr("class","backlabels")
 		.append("text")
-	    .attr("x", timeX(startTime))
+	    .attr("x", timeX(startTime)+22)
 	    .attr("y", h/2)
-	    .text("Hand Activity")
+	    .text("Hands")
+	    .attr("text-anchor","middle")
 	    .attr("font-size",8)
 
 
@@ -358,9 +359,10 @@ var	facePic = svgMain.append("g").attr("class","backlabels")
                .attr("xlink:href", "assets/face2.png")
 var	labelsFace = svgMain.append("g").attr("class","backlabels")
 		.append("text")
-	    .attr("x", timeX(startTime))
+	    .attr("x", timeX(startTime)+22)
+	    .attr("text-anchor","middle")
 	    .attr("y", h/2.6)
-	    .text("Faces Present")
+	    .text("Faces")
 	    .attr("font-size",8)
 
 var kitPic = svgMain.append("g").attr("class","backlabels")
@@ -372,9 +374,10 @@ var kitPic = svgMain.append("g").attr("class","backlabels")
                .attr("xlink:href", "assets/icons/btn.png")
 var	labelsKit = svgMain.append("g").attr("class","backlabels")
 		.append("text")
-	    .attr("x", timeX(startTime))
+	    .attr("x", timeX(startTime)+24)
 	    .attr("y", h/4)
-	    .text("Kit Activity")
+	    .text("Kit")
+	    .attr("text-anchor","middle")
 	    .attr("font-size",8)
 
 
@@ -830,13 +833,13 @@ if(i==0){
 })
 		  .text(function(d){
 		  	if(d.phase=="obs_reflect"){
-		  		return "Reflection"
+		  		return "REFLECTION"
 		  	}
 		  	if(d.phase=="obs_document"){
-		  		return "Documentation"
+		  		return "DOCUMENTATION"
 		  	}
 		  	if(d.phase=="obs_plan"){
-		  		return "Planning"
+		  		return "PLANNING"
 		  	}
 		  })
 		  .attr("text-anchor","middle")
