@@ -2143,6 +2143,66 @@ var margin = 60;
         .attr("id", "plot")
         .attr("transform", "translate(" + radius + ", " + (radius-39) + ")");
 
+
+var kitColor3 = buttonSVG.append("g").attr("class","backlabels")
+		.append("circle")
+	    .attr("cx", forcewidth/3.5-6)
+	    .attr("cy", forceheight-5)
+	    .attr("r", 4)
+	    .attr("fill","lightpink")
+	    .attr("stroke","lightpink")
+var	kitNameColor3 = buttonSVG.append("g").attr("class","backlabels")
+		.append("text")
+	    .attr("x", forcewidth/3.5)
+	    .attr("y", forceheight-3)
+	    .text("Inputs")
+	    .attr("font-size",8)
+
+var kitColor4 = buttonSVG.append("g").attr("class","backlabels")
+		.append("circle")
+	    .attr("cx", forcewidth/2-12)
+	    .attr("cy", forceheight-5)
+	    .attr("r", 4)
+	    .attr("fill","#FF9800")
+	    .attr("stroke","#FF9800")
+var	kitNameColor4 = buttonSVG.append("g").attr("class","backlabels")
+		.append("text")
+	    .attr("x", forcewidth/2-6)
+	    .attr("y", forceheight-3)
+	    .text("Outputs")
+	    .attr("font-size",8)
+
+var kitColor5 = buttonSVG.append("g").attr("class","backlabels")
+		.append("circle")
+	    .attr("cx", forcewidth/1.5-6)
+	    .attr("cy", forceheight-5)
+	    .attr("r", 4)
+	    .attr("fill","#C71549")
+	    .attr("stroke","#C71549")
+var	kitNameColor5 = buttonSVG.append("g").attr("class","backlabels")
+		.append("text")
+	    .attr("x", forcewidth/1.5)
+	    .attr("y", forceheight-3)
+	    .text("Functions")
+	    .attr("font-size",8)
+        	// for(j=0; j<inputs.length; j++){
+        	// 	if(d.name.toLowerCase().indexOf(inputs[j].toLowerCase())>-1){
+	        // 		return "lightpink";
+        	// 	}
+        	// }
+        	// for(k=0; k<outputs.length; k++){
+        	// 	if(d.name.toLowerCase().indexOf(outputs[k].toLowerCase())>-1){
+	        // 		return "#FF9800";
+        	// 	}
+        	// }
+        	// for(l=0; l<programming.length; l++){
+        	// 	if(d.name.toLowerCase().indexOf(programming[l].toLowerCase())>-1){
+	        // 		return "#C71549";
+        	// 	}
+        	// }
+
+
+
     // draw border around plot area
     plot.append("circle")
         .attr("class", "outline")
