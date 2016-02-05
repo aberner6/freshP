@@ -1492,6 +1492,7 @@ var yActivePath;
     .attr("fill","none")
     .attr("stroke","darkgrey")
     .attr("stroke-dasharray",1)
+    .attr("stroke-width",2)
   	pathActive1
   		.datum(softS1)
   		.attr("d", lineActive1);
@@ -1507,6 +1508,7 @@ var yActivePath;
     .attr("fill","none")
     .attr("stroke","darkgrey")
     .attr("stroke-dasharray",2)
+    .attr("stroke-width",2)
 
   	pathActive2
   		.datum(softS2)
@@ -1520,7 +1522,9 @@ var yActivePath;
     .attr("class","activepath3")
     .attr("fill","none")
     .attr("stroke","darkgrey")
-    .attr("stroke-dasharray",3)
+    // .attr("stroke-dasharray",3)
+    .attr("stroke-width",2)
+
   	pathActive3
   		.datum(softS3)
     	// .attr("transform", function(d,i){
@@ -1574,14 +1578,16 @@ var faceColor = "#AB47BC"
 ////////////OPTION 2
 maxFaces = d3.max(faceNum);
 /////OPTION 1
-	backFace = timeSVG.append("g").attr("class","backrect").selectAll(".backrect")
+	lineFace = timeSVG.append("g").attr("class","backline").selectAll(".backline")
 	    .data(d3.range(1))
-	  	.enter().append("rect")
-	    .attr("class", "backrect")
-	    .attr("x", timeX(startTime))
-	    .attr("y", timeSVGH/2-maxFaces*faceRadius)
-	    .attr("height", 2*(maxFaces*faceRadius))
-	    .attr("width",timeX(endTime)-timeX(startTime))
+	  	.enter().append("line")
+	    .attr("class", "backline")
+	    .attr("x1", timeX(startTime))
+	    .attr("x2", timeX(startTime)+timeX(endTime)-timeX(startTime))
+	    .attr("y1", timeSVGH/2-maxFaces*faceRadius+2*(maxFaces*faceRadius))
+	    .attr("y2", timeSVGH/2-maxFaces*faceRadius+2*(maxFaces*faceRadius))
+	    // .attr("height", 2*(maxFaces*faceRadius))
+	    // .attr("width",timeX(endTime)-timeX(startTime))
 	    .attr("fill", "none")
 		.attr("stroke","grey")
 		.attr("stroke-dasharray",1)
