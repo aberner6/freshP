@@ -39,10 +39,10 @@ var planStart, planEnd;
 var obs = [];
 
 var listComponents = ["BTN","POT","TMP","ACR","COL","ROT","LDR","LED","PEZ", "RGB","IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger","Note", "Random", "PONG", "SimonSays"];
-// inputs.push("BTN","POT","TMP","ACR","COL","ROT","LDR")
-// outputs.push("LED","PEZ", "RGB")
-// programming.push("IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger")
-// games.push("Note", "Random", "PONG", "SimonSays")
+var inputs=["BTN","POT","TMP","ACR","COL","ROT","LDR"]
+var outputs=["LED","PEZ", "RGB"]
+var programming = ["NOTE", "Random", "PONG", "SimonSays","IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger"]
+// var games = ["Note", "Random", "PONG", "SimonSays"]
 var hardware = ["BTN","POT","TMP","ACR","COL","ROT","LDR","LED","PEZ", "RGB"]
 
 
@@ -189,7 +189,7 @@ var games = [];
 var options=("BTN","POT","TMP","ACR","COL","ROT","LDR","LED","PEZ", "RGB","IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger","Note", "Random", "PONG", "SimonSays");
 inputs.push("BTN","POT","TMP","ACR","COL","ROT","LDR")
 outputs.push("LED","PEZ", "RGB")
-programming.push("IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger")
+programming.push("Note", "Random", "PONG", "SimonSays","IF", "Interval", "Fade", "Swap", "Map","MAP","MAPTOHIGHER", "Counter", "Trigger")
 games.push("Note", "Random", "PONG", "SimonSays")
 var radiusMin = 5;
 var spaceFactor = radiusMin;
@@ -2237,16 +2237,19 @@ var radius = 5;
         .attr("r", radius)
         .style("fill",  function(d, i) { 
         	addTooltip(d3.select(this))
-        	for(j=0; j<uniqueHards.length; j++){
-        		if(d.name.toLowerCase().indexOf(uniqueHards[j].toLowerCase())>-1){
-	        		return hardwareColor;
+        	for(j=0; j<inputs.length; j++){
+        		if(d.name.toLowerCase().indexOf(inputs[j].toLowerCase())>-1){
+	        		return "lightpink";
         		}
         	}
-        	for(k=0; k<uniqueSofts.length; k++){
-        		// console.log(d.name)
-        		// console.log(uniqueSofts[k])
-        		if(d.name.toLowerCase().indexOf(uniqueSofts[k].toLowerCase())>-1){
-	        		return softwareColor;
+        	for(k=0; k<outputs.length; k++){
+        		if(d.name.toLowerCase().indexOf(outputs[k].toLowerCase())>-1){
+	        		return "#FF9800";
+        		}
+        	}
+        	for(l=0; l<programming.length; l++){
+        		if(d.name.toLowerCase().indexOf(programming[l].toLowerCase())>-1){
+	        		return "#C71549";
         		}
         	}
         })
@@ -2291,14 +2294,19 @@ function drawLinks(links) {
 	        .append("path")
 	        .attr("class", "link")
 	        .attr("stroke",function(d, i) { 
-        	for(j=0; j<uniqueHards.length; j++){
-        		if(d.name.toLowerCase().indexOf(uniqueHards[j].toLowerCase())>-1){
-	        		return hardwareColor;
+        	for(j=0; j<inputs.length; j++){
+        		if(d.name.toLowerCase().indexOf(inputs[j].toLowerCase())>-1){
+	        		return "lightpink";
         		}
         	}
-        	for(k=0; k<uniqueSofts.length; k++){
-        		if(d.name.toLowerCase().indexOf(uniqueSofts[k].toLowerCase())>-1){
-	        		return softwareColor;
+        	for(k=0; k<outputs.length; k++){
+        		if(d.name.toLowerCase().indexOf(outputs[k].toLowerCase())>-1){
+	        		return "#FF9800";
+        		}
+        	}
+        	for(l=0; l<programming.length; l++){
+        		if(d.name.toLowerCase().indexOf(programming[l].toLowerCase())>-1){
+	        		return "#C71549";
         		}
         	}
         })
