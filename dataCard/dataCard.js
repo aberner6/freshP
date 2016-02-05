@@ -1641,26 +1641,19 @@ function showIDE(){
 	  	.attr("class","ide");
 		g.selectAll(".logs")
 		.data(function(d) {
-			// if(d.oc!=2){
 				return d.values;				
-			// }
 		}) 
 		.enter()
 		.append("rect")
 		.attr("class",function(d){
 			if(d.name){
-				// theseNames.push(d.name);
-				// uniqueNames = unique(theseNames);
 				if(d.mod=="M"){
 			d.timeEdit = Math.round(d.time/100)*100;
-// d.time
-					// (d.time)
 					hardwareOnly.push(d);
 					hardNames.push(d.name);
 				}
 				if(d.mod=="B"){
 			d.timeEdit = Math.round(d.time/100)*100;
-
 					softwareOnly.push(d);
 					softNames.push(d.name);
 				}
