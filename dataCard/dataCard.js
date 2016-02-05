@@ -126,21 +126,21 @@ var ardSVG = d3.select("#network")
 	.style("border","1px solid white") 
 	.style("margin-top","1px")
 
-var buttonSVG = d3.select("#buttonuse")
+var buttonSVG = d3.select("#ardinfo")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
 	.style("margin-top","1px");
 
-var activeSVG = d3.select("#ardinfo")
+var activeSVG = d3.select("#buttonuse")
 	.append("svg")
 	.attr("width",forcewidth)
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
 	.style("margin-top","1px");
 
-	
+
 var timeSVGH = h/2-60;
 var timeSVG = d3.select("#timeline")
 	.append("svg")
@@ -696,10 +696,10 @@ sliceLabel.enter().append("svg:text")
             // pythagorean theorem for hypotenuse
             h = Math.sqrt(x*x + y*y);
     	if ((y/h * labelr)>outerRadius/2) {
-    		return ".45em"
+    		return "1.5em"
     	}
 		else{
-			return ("-.45em")
+			return ("-.8em")
 		}
     })
     .attr("text-anchor", "middle")
