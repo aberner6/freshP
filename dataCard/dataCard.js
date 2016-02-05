@@ -139,6 +139,8 @@ var activeSVG = d3.select("#ardinfo")
 	.attr("height",forceheight)  
 	.style("border","1px solid white") 
 	.style("margin-top","1px");
+
+	
 var timeSVGH = h/2-60;
 var timeSVG = d3.select("#timeline")
 	.append("svg")
@@ -1619,7 +1621,7 @@ function showIDE(){
     xAxis
         .scale(xAxisScale)
         .orient("top")
-        .ticks(10)
+        .ticks(7)
         .tickPadding(1)
         .tickFormat(timeFormat);
     xAxisCall.call(xAxis)
